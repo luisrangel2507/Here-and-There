@@ -18,3 +18,16 @@ model AppState {
 
   @@map("app_state")
 }
+
+// One row per uploaded photo, keyed by where it's shown
+// ("dest:<id>" for a destination's hero photo, "dest:<id>:highlight:<name>"
+// for a highlight thumbnail). Storing the image itself (as a compressed
+// data URL) instead of a filename, since Railway's filesystem isn't
+// persistent across deploys.
+model Photo {
+  key       String   @id
+  dataUrl   String   @map("data_url")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("photos")
+}

@@ -504,6 +504,21 @@ const APP_STYLE = `
     gap:8px;
     cursor:pointer;
   }
+  .hero-photo-wrap{ position:relative; }
+  .hero-photo-remove{
+    position:absolute;
+    top:10px; right:10px;
+    width:30px;height:30px;
+    border:none;
+    border-radius:50%;
+    background:rgba(43,27,51,0.55);
+    color:#fff;
+    font-size:16px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .hero-photo-remove:hover{ background:rgba(255,107,91,0.85); }
   .detail-head{
     padding:22px 24px 6px;
     display:flex;
@@ -914,6 +929,84 @@ async function loadPriorities() {
   } catch (e) { /* keep defaults */ }
 }
 
+// ---- photos (uploaded from the device, persisted as compressed data URLs) ----
+function photoKeyForDest(id) {
+  return 'dest:' + id;
+}
+function photoKeyForHighlight(id, name) {
+  return 'dest:' + id + ':highlight:' + name;
+}
+
+async function savePhoto(key, dataUrl) {
+  try {
+    await fetch('/api/photos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, dataUrl }),
+    });
+  } catch (e) { /* best-effort only */ }
+}
+
+async function loadPhotos() {
+  try {
+    const res = await fetch('/api/photos');
+    if (!res.ok) return;
+    const map = await res.json();
+    allDestinations().forEach(d => {
+      const destKey = photoKeyForDest(d.id);
+      if (map[destKey]) d.photo = map[destKey];
+      d.highlights.forEach(h => {
+        const hKey = photoKeyForHighlight(d.id, h.name);
+        if (map[hKey]) h.photo = map[hKey];
+      });
+    });
+    render();
+  } catch (e) { /* keep defaults */ }
+}
+
+function fileToCompressedDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(reader.error);
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Could not read image'));
+      img.onload = () => {
+        const maxDim = 1600;
+        let width = img.width, height = img.height;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
+          else { width = Math.round(width * maxDim / height); height = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function pickPhoto(onPicked) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.addEventListener('change', async () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    try {
+      const dataUrl = await fileToCompressedDataUrl(file);
+      onPicked(dataUrl);
+    } catch (e) {
+      window.alert('Could not load that photo.');
+    }
+  });
+  input.click();
+}
+
 function submitPriorities() {
   if (cooldownRemaining() > 0 || priorityOrder.length <= 1) return;
   const eliminatedId = priorityOrder[priorityOrder.length - 1];
@@ -985,11 +1078,18 @@ function toggleFavorite(id) {
   render();
 }
 function setPhoto(id) {
+  pickPhoto(dataUrl => {
+    const d = getDest(id);
+    d.photo = dataUrl;
+    render();
+    savePhoto(photoKeyForDest(id), dataUrl);
+  });
+}
+function removePhoto(id) {
   const d = getDest(id);
-  const url = window.prompt('Paste a photo URL for ' + d.city + ':', d.photo || '');
-  if (url === null) return;
-  d.photo = url.trim() || null;
+  d.photo = null;
   render();
+  savePhoto(photoKeyForDest(id), null);
 }
 function addHighlight(id, text) {
   const d = getDest(id);
@@ -999,16 +1099,19 @@ function addHighlight(id, text) {
 }
 function removeHighlight(id, idx) {
   const d = getDest(id);
+  const h = d.highlights[idx];
   d.highlights.splice(idx, 1);
   render();
+  if (h.photo) savePhoto(photoKeyForHighlight(id, h.name), null);
 }
 function setHighlightPhoto(id, idx) {
-  const d = getDest(id);
-  const h = d.highlights[idx];
-  const url = window.prompt('Paste a photo URL for "' + h.name + '":', h.photo || '');
-  if (url === null) return;
-  h.photo = url.trim() || null;
-  render();
+  pickPhoto(dataUrl => {
+    const d = getDest(id);
+    const h = d.highlights[idx];
+    h.photo = dataUrl;
+    render();
+    savePhoto(photoKeyForHighlight(id, h.name), dataUrl);
+  });
 }
 
 function el(tag, className, html) {
@@ -1178,12 +1281,18 @@ function renderDetail() {
   card.style.setProperty('--plan-soft2', hexToRgba(plan.dim, 0.22));
 
   if (d.photo) {
+    const wrap = el('div', 'hero-photo-wrap');
     const img = document.createElement('img');
     img.className = 'hero-photo';
     img.src = d.photo;
     img.alt = d.city;
     img.addEventListener('click', () => setPhoto(d.id));
-    card.appendChild(img);
+    wrap.appendChild(img);
+    const removeBtn = el('button', 'hero-photo-remove', '×');
+    removeBtn.setAttribute('aria-label', 'Remove photo');
+    removeBtn.addEventListener('click', (e) => { e.stopPropagation(); removePhoto(d.id); });
+    wrap.appendChild(removeBtn);
+    card.appendChild(wrap);
   } else {
     const btn = el('button', 'hero-photo-btn', '📷 Add a photo');
     btn.addEventListener('click', () => setPhoto(d.id));
@@ -1428,6 +1537,7 @@ function render() {
 }
 
 loadPriorities();
+loadPhotos();
 render();
 
 `;
