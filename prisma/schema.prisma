@@ -1,0 +1,20 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+// Single-row table holding Eleny's daily priority ranking state.
+// (One row is enough for this app; swap for a real per-user table later if needed.)
+model AppState {
+  id             Int      @id @default(1)
+  priorityOrder  Json     @default("[]") @map("priority_order")
+  blockedIds     Json     @default("[]") @map("blocked_ids")
+  lastSubmitAt   DateTime? @map("last_submit_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("app_state")
+}

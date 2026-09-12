@@ -1,0 +1,1453 @@
+'use client';
+import { useEffect, useRef } from 'react';
+
+const APP_STYLE = `
+
+  :root{
+    --sky-top:#FFDD8A;
+    --sky-mid:#FF9F68;
+    --sky-pink:#FF6F91;
+    --sky-purple:#8A5FBF;
+    --sky-deep:#4B3869;
+    --sun:#FFC93C;
+    --coral:#FF6B5B;
+    --turquoise:#0EA5A0;
+    --turquoise-dim:#0a7d79;
+    --card:#FFF9EF;
+    --ink:#2B1B33;
+    --ink-soft:rgba(43,27,51,0.6);
+    --line:rgba(43,27,51,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  .app{
+    position:relative;
+    overflow-x:hidden;
+    min-height:100%;
+    padding:36px 16px 80px;
+    font-family:'Poppins', sans-serif;
+    color:#fff;
+    background:linear-gradient(180deg,
+      var(--sky-top) 0%,
+      var(--sky-mid) 26%,
+      var(--sky-pink) 52%,
+      var(--sky-purple) 76%,
+      var(--sky-deep) 100%);
+  }
+  .app::before{
+    content:'';
+    position:absolute;
+    top:-70px;
+    left:50%;
+    transform:translateX(-50%);
+    width:360px;height:260px;
+    background:
+      radial-gradient(circle at 30% 65%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.95) 30%, transparent 32%),
+      radial-gradient(circle at 52% 50%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.95) 36%, transparent 38%),
+      radial-gradient(circle at 74% 62%, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.92) 28%, transparent 30%),
+      radial-gradient(circle at 50% 78%, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.92) 34%, transparent 36%);
+    filter:blur(2px);
+    opacity:0.9;
+    pointer-events:none;
+    z-index:0;
+  }
+  .app::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:
+      radial-gradient(ellipse at 15% 85%, rgba(14,165,160,0.28), transparent 45%),
+      radial-gradient(ellipse at 90% 92%, rgba(255,107,91,0.22), transparent 40%);
+    pointer-events:none;
+    z-index:0;
+  }
+  .app.photo-bg::before,
+  .app.photo-bg::after{
+    display:none;
+  }
+  .bg-photo{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    z-index:0;
+  }
+  .bg-overlay{
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg, rgba(30,20,40,0.55) 0%, rgba(30,20,40,0.7) 60%, rgba(30,20,40,0.85) 100%);
+    z-index:0;
+  }
+  .wrap{max-width:680px;margin:0 auto;position:relative;z-index:1;}
+
+  @keyframes fadeSlideUp{
+    from{opacity:0; transform:translateY(14px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  @keyframes fadeSlideRight{
+    from{opacity:0; transform:translateX(-16px);}
+    to{opacity:1; transform:translateX(0);}
+  }
+  @keyframes popIn{
+    0%{transform:scale(0.6); opacity:0;}
+    60%{transform:scale(1.15); opacity:1;}
+    100%{transform:scale(1);}
+  }
+
+  .view{animation:fadeSlideUp .45s ease both;}
+
+  /* header */
+  .eyebrow{
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:0.16em;
+    color:#fff;
+    text-shadow:0 1px 8px rgba(0,0,0,0.15);
+    margin-bottom:12px;
+    animation:fadeSlideUp .5s ease both;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:700;
+    font-size:clamp(30px,7.5vw,44px);
+    line-height:1.06;
+    margin:0 0 14px;
+    color:#fff;
+    text-shadow:0 4px 24px rgba(75,56,105,0.35);
+    animation:fadeSlideUp .55s ease both;
+    animation-delay:.05s;
+  }
+  h1 em{
+    font-style:italic;
+    background:linear-gradient(90deg, var(--sun), var(--coral));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  .sub{
+    font-size:13.5px;
+    line-height:1.6;
+    color:rgba(255,255,255,0.92);
+    max-width:48ch;
+    margin:0 0 26px;
+    text-shadow:0 1px 10px rgba(0,0,0,0.1);
+    animation:fadeSlideUp .6s ease both;
+    animation-delay:.1s;
+  }
+
+  /* region tabs */
+  .region-tabs{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+    animation:fadeSlideUp .6s ease both;
+    animation-delay:.12s;
+  }
+  .region-tab{
+    flex:1;
+    text-align:center;
+    background:rgba(255,255,255,0.16);
+    backdrop-filter:blur(6px);
+    border:1.5px solid rgba(255,255,255,0.4);
+    color:#fff;
+    font-family:'Poppins', sans-serif;
+    font-weight:600;
+    font-size:13px;
+    padding:12px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:transform .2s ease, background .2s ease;
+  }
+  .region-tab:hover{transform:translateY(-1px);}
+  .region-tab.active{
+    background:linear-gradient(90deg, var(--coral), var(--sun));
+    border-color:transparent;
+    color:var(--ink);
+    box-shadow:0 8px 20px rgba(255,107,91,0.4);
+  }
+
+  /* map */
+  .map-card{
+    background:rgba(255,255,255,0.14);
+    backdrop-filter:blur(10px);
+    border:1.5px solid rgba(255,255,255,0.35);
+    border-radius:26px;
+    padding:18px;
+    margin-bottom:18px;
+    animation:fadeSlideUp .65s ease both;
+    animation-delay:.16s;
+  }
+  .map-stage{
+    position:relative;
+    width:100%;
+    border-radius:18px;
+    overflow:hidden;
+    background:radial-gradient(circle at 30% 20%, rgba(255,255,255,0.14), transparent 60%);
+  }
+  .map-svg{width:100%;height:100%;display:block;}
+  .map-svg path{
+    fill:rgba(255,255,255,0.22);
+    stroke:rgba(255,255,255,0.75);
+    stroke-width:1.6;
+  }
+  .map-img{
+    width:100%;
+    height:100%;
+    display:block;
+    object-fit:cover;
+    border-radius:18px;
+  }
+  .pin{
+    position:absolute;
+    width:40px;height:40px;
+    transform:translate(-50%,-50%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    background:none;
+    border:none;
+    padding:0;
+  }
+  .pin-dot-wrap{
+    position:relative;
+    width:15px;height:15px;
+  }
+  .pin-ring{
+    position:absolute;
+    inset:-3px;
+    border-radius:50%;
+    background:var(--plan-color, var(--coral));
+    opacity:0.25;
+  }
+  .pin-dot{
+    position:relative;
+    width:15px;height:15px;
+    border-radius:50%;
+    background:var(--plan-color, var(--coral));
+    border:2px solid #fff;
+    box-shadow:0 3px 8px rgba(0,0,0,0.3);
+  }
+  .pin-star{
+    position:absolute;
+    top:-7px;
+    right:-8px;
+    font-size:11px;
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+  }
+  .map-hint{
+    font-size:11.5px;
+    color:rgba(255,255,255,0.75);
+    text-align:center;
+    margin-top:10px;
+  }
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px 14px;
+    justify-content:center;
+    margin-top:12px;
+  }
+  .legend-item{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-size:10px;
+    font-weight:500;
+    color:rgba(255,255,255,0.8);
+  }
+  .legend-swatch{
+    width:9px;height:9px;
+    border-radius:50%;
+    background:var(--plan-color);
+    flex:0 0 auto;
+  }
+
+  /* intro / profile select */
+  .app-logo{
+    display:block;
+    width:170px;
+    height:170px;
+    border-radius:34px;
+    margin:0 auto 14px;
+    box-shadow:0 16px 36px rgba(75,56,105,0.45);
+    animation:popIn .5s ease both;
+  }
+  .intro-hero{
+    width:100%;
+    height:230px;
+    object-fit:cover;
+    border-radius:24px;
+    display:block;
+    margin-bottom:22px;
+    box-shadow:0 20px 45px rgba(75,56,105,0.4);
+    animation:fadeSlideUp .55s ease both;
+  }
+  .profile-select{
+    display:flex;
+    gap:12px;
+    margin-top:22px;
+    animation:fadeSlideUp .7s ease both;
+    animation-delay:.15s;
+  }
+  .profile-card{
+    flex:1;
+    background:rgba(255,255,255,0.16);
+    backdrop-filter:blur(8px);
+    border:1.5px solid rgba(255,255,255,0.4);
+    border-radius:20px;
+    padding:22px 14px;
+    text-align:center;
+    cursor:pointer;
+    color:#fff;
+    font-family:'Poppins', sans-serif;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .profile-card:hover{transform:translateY(-2px);background:rgba(255,255,255,0.24);}
+  .profile-emoji{font-size:30px;margin-bottom:8px;}
+  .profile-name{font-family:'Fraunces', serif;font-style:italic;font-weight:700;font-size:18px;}
+  .profile-hint{font-size:10.5px;color:rgba(255,255,255,0.7);margin-top:4px;}
+
+  .elim-banner{
+    background:rgba(255,255,255,0.18);
+    backdrop-filter:blur(8px);
+    border:1.5px solid rgba(255,255,255,0.4);
+    border-radius:14px;
+    padding:12px 16px;
+    font-size:12.5px;
+    font-weight:500;
+    color:#fff;
+    text-align:center;
+    margin-bottom:16px;
+    animation:popIn .4s ease both;
+  }
+  .priority-list{
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+    margin-bottom:8px;
+  }
+  .priority-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:rgba(255,255,255,0.16);
+    backdrop-filter:blur(8px);
+    border:1.5px solid rgba(255,255,255,0.35);
+    border-left:4px solid var(--plan-color, rgba(255,255,255,0.35));
+    border-radius:14px;
+    padding:12px 14px;
+    user-select:none;
+    touch-action:none;
+    position:relative;
+  }
+  .priority-row.dragging{
+    opacity:0.85;
+    box-shadow:0 14px 30px rgba(0,0,0,0.35);
+    background:rgba(255,255,255,0.28);
+  }
+  .priority-rank{
+    flex:0 0 auto;
+    width:22px;height:22px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.25);
+    color:#fff;
+    font-size:11px;
+    font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .priority-name{flex:1;min-width:0;font-size:13px;font-weight:600;color:#fff;}
+  .priority-plan{font-size:10px;color:rgba(255,255,255,0.7);margin-top:1px;}
+  .priority-grip{flex:0 0 auto;font-size:15px;color:rgba(255,255,255,0.5);cursor:grab;padding:2px 4px;}
+  .priority-hint{
+    font-size:11.5px;
+    color:rgba(255,255,255,0.65);
+    text-align:center;
+    margin-top:12px;
+  }
+  .winner-card{
+    text-align:center;
+    padding:36px 20px;
+    background:rgba(255,255,255,0.16);
+    backdrop-filter:blur(10px);
+    border:1.5px solid rgba(255,255,255,0.4);
+    border-radius:24px;
+    animation:popIn .5s ease both;
+  }
+  .winner-trophy{font-size:40px;margin-bottom:10px;}
+  .winner-city{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:700;
+    font-size:26px;
+    color:#fff;
+  }
+  .winner-sub{font-size:12.5px;color:rgba(255,255,255,0.75);margin-top:8px;}
+
+  .app-title{
+    text-align:center;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:700;
+    font-size:24px;
+    color:#fff;
+    text-shadow:0 1px 8px rgba(0,0,0,0.2);
+    margin-bottom:18px;
+    letter-spacing:0.02em;
+  }
+  .switch-profile{
+    display:block;
+    margin:22px auto 0;
+    background:none;
+    border:none;
+    color:rgba(255,255,255,0.5);
+    font-family:'Poppins', sans-serif;
+    font-size:10.5px;
+    cursor:pointer;
+    padding:6px 10px;
+  }
+  .switch-profile:hover{color:rgba(255,255,255,0.85);}
+
+  .admin-toggle{
+    display:block;
+    margin:22px auto 0;
+    background:none;
+    border:none;
+    color:rgba(255,255,255,0.4);
+    font-family:'Poppins', sans-serif;
+    font-size:10.5px;
+    cursor:pointer;
+    padding:6px 10px;
+  }
+  .admin-toggle.on{color:rgba(255,255,255,0.85);}
+
+  /* destination list (below map, easier tap target) */
+  .dest-list{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+    animation:fadeSlideUp .7s ease both;
+    animation-delay:.2s;
+  }
+  .dest-row{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:6px;
+    background:rgba(255,255,255,0.14);
+    backdrop-filter:blur(8px);
+    border:1.5px solid rgba(255,255,255,0.3);
+    border-left:4px solid var(--plan-color, rgba(255,255,255,0.3));
+    border-radius:16px;
+    padding:12px 14px;
+    cursor:pointer;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .dest-row:hover{transform:translateY(-1px);background:rgba(255,255,255,0.2);}
+  .dest-row-name{font-size:12.5px;font-weight:600;color:#fff;line-height:1.25;}
+  .dest-row-plan{font-size:9.5px;font-weight:600;color:rgba(255,255,255,0.75);margin-top:1px;}
+  .dest-row-note{font-size:9.5px;color:rgba(255,255,255,0.7);margin-top:1px;}
+  .dest-row-right{display:flex;align-items:center;gap:6px;width:100%;justify-content:space-between;}
+  .dest-row-price{font-family:'Fraunces', serif;font-style:italic;font-weight:700;font-size:13.5px;color:var(--sun);}
+  .dest-row-heart{font-size:13px;}
+
+  /* detail view */
+  .back-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:rgba(255,255,255,0.18);
+    backdrop-filter:blur(6px);
+    border:1.5px solid rgba(255,255,255,0.4);
+    color:#fff;
+    font-family:'Poppins', sans-serif;
+    font-weight:600;
+    font-size:12.5px;
+    padding:9px 16px;
+    border-radius:999px;
+    cursor:pointer;
+    margin-bottom:20px;
+    transition:transform .15s ease;
+    animation:fadeSlideRight .4s ease both;
+  }
+  .back-btn:hover{transform:translateX(-3px);}
+
+  .detail-card{
+    background:var(--card);
+    color:var(--ink);
+    border-radius:24px;
+    overflow:hidden;
+    box-shadow:0 24px 55px rgba(75,56,105,0.4);
+    animation:fadeSlideUp .5s ease both;
+    animation-delay:.05s;
+  }
+  .hero-photo{
+    width:100%;
+    height:190px;
+    object-fit:cover;
+    display:block;
+    cursor:pointer;
+  }
+  .hero-photo-btn{
+    width:100%;
+    height:190px;
+    border:none;
+    background:linear-gradient(135deg, var(--plan-soft1, rgba(255,201,60,0.35)), var(--plan-soft2, rgba(255,107,91,0.25)));
+    color:var(--ink);
+    font-size:15px;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    cursor:pointer;
+  }
+  .detail-head{
+    padding:22px 24px 6px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+  }
+  .detail-head-left{
+    min-width:0;
+    flex:1;
+  }
+  .detail-city{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:700;
+    font-size:27px;
+    line-height:1.15;
+    overflow-wrap:break-word;
+  }
+  .detail-country{
+    font-size:11.5px;
+    font-weight:500;
+    color:var(--turquoise-dim);
+    margin-top:6px;
+  }
+  .detail-note{
+    font-size:12.5px;
+    font-style:italic;
+    font-family:'Fraunces', serif;
+    color:rgba(43,27,51,0.65);
+    margin-top:4px;
+  }
+  .detail-code{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:24px;
+    color:var(--plan-color, var(--coral));
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+  .detail-plan-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-size:10.5px;
+    font-weight:600;
+    padding:4px 11px;
+    border-radius:999px;
+    margin-top:8px;
+    color:#fff;
+    background:var(--plan-color, var(--coral));
+  }
+
+  .price-block{
+    margin:16px 24px 0;
+    padding:16px 18px;
+    border-radius:16px;
+    background:rgba(14,165,160,0.08);
+    border:1.5px dashed rgba(14,165,160,0.35);
+  }
+  .price-total{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:700;
+    font-size:26px;
+    color:var(--turquoise-dim);
+  }
+  .price-total-label{font-size:10px;font-weight:700;letter-spacing:0.08em;color:var(--ink-soft);margin-bottom:4px;}
+  .price-split{
+    display:flex;
+    gap:16px;
+    margin-top:8px;
+    font-size:11.5px;
+    color:var(--ink-soft);
+  }
+  .price-split b{color:var(--ink);}
+
+  .detail-section{padding:20px 24px 4px;}
+  .detail-label{
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:0.12em;
+    color:var(--turquoise-dim);
+    margin-bottom:10px;
+  }
+  .highlights{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom:8px;
+  }
+  .highlight-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:10px 14px;
+    animation:fadeSlideUp .35s ease both;
+  }
+  .highlight-name{font-size:12.5px;font-weight:500;flex:1;min-width:0;}
+  .highlight-thumb{
+    flex:0 0 auto;
+    width:36px;height:36px;
+    border-radius:9px;
+    object-fit:cover;
+    cursor:pointer;
+    background:rgba(43,27,51,0.08);
+  }
+  .highlight-thumb-btn{
+    flex:0 0 auto;
+    width:36px;height:36px;
+    border-radius:9px;
+    border:1.5px dashed rgba(43,27,51,0.28);
+    background:transparent;
+    color:rgba(43,27,51,0.4);
+    font-size:14px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .highlight-thumb-btn:hover{border-color:var(--coral);color:var(--coral);}
+  .gallery{
+    padding:16px 24px 0;
+  }
+  .gallery-label{
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:0.12em;
+    color:var(--turquoise-dim);
+    margin-bottom:10px;
+  }
+  .gallery-scroll{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-bottom:2px;
+  }
+  .gallery-thumb{
+    flex:0 0 auto;
+    width:84px;
+    height:84px;
+    border-radius:14px;
+    object-fit:cover;
+  }
+  .highlight-del{
+    flex:0 0 auto;
+    width:22px;height:22px;
+    border:none;
+    background:transparent;
+    color:rgba(43,27,51,0.32);
+    font-size:16px;
+    cursor:pointer;
+    border-radius:50%;
+    transition:color .15s ease, background .15s ease;
+  }
+  .highlight-del:hover{color:var(--coral);background:rgba(255,107,91,0.1);}
+  .highlight-empty{font-size:12px;color:var(--ink-soft);margin-bottom:8px;}
+
+  .add-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    border:1.5px dashed rgba(43,27,51,0.25);
+    border-radius:12px;
+    padding:10px 13px;
+    font-size:12px;
+    font-weight:500;
+    color:var(--ink-soft);
+    cursor:pointer;
+    margin-top:2px;
+    margin-bottom:8px;
+  }
+  .add-row:hover{border-color:var(--coral);color:var(--coral);}
+  .add-form{
+    display:flex;
+    gap:8px;
+    margin-top:2px;
+    margin-bottom:8px;
+  }
+  .add-form input{
+    flex:1;
+    min-width:0;
+    font-family:'Poppins', sans-serif;
+    font-size:12px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    padding:9px 10px;
+    background:#fff;
+    color:var(--ink);
+  }
+  .add-form input:focus{outline:none;border-color:var(--turquoise);}
+  .add-form button{
+    font-family:'Poppins', sans-serif;
+    font-size:11.5px;
+    font-weight:700;
+    border-radius:999px;
+    padding:9px 16px;
+    cursor:pointer;
+    border:none;
+    background:linear-gradient(90deg, var(--turquoise), var(--turquoise-dim));
+    color:#fff;
+  }
+
+  .fav-btn{
+    width:100%;
+    margin:18px 0 22px;
+    padding:15px;
+    border:none;
+    border-radius:999px;
+    background:linear-gradient(90deg, var(--coral), var(--sun));
+    color:var(--ink);
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    font-size:13.5px;
+    cursor:pointer;
+    box-shadow:0 10px 26px rgba(255,107,91,0.4);
+    transition:transform .15s ease;
+  }
+  .fav-btn:hover{transform:translateY(-1px);}
+  .fav-btn.is-fav{
+    background:linear-gradient(90deg, var(--turquoise), var(--turquoise-dim));
+    color:#fff;
+    box-shadow:0 10px 26px rgba(14,165,160,0.4);
+  }
+  .fav-btn .heart{display:inline-block;animation:popIn .35s ease;}
+  .fav-note{
+    margin:0 24px 24px;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:13.5px;
+    color:rgba(43,27,51,0.7);
+    text-align:center;
+  }
+
+  @media (max-width:480px){
+    .detail-city{font-size:23px;}
+    .detail-code{font-size:20px;}
+  }
+
+`;
+
+const APP_SCRIPT = `
+
+const MEXICO_MAP_IMG = '/images/mexico-map.jpg';
+const LOGO_IMG = '/images/logo.png';
+const INTRO_HERO_IMG = '/images/intro-hero.jpg';
+const USA_MAP_IMG = '/images/usa-map.jpg';
+const BG_PHOTO_IMG = '/images/bg-photo.jpg';
+const PLAN_META = {
+  beach:     { label: 'Beach',     emoji: '🏖️', color: '#0EA5A0', dim: '#0a7d79' },
+  city:      { label: 'City',      emoji: '🏙️', color: '#FF6B5B', dim: '#e14f40' },
+  colonial:  { label: 'Colonial',  emoji: '🎭', color: '#8A5FBF', dim: '#6c479c' },
+  nature:    { label: 'Nature',    emoji: '🏔️', color: '#3F8F5C', dim: '#2f6c45' },
+  nightlife: { label: 'Nightlife', emoji: '🎉', color: '#E0457B', dim: '#b83362' },
+};
+function planOf(d) { return PLAN_META[d.plan] || PLAN_META.city; }
+function hexToRgba(hex, alpha) {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0,2), 16);
+  const g = parseInt(h.substring(2,4), 16);
+  const b = parseInt(h.substring(4,6), 16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+}
+
+const REGIONS = {
+  mexico: {
+    label: '🇲🇽 Mexico',
+    type: 'image',
+    src: MEXICO_MAP_IMG,
+    aspect: '900 / 686',
+    destinations: [
+      {
+        id: 'cdmx', city: 'Ciudad de México', country: 'Mexico', code: 'CDMX', plan: 'city',
+        price: 7807, note: null,
+        highlights: [{ name: 'Pirámides', photo: null }, { name: 'Trajineras', photo: null }, { name: 'Chapultepec', photo: null }, { name: 'Bellas Artes', photo: null }, { name: 'Polanco', photo: null }, { name: 'La Mexicana', photo: null }, { name: 'Bar hopping Roma', photo: null }],
+        photo: null, favorite: false, pin: { x: 58.0, y: 64.1 },
+      },
+      {
+        id: 'cabo', city: 'Los Cabos', country: 'Mexico', code: 'SJD', plan: 'beach',
+        price: 7920, note: null,
+        highlights: [{ name: 'Mango Deck', photo: null }, { name: 'Bar hopping', photo: null }, { name: 'All-inclusive Rosewood · $5k/night', photo: null }],
+        photo: null, favorite: false, pin: { x: 24.7, y: 48.3 },
+      },
+      {
+        id: 'gdl', city: 'Guadalajara', country: 'Mexico', code: 'GDL', plan: 'city',
+        price: 8000, note: null,
+        highlights: [],
+        photo: null, favorite: false, pin: { x: 44.6, y: 58.5 },
+      },
+      {
+        id: 'pvr', city: 'Puerto Vallarta', country: 'Mexico', code: 'PVR', plan: 'beach',
+        price: 9739, note: null,
+        highlights: [],
+        photo: null, favorite: false, pin: { x: 38.9, y: 59.2 },
+      },
+      {
+        id: 'bajio', city: 'Guanajuato', country: 'Mexico', code: 'BJX', plan: 'colonial',
+        price: 7807, note: 'San Miguel de Allende / Guanajuato Capital',
+        highlights: [{ name: 'Ciudad de México', photo: null }, { name: 'Guanajuato capital', photo: null }, { name: 'San Miguel de Allende', photo: null }],
+        photo: null, favorite: false, pin: { x: 51.2, y: 57.3 },
+      },
+    ],
+  },
+  usa: {
+    label: '🇺🇸 USA',
+    type: 'image',
+    src: USA_MAP_IMG,
+    aspect: '1400 / 1052',
+    destinations: [
+      {
+        id: 'tahoe', city: 'Lake Tahoe', country: 'USA', code: 'RNO', plan: 'nature',
+        price: 7920, note: 'via SF Airport',
+        highlights: [],
+        photo: null, favorite: false, pin: { x: 16.65, y: 32.9 },
+      },
+      {
+        id: 'vegas', city: 'Las Vegas', country: 'USA', code: 'LAS', plan: 'nightlife',
+        costs: { edu: 4000, eleny: 3000 }, note: null,
+        highlights: [],
+        photo: null, favorite: false, pin: { x: 23.4, y: 46.25 },
+      },
+      {
+        id: 'austin', city: 'Austin / San Antonio', country: 'USA', code: 'AUS', plan: 'city',
+        costs: { edu: 3000, eleny: 4500 }, note: null,
+        highlights: [],
+        photo: null, favorite: false, pin: { x: 49.8, y: 66.3 },
+      },
+      {
+        id: 'miami', city: 'Miami', country: 'USA', code: 'MIA', plan: 'beach',
+        costs: { edu: 7261, eleny: 6000 }, note: null,
+        highlights: [],
+        photo: null, favorite: false, pin: { x: 81.1, y: 73.4 },
+      },
+      {
+        id: 'sandiego', city: 'San Diego', country: 'USA', code: 'SAN', plan: 'beach',
+        price: 6500, note: null,
+        highlights: [],
+        photo: null, favorite: false, pin: { x: 19.15, y: 54.6 },
+      },
+    ],
+  },
+};
+
+const money = n => '$' + n.toLocaleString('en-US');
+
+function getDest(id) {
+  for (const key of Object.keys(REGIONS)) {
+    const found = REGIONS[key].destinations.find(d => d.id === id);
+    if (found) return found;
+  }
+  return null;
+}
+function destTotal(d) {
+  return d.price != null ? d.price : (d.costs.edu + d.costs.eleny);
+}
+
+const ADMIN_CODE = 'vamonos';
+const COOLDOWN_MS = 24 * 60 * 60 * 1000;
+const STORAGE_KEY = 'priorities-state';
+
+function allDestinations() {
+  return [...REGIONS.mexico.destinations, ...REGIONS.usa.destinations];
+}
+function defaultOrder() {
+  return allDestinations().map(d => d.id);
+}
+
+let priorityOrder = defaultOrder();
+let blockedIds = [];
+let lastSubmitAt = null;
+let justEliminatedId = null;
+
+function cooldownRemaining() {
+  if (!lastSubmitAt) return 0;
+  const remaining = (lastSubmitAt + COOLDOWN_MS) - Date.now();
+  return remaining > 0 ? remaining : 0;
+}
+function formatCountdown(ms) {
+  const totalMin = Math.max(1, Math.ceil(ms / 60000));
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return (h > 0 ? h + 'h ' : '') + m + 'm';
+}
+
+async function savePriorities() {
+  try {
+    await fetch('/api/state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ priorityOrder, blockedIds, lastSubmitAt }),
+    });
+  } catch (e) { /* best-effort only */ }
+}
+async function loadPriorities() {
+  try {
+    const res = await fetch('/api/state');
+    if (res.ok) {
+      const parsed = await res.json();
+      if (parsed) {
+        blockedIds = parsed.blockedIds || [];
+        priorityOrder = (parsed.priorityOrder || defaultOrder()).filter(id => !blockedIds.includes(id));
+        lastSubmitAt = parsed.lastSubmitAt || null;
+        render();
+      }
+    }
+  } catch (e) { /* keep defaults */ }
+}
+
+function submitPriorities() {
+  if (cooldownRemaining() > 0 || priorityOrder.length <= 1) return;
+  const eliminatedId = priorityOrder[priorityOrder.length - 1];
+  blockedIds.push(eliminatedId);
+  priorityOrder = priorityOrder.filter(id => id !== eliminatedId);
+  lastSubmitAt = Date.now();
+  justEliminatedId = eliminatedId;
+  savePriorities();
+  render();
+}
+
+function goPriorities() {
+  view = 'priorities';
+  justEliminatedId = null;
+  render();
+}
+
+// ---- state ----
+let view = 'intro'; // 'intro' | 'map' | 'detail'
+let region = 'mexico'; // 'mexico' | 'usa'
+let detailId = null;
+let openAddHighlight = false;
+let profile = null; // 'eleny' | 'luis'
+let isAdmin = false;
+
+function selectProfile(p) {
+  if (p === 'eleny') {
+    profile = 'eleny';
+    isAdmin = false;
+    view = 'map';
+    render();
+    return;
+  }
+  const code = window.prompt('Passcode for Luis:');
+  if (code === null) return;
+  if (code.trim().toLowerCase() === ADMIN_CODE) {
+    profile = 'luis';
+    isAdmin = true;
+    view = 'map';
+    render();
+  } else {
+    window.alert('Wrong passcode.');
+  }
+}
+function goIntro() {
+  view = 'intro';
+  profile = null;
+  isAdmin = false;
+  detailId = null;
+  render();
+}
+
+function goDetail(id) {
+  const d = getDest(id);
+  region = d.country === 'Mexico' ? 'mexico' : 'usa';
+  detailId = id;
+  view = 'detail';
+  openAddHighlight = false;
+  render();
+}
+function goMap() {
+  view = 'map';
+  detailId = null;
+  render();
+}
+function toggleFavorite(id) {
+  const d = getDest(id);
+  d.favorite = !d.favorite;
+  render();
+}
+function setPhoto(id) {
+  const d = getDest(id);
+  const url = window.prompt('Paste a photo URL for ' + d.city + ':', d.photo || '');
+  if (url === null) return;
+  d.photo = url.trim() || null;
+  render();
+}
+function addHighlight(id, text) {
+  const d = getDest(id);
+  if (text && text.trim()) d.highlights.push({ name: text.trim(), photo: null });
+  openAddHighlight = false;
+  render();
+}
+function removeHighlight(id, idx) {
+  const d = getDest(id);
+  d.highlights.splice(idx, 1);
+  render();
+}
+function setHighlightPhoto(id, idx) {
+  const d = getDest(id);
+  const h = d.highlights[idx];
+  const url = window.prompt('Paste a photo URL for "' + h.name + '":', h.photo || '');
+  if (url === null) return;
+  h.photo = url.trim() || null;
+  render();
+}
+
+function el(tag, className, html) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (html !== undefined) node.innerHTML = html;
+  return node;
+}
+function appTitle() {
+  return el('div', 'app-title', '🌵 Here & There 🌁');
+}
+
+function renderIntro() {
+  const view_ = el('div', 'view');
+
+  const hero = document.createElement('img');
+  hero.className = 'intro-hero';
+  hero.src = INTRO_HERO_IMG;
+  hero.alt = 'Eleny and Luis';
+  view_.appendChild(hero);
+
+  const logo = document.createElement('img');
+  logo.className = 'app-logo';
+  logo.src = LOGO_IMG;
+  logo.alt = 'Here & There';
+  view_.appendChild(logo);
+
+  const header = el('div');
+  header.style.textAlign = 'center';
+  header.appendChild(el('h1', null, 'Where should we <em>run away</em> to?'));
+  view_.appendChild(header);
+
+  const chooseLabel = el('div', 'sub', 'Choose the traveler');
+  chooseLabel.style.textAlign = 'center';
+  chooseLabel.style.marginTop = '4px';
+  view_.appendChild(chooseLabel);
+
+  const select = el('div', 'profile-select');
+
+  const elenyCard = el('div', 'profile-card');
+  elenyCard.innerHTML = '<div class="profile-emoji">🇺🇸</div><div class="profile-name">Eleny</div><div class="profile-hint">tap to enter</div>';
+  elenyCard.addEventListener('click', () => selectProfile('eleny'));
+  select.appendChild(elenyCard);
+
+  const luisCard = el('div', 'profile-card');
+  luisCard.innerHTML = '<div class="profile-emoji">🇲🇽</div><div class="profile-name">Luis</div><div class="profile-hint">passcode required</div>';
+  luisCard.addEventListener('click', () => selectProfile('luis'));
+  select.appendChild(luisCard);
+
+  view_.appendChild(select);
+
+  return view_;
+}
+
+function renderMap() {
+  const view_ = el('div', 'view');
+  view_.appendChild(appTitle());
+
+  const priBtn = el('button', 'confirm-btn', '🗳️ Daily priority pick');
+  priBtn.style.marginBottom = '18px';
+  priBtn.addEventListener('click', goPriorities);
+  view_.appendChild(priBtn);
+
+  const tabs = el('div', 'region-tabs');
+  Object.keys(REGIONS).forEach(key => {
+    const btn = el('button', 'region-tab' + (region === key ? ' active' : ''), REGIONS[key].label);
+    btn.addEventListener('click', () => { region = key; render(); });
+    tabs.appendChild(btn);
+  });
+  view_.appendChild(tabs);
+
+  const r = { ...REGIONS[region], destinations: REGIONS[region].destinations.filter(d => !blockedIds.includes(d.id)) };
+
+  const mapCard = el('div', 'map-card');
+  const stage = el('div', 'map-stage');
+  stage.style.aspectRatio = r.aspect;
+
+  if (r.type === 'image') {
+    const img = document.createElement('img');
+    img.className = 'map-img';
+    img.src = r.src;
+    img.alt = r.label + ' map';
+    stage.appendChild(img);
+  } else {
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('class', 'map-svg');
+    svg.setAttribute('viewBox', r.viewBox);
+    svg.setAttribute('preserveAspectRatio', 'none');
+    const path = document.createElementNS(svgNS, 'path');
+    path.setAttribute('d', r.path);
+    svg.appendChild(path);
+    stage.appendChild(svg);
+  }
+
+  r.destinations.forEach(d => {
+    const plan = planOf(d);
+    const pin = el('button', 'pin');
+    pin.style.left = d.pin.x + '%';
+    pin.style.top = d.pin.y + '%';
+    pin.style.setProperty('--plan-color', plan.color);
+    const dotWrap = el('div', 'pin-dot-wrap');
+    dotWrap.appendChild(el('div', 'pin-ring'));
+    dotWrap.appendChild(el('div', 'pin-dot'));
+    if (d.favorite) dotWrap.appendChild(el('div', 'pin-star', '⭐'));
+    pin.appendChild(dotWrap);
+    pin.addEventListener('click', () => goDetail(d.id));
+    stage.appendChild(pin);
+  });
+
+  mapCard.appendChild(stage);
+  mapCard.appendChild(el('div', 'map-hint', 'Tap any pin to open the full proposal'));
+
+  const plansUsed = [...new Set(r.destinations.map(d => d.plan))];
+  const legend = el('div', 'legend');
+  plansUsed.forEach(planKey => {
+    const meta = PLAN_META[planKey];
+    const item = el('div', 'legend-item');
+    item.style.setProperty('--plan-color', meta.color);
+    item.appendChild(el('div', 'legend-swatch'));
+    item.appendChild(document.createTextNode(meta.emoji + ' ' + meta.label));
+    legend.appendChild(item);
+  });
+  mapCard.appendChild(legend);
+  view_.appendChild(mapCard);
+
+  const list = el('div', 'dest-list');
+  r.destinations.forEach(d => {
+    const plan = planOf(d);
+    const row = el('div', 'dest-row');
+    row.style.setProperty('--plan-color', plan.color);
+    const left = el('div');
+    left.appendChild(el('div', 'dest-row-name', d.city));
+    left.appendChild(el('div', 'dest-row-plan', plan.emoji + ' ' + plan.label));
+    if (d.note) left.appendChild(el('div', 'dest-row-note', d.note));
+    row.appendChild(left);
+    const right = el('div', 'dest-row-right');
+    if (d.favorite) right.appendChild(el('span', 'dest-row-heart', '💛'));
+    if (isAdmin) right.appendChild(el('div', 'dest-row-price', money(destTotal(d))));
+    row.appendChild(right);
+    row.addEventListener('click', () => goDetail(d.id));
+    list.appendChild(row);
+  });
+  view_.appendChild(list);
+
+  const switchBtn = el('button', 'switch-profile', '↺ Switch profile (' + (profile === 'luis' ? 'Luis' : 'Eleny') + ')');
+  switchBtn.addEventListener('click', goIntro);
+  view_.appendChild(switchBtn);
+
+  return view_;
+}
+
+function renderDetail() {
+  const view_ = el('div', 'view');
+  const d = getDest(detailId);
+  const plan = planOf(d);
+  view_.appendChild(appTitle());
+
+  const backBtn = el('button', 'back-btn', '← Back to map');
+  backBtn.addEventListener('click', goMap);
+  view_.appendChild(backBtn);
+
+  const card = el('div', 'detail-card');
+  card.style.setProperty('--plan-color', plan.color);
+  card.style.setProperty('--plan-dim', plan.dim);
+  card.style.setProperty('--plan-soft1', hexToRgba(plan.color, 0.32));
+  card.style.setProperty('--plan-soft2', hexToRgba(plan.dim, 0.22));
+
+  if (d.photo) {
+    const img = document.createElement('img');
+    img.className = 'hero-photo';
+    img.src = d.photo;
+    img.alt = d.city;
+    img.addEventListener('click', () => setPhoto(d.id));
+    card.appendChild(img);
+  } else {
+    const btn = el('button', 'hero-photo-btn', '📷 Add a photo');
+    btn.addEventListener('click', () => setPhoto(d.id));
+    card.appendChild(btn);
+  }
+
+  const photos = d.highlights.filter(h => h.photo).map(h => h.photo);
+  if (photos.length > 0) {
+    const gallery = el('div', 'gallery');
+    gallery.appendChild(el('div', 'gallery-label', 'PHOTOS'));
+    const scroller = el('div', 'gallery-scroll');
+    photos.forEach(url => {
+      const img = document.createElement('img');
+      img.className = 'gallery-thumb';
+      img.src = url;
+      img.alt = d.city;
+      scroller.appendChild(img);
+    });
+    gallery.appendChild(scroller);
+    card.appendChild(gallery);
+  }
+
+  const head = el('div', 'detail-head');
+  const headLeft = el('div', 'detail-head-left');
+  headLeft.appendChild(el('div', 'detail-city', d.city));
+  headLeft.appendChild(el('div', 'detail-country', d.country));
+  headLeft.appendChild(el('div', 'detail-plan-chip', plan.emoji + ' ' + plan.label));
+  if (d.note) headLeft.appendChild(el('div', 'detail-note', d.note));
+  head.appendChild(headLeft);
+  head.appendChild(el('div', 'detail-code', d.code));
+  card.appendChild(head);
+
+  const priceBlock = el('div', 'price-block');
+  priceBlock.appendChild(el('div', 'price-total-label', 'ESTIMATED TOTAL'));
+  priceBlock.appendChild(el('div', 'price-total', money(destTotal(d))));
+  if (d.costs) {
+    const split = el('div', 'price-split');
+    split.innerHTML = '<span>Edu <b>' + money(d.costs.edu) + '</b></span><span>Eleny <b>' + money(d.costs.eleny) + '</b></span>';
+    priceBlock.appendChild(split);
+  }
+  if (isAdmin) card.appendChild(priceBlock);
+
+  const section = el('div', 'detail-section');
+  section.appendChild(el('div', 'detail-label', 'HIGHLIGHTS'));
+
+  if (d.highlights.length === 0 && !openAddHighlight) {
+    section.appendChild(el('div', 'highlight-empty', 'No highlights added yet.'));
+  }
+
+  const highlightsBox = el('div', 'highlights');
+  d.highlights.forEach((h, idx) => {
+    const row = el('div', 'highlight-row');
+    row.style.animationDelay = (idx * 0.05) + 's';
+    if (h.photo) {
+      const img = document.createElement('img');
+      img.className = 'highlight-thumb';
+      img.src = h.photo;
+      img.alt = h.name;
+      img.addEventListener('click', () => setHighlightPhoto(d.id, idx));
+      row.appendChild(img);
+    } else {
+      const thumbBtn = el('button', 'highlight-thumb-btn', '📷');
+      thumbBtn.setAttribute('aria-label', 'Add photo');
+      thumbBtn.addEventListener('click', () => setHighlightPhoto(d.id, idx));
+      row.appendChild(thumbBtn);
+    }
+    row.appendChild(el('div', 'highlight-name', h.name));
+    const del = el('button', 'highlight-del', '×');
+    del.addEventListener('click', () => removeHighlight(d.id, idx));
+    row.appendChild(del);
+    highlightsBox.appendChild(row);
+  });
+  section.appendChild(highlightsBox);
+
+  if (openAddHighlight) {
+    const form = el('div', 'add-form');
+    const input = document.createElement('input');
+    input.placeholder = 'e.g. Sunset boat tour';
+    const addBtn = el('button', null, 'Add');
+    addBtn.addEventListener('click', () => addHighlight(d.id, input.value));
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') addHighlight(d.id, input.value); });
+    form.appendChild(input);
+    form.appendChild(addBtn);
+    section.appendChild(form);
+  } else {
+    const addRow = el('div', 'add-row', '+ add highlight');
+    addRow.addEventListener('click', () => { openAddHighlight = true; render(); });
+    section.appendChild(addRow);
+  }
+
+  card.appendChild(section);
+
+  const favBtn = el('button', 'fav-btn' + (d.favorite ? ' is-fav' : ''));
+  favBtn.innerHTML = d.favorite
+    ? '<span class="heart">💛</span> On the shortlist'
+    : '🤍 Add to shortlist';
+  favBtn.addEventListener('click', () => toggleFavorite(d.id));
+  card.appendChild(favBtn);
+
+  if (d.favorite) {
+    card.appendChild(el('div', 'fav-note', 'Noted — this one just made the cut.'));
+  }
+
+  view_.appendChild(card);
+
+  const switchBtn = el('button', 'switch-profile', '↺ Switch profile (' + (profile === 'luis' ? 'Luis' : 'Eleny') + ')');
+  switchBtn.addEventListener('click', goIntro);
+  view_.appendChild(switchBtn);
+
+  return view_;
+}
+
+function makeRowDraggable(row, listEl) {
+  let dragging = false;
+  let startY = 0;
+
+  row.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    startY = e.clientY;
+    row.setPointerCapture(e.pointerId);
+    row.classList.add('dragging');
+  });
+
+  row.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const deltaY = e.clientY - startY;
+    row.style.transform = 'translateY(' + deltaY + 'px)';
+
+    const overEl = document.elementFromPoint(e.clientX, e.clientY);
+    const overRow = overEl ? overEl.closest('.priority-row') : null;
+    if (overRow && overRow !== row && listEl.contains(overRow)) {
+      const rect = overRow.getBoundingClientRect();
+      const midpoint = rect.top + rect.height / 2;
+      if (e.clientY < midpoint) {
+        listEl.insertBefore(row, overRow);
+      } else {
+        listEl.insertBefore(row, overRow.nextSibling);
+      }
+      startY = e.clientY;
+      row.style.transform = 'translateY(0px)';
+    }
+  });
+
+  function endDrag(e) {
+    if (!dragging) return;
+    dragging = false;
+    try { row.releasePointerCapture(e.pointerId); } catch (err) {}
+    row.classList.remove('dragging');
+    row.style.transform = '';
+    priorityOrder = Array.from(listEl.children).map(c => c.dataset.id);
+    render();
+  }
+  row.addEventListener('pointerup', endDrag);
+  row.addEventListener('pointercancel', endDrag);
+}
+
+function renderPriorities() {
+  const view_ = el('div', 'view');
+  view_.appendChild(appTitle());
+
+  const backBtn = el('button', 'back-btn', '← Back to map');
+  backBtn.addEventListener('click', goMap);
+  view_.appendChild(backBtn);
+
+  view_.appendChild(el('div', 'eyebrow', '🗳️ DAILY PRIORITY PICK'));
+  view_.appendChild(el('h1', null, 'Rank today\\'s <em>favorites</em>'));
+
+  if (justEliminatedId) {
+    const gone = getDest(justEliminatedId);
+    if (gone) view_.appendChild(el('div', 'elim-banner', '💔 ' + gone.city + ' just got cut — ' + priorityOrder.length + ' left.'));
+  }
+
+  if (priorityOrder.length <= 1) {
+    const winnerId = priorityOrder[0];
+    const winner = winnerId ? getDest(winnerId) : null;
+    const card = el('div', 'winner-card');
+    card.appendChild(el('div', 'winner-trophy', '🏆'));
+    card.appendChild(el('div', 'winner-city', winner ? winner.city : '—'));
+    card.appendChild(el('div', 'winner-sub', 'That\\'s it — this is the one.'));
+    view_.appendChild(card);
+    return view_;
+  }
+
+  const remaining = cooldownRemaining();
+  view_.appendChild(el('p', 'sub', remaining > 0
+    ? 'Ranking locked for today — next pick in ' + formatCountdown(remaining) + '.'
+    : 'Drag to rank them — whichever ends up last gets cut for good.'));
+
+  const list = el('div', 'priority-list');
+  priorityOrder.forEach((id, idx) => {
+    const d = getDest(id);
+    if (!d) return;
+    const plan = planOf(d);
+    const row = el('div', 'priority-row' + (remaining > 0 ? ' locked' : ''));
+    row.dataset.id = id;
+    row.style.setProperty('--plan-color', plan.color);
+    row.appendChild(el('div', 'priority-rank', String(idx + 1)));
+    const mid = el('div');
+    mid.style.flex = '1';
+    mid.style.minWidth = '0';
+    mid.appendChild(el('div', 'priority-name', d.city));
+    mid.appendChild(el('div', 'priority-plan', plan.emoji + ' ' + plan.label));
+    row.appendChild(mid);
+    row.appendChild(el('div', 'priority-grip', remaining > 0 ? '🔒' : '⠿'));
+    list.appendChild(row);
+    if (remaining === 0) makeRowDraggable(row, list);
+  });
+  view_.appendChild(list);
+
+  if (remaining === 0) {
+    const confirmBtn = el('button', 'confirm-btn', 'Lock in today\\'s ranking →');
+    confirmBtn.addEventListener('click', submitPriorities);
+    view_.appendChild(confirmBtn);
+    view_.appendChild(el('div', 'priority-hint', 'Whatever lands last is out — no take-backs.'));
+  }
+
+  return view_;
+}
+
+function render() {
+  const root = document.getElementById('root');
+  root.innerHTML = '';
+  const app = el('div', 'app');
+  if (view !== 'intro') {
+    app.classList.add('photo-bg');
+    const bgImg = document.createElement('img');
+    bgImg.className = 'bg-photo';
+    bgImg.src = BG_PHOTO_IMG;
+    bgImg.alt = '';
+    app.appendChild(bgImg);
+    app.appendChild(el('div', 'bg-overlay'));
+  }
+  const wrap = el('div', 'wrap');
+  let content;
+  if (view === 'intro') content = renderIntro();
+  else if (view === 'detail') content = renderDetail();
+  else if (view === 'priorities') content = renderPriorities();
+  else content = renderMap();
+  wrap.appendChild(content);
+  app.appendChild(wrap);
+  root.appendChild(app);
+}
+
+loadPriorities();
+render();
+
+`;
+
+export default function Page() {
+  const ranRef = useRef(false);
+
+  useEffect(() => {
+    if (ranRef.current) return; // avoid double-run under React 18 strict mode in dev
+    ranRef.current = true;
+    const script = document.createElement('script');
+    script.textContent = APP_SCRIPT;
+    document.body.appendChild(script);
+    return () => { script.remove(); };
+  }, []);
+
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: APP_STYLE }} />
+      <div id="root" />
+    </>
+  );
+}
