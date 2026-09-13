@@ -13,6 +13,7 @@ model AppState {
   id             Int      @id @default(1)
   priorityOrder  Json     @default("[]") @map("priority_order")
   blockedIds     Json     @default("[]") @map("blocked_ids")
+  hiddenIds      Json     @default("[]") @map("hidden_ids")
   lastSubmitAt   DateTime? @map("last_submit_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 

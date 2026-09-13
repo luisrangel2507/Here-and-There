@@ -1046,6 +1046,21 @@ const APP_STYLE = `
     color:rgba(43,27,51,0.7);
     text-align:center;
   }
+  .delete-city-btn{
+    display:block;
+    width:calc(100% - 48px);
+    margin:0 24px 22px;
+    padding:11px;
+    border:1.5px solid rgba(225,79,64,0.35);
+    border-radius:999px;
+    background:none;
+    color:#c0392b;
+    font-family:'Poppins', sans-serif;
+    font-weight:600;
+    font-size:12px;
+    cursor:pointer;
+  }
+  .delete-city-btn:hover{ background:rgba(225,79,64,0.08); }
 
   @media (max-width:480px){
     .detail-city{font-size:23px;}
@@ -1194,6 +1209,7 @@ function defaultOrder() {
 
 let priorityOrder = defaultOrder();
 let blockedIds = [];
+let hiddenIds = [];
 let lastSubmitAt = null;
 let justEliminatedId = null;
 
@@ -1214,7 +1230,7 @@ async function savePriorities() {
     await fetch('/api/state', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ priorityOrder, blockedIds, lastSubmitAt }),
+      body: JSON.stringify({ priorityOrder, blockedIds, hiddenIds, lastSubmitAt }),
     });
   } catch (e) { /* best-effort only */ }
 }
@@ -1225,7 +1241,8 @@ async function loadPriorities() {
       const parsed = await res.json();
       if (parsed) {
         blockedIds = parsed.blockedIds || [];
-        priorityOrder = (parsed.priorityOrder || defaultOrder()).filter(id => !blockedIds.includes(id));
+        hiddenIds = parsed.hiddenIds || [];
+        priorityOrder = (parsed.priorityOrder || defaultOrder()).filter(id => !blockedIds.includes(id) && !hiddenIds.includes(id));
         lastSubmitAt = parsed.lastSubmitAt || null;
       }
     }
@@ -1336,7 +1353,7 @@ async function loadCustomDestinations() {
       map[regionKey].forEach(d => {
         if (r.destinations.some(existing => existing.id === d.id)) return;
         r.destinations.push(d);
-        if (!priorityOrder.includes(d.id) && !blockedIds.includes(d.id)) priorityOrder.push(d.id);
+        if (!priorityOrder.includes(d.id) && !blockedIds.includes(d.id) && !hiddenIds.includes(d.id)) priorityOrder.push(d.id);
       });
     });
   } catch (e) { /* keep defaults */ }
@@ -1612,6 +1629,14 @@ function goMap() {
   detailId = null;
   render();
 }
+function deleteDestination(id) {
+  const d = getDest(id);
+  if (!window.confirm('Delete ' + d.city + '? This can\\'t be undone.')) return;
+  hiddenIds.push(id);
+  priorityOrder = priorityOrder.filter(pid => pid !== id);
+  savePriorities();
+  goMap();
+}
 function toggleFavorite(id) {
   const d = getDest(id);
   d.favorite = !d.favorite;
@@ -1725,7 +1750,7 @@ function renderMap() {
   });
   view_.appendChild(tabs);
 
-  const r = { ...REGIONS[region], destinations: REGIONS[region].destinations.filter(d => !blockedIds.includes(d.id)) };
+  const r = { ...REGIONS[region], destinations: REGIONS[region].destinations.filter(d => !blockedIds.includes(d.id) && !hiddenIds.includes(d.id)) };
 
   const mapCard = el('div', 'map-card');
   const stage = el('div', 'map-stage' + (addingCity && addingCity.step === 'pin' ? ' placing' : ''));
@@ -2077,6 +2102,10 @@ function renderDetail() {
   if (d.favorite) {
     card.appendChild(el('div', 'fav-note', 'Noted — this one just made the cut.'));
   }
+
+  const deleteBtn = el('button', 'delete-city-btn', '🗑 Delete this city');
+  deleteBtn.addEventListener('click', () => deleteDestination(d.id));
+  card.appendChild(deleteBtn);
 
   view_.appendChild(card);
 
