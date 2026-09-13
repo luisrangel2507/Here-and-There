@@ -1424,11 +1424,22 @@ function makeRowDraggable(row, listEl) {
     const deltaY = e.clientY - startY;
     row.style.transform = 'translateY(' + deltaY + 'px)';
 
+    // Hide the dragged row from hit-testing first: while it holds pointer
+    // capture, elementFromPoint can otherwise keep resolving back to it
+    // instead of whatever row is actually under the finger.
+    row.style.pointerEvents = 'none';
     const overEl = document.elementFromPoint(e.clientX, e.clientY);
+    row.style.pointerEvents = '';
     const overRow = overEl ? overEl.closest('.priority-row') : null;
     if (overRow && overRow !== row && listEl.contains(overRow)) {
       const rect = overRow.getBoundingClientRect();
       const midpoint = rect.top + rect.height / 2;
+
+      // FLIP the other rows into their new spot so they visibly slide
+      // instead of snapping.
+      const siblings = Array.from(listEl.children).filter(c => c !== row);
+      const before = new Map(siblings.map(c => [c, c.getBoundingClientRect().top]));
+
       // Move the OTHER row around the one being dragged, never the dragged
       // row itself — reparenting the pointer-captured element mid-gesture
       // silently drops touch capture on iOS Safari and freezes the drag.
@@ -1439,6 +1450,18 @@ function makeRowDraggable(row, listEl) {
       }
       startY = e.clientY;
       row.style.transform = 'translateY(0px)';
+
+      siblings.forEach(c => {
+        const diff = before.get(c) - c.getBoundingClientRect().top;
+        if (!diff) return;
+        c.style.transition = 'none';
+        c.style.transform = 'translateY(' + diff + 'px)';
+        requestAnimationFrame(() => {
+          c.style.transition = 'transform 0.18s ease';
+          c.style.transform = '';
+          setTimeout(() => { c.style.transition = ''; }, 200);
+        });
+      });
     }
   });
 
