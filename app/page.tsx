@@ -372,12 +372,14 @@ const APP_STYLE = `
     font-size:11px;
     filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4));
   }
-  .pin-crown{
-    position:absolute;
-    top:-9px;
-    left:-9px;
-    font-size:13px;
-    filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+  .pin-gold .pin-dot{
+    background:linear-gradient(135deg, #FFE18A, #FFC93C);
+    border-color:#FFF3CE;
+    box-shadow:0 3px 10px rgba(0,0,0,0.35), 0 0 18px rgba(255,201,60,0.9);
+  }
+  .pin-gold .pin-ring{
+    background:#FFC93C;
+    opacity:0.4;
   }
   .map-stage.placing{ cursor:crosshair; }
   .pin-preview{ cursor:default; animation:popIn .3s ease both; }
@@ -745,6 +747,13 @@ const APP_STYLE = `
     transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
   }
   .dest-row:hover{transform:translateY(-2px);background:linear-gradient(160deg, rgba(255,255,255,0.28), rgba(255,255,255,0.12));box-shadow:0 12px 26px rgba(20,10,30,0.3);}
+  .dest-row.is-top-pick{
+    background:linear-gradient(160deg, rgba(255,201,60,0.4), rgba(255,159,104,0.18));
+    border-color:rgba(255,225,138,0.7);
+    border-left-color:#FFC93C;
+    box-shadow:0 8px 22px rgba(255,180,60,0.35), 0 8px 20px rgba(20,10,30,0.22);
+  }
+  .dest-row.is-top-pick:hover{background:linear-gradient(160deg, rgba(255,201,60,0.48), rgba(255,159,104,0.24));}
   .dest-row-left{min-width:0;}
   .dest-row-name{font-size:12.5px;font-weight:600;color:#fff;line-height:1.25;}
   .dest-row-note{font-size:9.5px;color:rgba(255,255,255,0.7);margin-top:1px;}
@@ -1122,6 +1131,11 @@ const APP_STYLE = `
     border-radius:999px;
     padding:3px 10px;
     margin-top:4px;
+  }
+  .admin-pick-banner.is-top-pick{
+    color:var(--ink);
+    background:linear-gradient(90deg, #FFE18A, #FFC93C);
+    box-shadow:0 4px 14px rgba(255,180,60,0.5);
   }
   .admin-pick-map-banner{
     display:block;
@@ -1938,7 +1952,7 @@ function renderMap() {
     dotWrap.appendChild(el('div', 'pin-ring'));
     dotWrap.appendChild(el('div', 'pin-dot'));
     if (d.favorite) dotWrap.appendChild(el('div', 'pin-star', '⭐'));
-    if (adminRanking[0] === d.id) dotWrap.appendChild(el('div', 'pin-crown', '👑'));
+    if (adminRanking[0] === d.id) dotWrap.classList.add('pin-gold');
     pin.appendChild(dotWrap);
     pin.addEventListener('click', () => goDetail(d.id));
     stage.appendChild(pin);
@@ -1975,7 +1989,8 @@ function renderMap() {
   const list = el('div', 'dest-list');
   r.destinations.forEach(d => {
     const plan = planOf(d);
-    const row = el('div', 'dest-row');
+    const isTopPick = adminRanking[0] === d.id;
+    const row = el('div', 'dest-row' + (isTopPick ? ' is-top-pick' : ''));
     row.style.setProperty('--plan-color', plan.color);
     const left = el('div', 'dest-row-left');
     left.appendChild(el('div', 'dest-row-name', d.city));
@@ -1983,7 +1998,6 @@ function renderMap() {
     row.appendChild(left);
     const right = el('div', 'dest-row-right');
     right.appendChild(el('span', 'dest-row-plan-emoji', plan.emoji));
-    if (adminRanking[0] === d.id) right.appendChild(el('span', 'dest-row-heart', '👑'));
     if (d.favorite) right.appendChild(el('span', 'dest-row-heart', '💛'));
     if (isAdmin) right.appendChild(el('div', 'dest-row-price', money(destTotal(d))));
     row.appendChild(right);
@@ -2146,7 +2160,7 @@ function renderDetail() {
   const headLeft = el('div', 'detail-head-left');
   headLeft.appendChild(el('div', 'detail-city', d.city));
   const rankPos = adminRanking.indexOf(d.id);
-  if (rankPos === 0) headLeft.appendChild(el('div', 'admin-pick-banner', '👑 Luis\\'s top pick'));
+  if (rankPos === 0) headLeft.appendChild(el('div', 'admin-pick-banner is-top-pick', 'Luis\\'s top pick'));
   else if (rankPos > 0) headLeft.appendChild(el('div', 'admin-pick-banner', '👑 #' + (rankPos + 1) + ' on Luis\\'s list'));
   headLeft.appendChild(el('div', 'detail-country', d.country));
   headLeft.appendChild(el('div', 'detail-plan-chip', plan.emoji + ' ' + plan.label));
