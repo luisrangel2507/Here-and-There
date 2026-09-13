@@ -372,6 +372,13 @@ const APP_STYLE = `
     font-size:11px;
     filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4));
   }
+  .pin-crown{
+    position:absolute;
+    top:-9px;
+    left:-9px;
+    font-size:13px;
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+  }
   .map-stage.placing{ cursor:crosshair; }
   .pin-preview{ cursor:default; animation:popIn .3s ease both; }
   .pin-preview .pin-dot{ background:#fff; border-color:var(--coral); }
@@ -1092,6 +1099,51 @@ const APP_STYLE = `
     box-shadow:0 10px 26px rgba(14,165,160,0.4);
   }
   .fav-btn .heart{display:inline-block;animation:popIn .35s ease;}
+  .admin-pick-btn{
+    display:block;
+    width:calc(100% - 48px);
+    margin:0 24px 14px;
+    padding:13px;
+    border:1.5px solid rgba(255,201,60,0.5);
+    border-radius:999px;
+    background:none;
+    color:#b8860b;
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .admin-pick-btn.is-pick{
+    background:linear-gradient(90deg, #FFC93C, #FF9F68);
+    color:var(--ink);
+    border-color:transparent;
+    box-shadow:0 10px 24px rgba(255,201,60,0.4);
+  }
+  .admin-pick-banner{
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    color:#b8860b;
+    background:rgba(255,201,60,0.18);
+    border-radius:999px;
+    padding:3px 10px;
+    margin-top:4px;
+  }
+  .admin-pick-map-banner{
+    display:block;
+    width:100%;
+    border:1.5px solid rgba(255,201,60,0.5);
+    border-radius:999px;
+    padding:9px 14px;
+    margin-bottom:14px;
+    background:rgba(255,201,60,0.16);
+    backdrop-filter:blur(6px);
+    color:#fff;
+    font-family:'Poppins', sans-serif;
+    font-weight:600;
+    font-size:12.5px;
+    cursor:pointer;
+  }
   .fav-note{
     margin:0 24px 24px;
     font-family:'Fraunces', serif;
@@ -1266,6 +1318,7 @@ let priorityOrder = defaultOrder();
 let blockedIds = [];
 let hiddenIds = [];
 let profileInfo = {};
+let adminPickId = null;
 let lastSubmitAt = null;
 let justEliminatedId = null;
 
@@ -1286,7 +1339,7 @@ async function savePriorities() {
     await fetch('/api/state', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ priorityOrder, blockedIds, hiddenIds, profileInfo, lastSubmitAt }),
+      body: JSON.stringify({ priorityOrder, blockedIds, hiddenIds, profileInfo, adminPickId, lastSubmitAt }),
     });
   } catch (e) { /* best-effort only */ }
 }
@@ -1299,6 +1352,7 @@ async function loadPriorities() {
         blockedIds = parsed.blockedIds || [];
         hiddenIds = parsed.hiddenIds || [];
         profileInfo = parsed.profileInfo || {};
+        adminPickId = parsed.adminPickId || null;
         priorityOrder = (parsed.priorityOrder || defaultOrder()).filter(id => !blockedIds.includes(id) && !hiddenIds.includes(id));
         lastSubmitAt = parsed.lastSubmitAt || null;
       }
@@ -1715,6 +1769,11 @@ function toggleFavorite(id) {
   d.favorite = !d.favorite;
   render();
 }
+function toggleAdminPick(id) {
+  adminPickId = adminPickId === id ? null : id;
+  render();
+  savePriorities();
+}
 function addHighlight(id, text) {
   const d = getDest(id);
   if (text && text.trim()) {
@@ -1815,6 +1874,13 @@ function renderMap() {
     ? '🔒 Next pick in ' + formatCountdown(priRemaining)
     : '✅ Ready to rank today'));
 
+  const adminPickDest = adminPickId ? getDest(adminPickId) : null;
+  if (adminPickDest) {
+    const pickBanner = el('button', 'admin-pick-map-banner', '👑 Luis\\'s pick: ' + adminPickDest.city);
+    pickBanner.addEventListener('click', () => goDetail(adminPickDest.id));
+    view_.appendChild(pickBanner);
+  }
+
   const tabs = el('div', 'region-tabs');
   Object.keys(REGIONS).forEach(key => {
     const btn = el('button', 'region-tab' + (region === key ? ' active' : ''), REGIONS[key].label);
@@ -1866,6 +1932,7 @@ function renderMap() {
     dotWrap.appendChild(el('div', 'pin-ring'));
     dotWrap.appendChild(el('div', 'pin-dot'));
     if (d.favorite) dotWrap.appendChild(el('div', 'pin-star', '⭐'));
+    if (adminPickId === d.id) dotWrap.appendChild(el('div', 'pin-crown', '👑'));
     pin.appendChild(dotWrap);
     pin.addEventListener('click', () => goDetail(d.id));
     stage.appendChild(pin);
@@ -1910,6 +1977,7 @@ function renderMap() {
     row.appendChild(left);
     const right = el('div', 'dest-row-right');
     right.appendChild(el('span', 'dest-row-plan-emoji', plan.emoji));
+    if (adminPickId === d.id) right.appendChild(el('span', 'dest-row-heart', '👑'));
     if (d.favorite) right.appendChild(el('span', 'dest-row-heart', '💛'));
     if (isAdmin) right.appendChild(el('div', 'dest-row-price', money(destTotal(d))));
     row.appendChild(right);
@@ -2058,6 +2126,7 @@ function renderDetail() {
   const head = el('div', 'detail-head');
   const headLeft = el('div', 'detail-head-left');
   headLeft.appendChild(el('div', 'detail-city', d.city));
+  if (adminPickId === d.id) headLeft.appendChild(el('div', 'admin-pick-banner', '👑 Luis\\'s pick'));
   headLeft.appendChild(el('div', 'detail-country', d.country));
   headLeft.appendChild(el('div', 'detail-plan-chip', plan.emoji + ' ' + plan.label));
   if (d.note) headLeft.appendChild(el('div', 'detail-note', d.note));
@@ -2219,6 +2288,15 @@ function renderDetail() {
 
   if (d.favorite) {
     card.appendChild(el('div', 'fav-note', 'Noted — this one just made the cut.'));
+  }
+
+  if (isAdmin) {
+    const isPick = adminPickId === d.id;
+    const pickBtn = el('button', 'admin-pick-btn' + (isPick ? ' is-pick' : ''), isPick
+      ? '👑 This is my pick'
+      : '👑 Mark as my pick');
+    pickBtn.addEventListener('click', () => toggleAdminPick(d.id));
+    card.appendChild(pickBtn);
   }
 
   const deleteBtn = el('button', 'delete-city-btn', '🗑 Delete this city');
