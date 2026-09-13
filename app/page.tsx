@@ -34,7 +34,7 @@ const APP_STYLE = `
     overflow-x:hidden;
     min-height:100vh;
     min-height:100dvh;
-    padding:36px 16px 80px;
+    padding:36px 16px 130px;
     font-family:'Poppins', sans-serif;
     color:#fff;
     background:linear-gradient(180deg,
@@ -379,7 +379,7 @@ const APP_STYLE = `
     background:none;
     cursor:pointer;
     width:100%;
-    margin-bottom:28px;
+    margin-bottom:12px;
   }
   .add-city-row:hover{ border-color:#fff; color:#fff; }
   .add-city-form{
