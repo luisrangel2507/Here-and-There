@@ -65,3 +65,14 @@ model DestinationLodging {
 
   @@map("destination_lodging")
 }
+
+// One row per destination with Luis's admin-only cost breakdown.
+// `costs` is { myTransport, elenyTransport, gas, tolls, hotel } (numbers).
+// Never exposed to Eleny — admin-only input and display.
+model DestinationCosts {
+  destId    String   @id @map("dest_id")
+  costs     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("destination_costs")
+}

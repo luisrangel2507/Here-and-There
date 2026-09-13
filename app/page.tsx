@@ -927,6 +927,30 @@ const APP_STYLE = `
     color:var(--ink-soft);
   }
   .price-split b{color:var(--ink);}
+  .cost-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:14px;
+  }
+  .cost-field-label{
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:0.03em;
+    color:var(--ink-soft);
+    margin-bottom:4px;
+  }
+  .cost-field input{
+    width:100%;
+    font-family:'Poppins', sans-serif;
+    font-size:16px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    padding:9px 10px;
+    background:#fff;
+    color:var(--ink);
+  }
+  .cost-field input:focus{ outline:none; border-color:var(--turquoise); }
 
   .detail-section{padding:20px 24px 4px;}
   .detail-label{
@@ -1307,8 +1331,13 @@ function getDest(id) {
   return null;
 }
 function destTotal(d) {
+  if (d.costs && d.costs.myTransport != null) {
+    const c = d.costs;
+    return (c.myTransport || 0) + (c.elenyTransport || 0) + (c.gas || 0) + (c.tolls || 0) + (c.hotel || 0);
+  }
+  if (d.costs && d.costs.edu != null) return (d.costs.edu || 0) + (d.costs.eleny || 0);
   if (d.price != null) return d.price;
-  return d.costs ? d.costs.edu + d.costs.eleny : 0;
+  return 0;
 }
 
 const ADMIN_CODE = 'aguacate9';
@@ -1422,6 +1451,42 @@ async function loadLodgingData() {
       d.lodging = map[destId].map(l => ({ name: l.name, url: l.url || null }));
     });
   } catch (e) { /* keep defaults */ }
+}
+
+// ---- admin-only cost breakdown (never shown to Eleny) ----
+const EMPTY_COSTS = { myTransport: 0, elenyTransport: 0, gas: 0, tolls: 0, hotel: 0 };
+
+let costsSaveTimer = null;
+function saveCosts(destId) {
+  const d = getDest(destId);
+  clearTimeout(costsSaveTimer);
+  costsSaveTimer = setTimeout(() => {
+    fetch('/api/costs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ destId, costs: d.costs }),
+    }).catch(() => {});
+  }, 400);
+}
+
+async function loadCostsData() {
+  try {
+    const res = await fetch('/api/costs');
+    if (!res.ok) return;
+    const map = await res.json();
+    Object.keys(map).forEach(destId => {
+      const d = getDest(destId);
+      if (!d) return;
+      d.costs = { ...EMPTY_COSTS, ...map[destId] };
+    });
+  } catch (e) { /* keep defaults */ }
+}
+
+function setCostField(destId, field, value) {
+  const d = getDest(destId);
+  if (!d.costs) d.costs = { ...EMPTY_COSTS };
+  d.costs[field] = Number(value) || 0;
+  saveCosts(destId);
 }
 
 function addLodging(id, text, url) {
@@ -2160,15 +2225,40 @@ function renderDetail() {
 
   if (d.vibe) card.appendChild(el('p', 'detail-vibe', d.vibe));
 
-  const priceBlock = el('div', 'price-block');
-  priceBlock.appendChild(el('div', 'price-total-label', 'ESTIMATED TOTAL'));
-  priceBlock.appendChild(el('div', 'price-total', money(destTotal(d))));
-  if (d.costs) {
-    const split = el('div', 'price-split');
-    split.innerHTML = '<span>Edu <b>' + money(d.costs.edu) + '</b></span><span>Eleny <b>' + money(d.costs.eleny) + '</b></span>';
-    priceBlock.appendChild(split);
+  if (isAdmin) {
+    const priceBlock = el('div', 'price-block');
+    priceBlock.appendChild(el('div', 'price-total-label', 'ESTIMATED TOTAL (only you see this)'));
+    const totalEl = el('div', 'price-total', money(destTotal(d)));
+    priceBlock.appendChild(totalEl);
+
+    const currentCosts = (d.costs && d.costs.myTransport != null) ? d.costs : EMPTY_COSTS;
+    const costFields = [
+      { key: 'myTransport', label: 'My transport' },
+      { key: 'elenyTransport', label: 'Eleny\\'s transport' },
+      { key: 'gas', label: 'Gas' },
+      { key: 'tolls', label: 'Tolls (casetas)' },
+      { key: 'hotel', label: 'Hotel / Airbnb' },
+    ];
+    const costGrid = el('div', 'cost-grid');
+    costFields.forEach(f => {
+      const field = el('div', 'cost-field');
+      field.appendChild(el('div', 'cost-field-label', f.label));
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.inputMode = 'decimal';
+      input.min = '0';
+      input.value = currentCosts[f.key] || '';
+      input.placeholder = '0';
+      input.addEventListener('input', () => {
+        setCostField(d.id, f.key, input.value);
+        totalEl.textContent = money(destTotal(d));
+      });
+      field.appendChild(input);
+      costGrid.appendChild(field);
+    });
+    priceBlock.appendChild(costGrid);
+    card.appendChild(priceBlock);
   }
-  if (isAdmin) card.appendChild(priceBlock);
 
   const section = el('div', 'detail-section');
   section.appendChild(el('div', 'detail-label', 'HIGHLIGHTS'));
@@ -2513,6 +2603,7 @@ Promise.all([
   loadPriorities().then(loadCustomDestinations),
   loadHighlightsData(),
   loadLodgingData(),
+  loadCostsData(),
 ])
   .then(loadPhotos)
   .then(render);
