@@ -987,7 +987,7 @@ function destTotal(d) {
   return d.price != null ? d.price : (d.costs.edu + d.costs.eleny);
 }
 
-const ADMIN_CODE = 'vamonos';
+const ADMIN_CODE = 'aguacate9';
 const COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const STORAGE_KEY = 'priorities-state';
 
