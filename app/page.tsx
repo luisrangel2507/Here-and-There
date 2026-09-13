@@ -685,12 +685,12 @@ const APP_STYLE = `
   .detail-plan-chip{
     display:inline-flex;
     align-items:center;
-    gap:5px;
-    font-size:10.5px;
+    gap:3px;
+    font-size:8px;
     font-weight:600;
-    padding:4px 11px;
+    padding:2px 6px;
     border-radius:999px;
-    margin-top:8px;
+    margin-top:4px;
     color:#fff;
     background:var(--plan-color, var(--coral));
   }
