@@ -576,42 +576,59 @@ const APP_STYLE = `
     animation:fadeSlideUp .5s ease both;
     animation-delay:.05s;
   }
-  .hero-photo{
-    width:100%;
-    height:190px;
-    object-fit:cover;
-    display:block;
-    cursor:pointer;
-  }
-  .hero-photo-btn{
-    width:100%;
-    height:190px;
-    border:none;
-    background:linear-gradient(135deg, var(--plan-soft1, rgba(255,201,60,0.35)), var(--plan-soft2, rgba(255,107,91,0.25)));
-    color:var(--ink);
-    font-size:15px;
-    font-weight:600;
+  .lightbox-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(10,5,15,0.92);
+    z-index:200;
     display:flex;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:8px;
-    cursor:pointer;
+    padding:24px;
+    animation:fadeIn .15s ease both;
   }
-  .hero-photo-wrap{ position:relative; }
-  .hero-photo-remove{
+  .lightbox-img{
+    max-width:100%;
+    max-height:70vh;
+    object-fit:contain;
+    border-radius:12px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  }
+  .lightbox-close{
     position:absolute;
-    top:10px; right:10px;
-    width:30px;height:30px;
+    top:16px; right:16px;
+    width:38px;height:38px;
     border:none;
     border-radius:50%;
-    background:rgba(43,27,51,0.55);
+    background:rgba(255,255,255,0.15);
     color:#fff;
-    font-size:16px;
-    line-height:1;
+    font-size:20px;
     cursor:pointer;
     display:flex;align-items:center;justify-content:center;
   }
-  .hero-photo-remove:hover{ background:rgba(255,107,91,0.85); }
+  .lightbox-actions{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .lightbox-btn{
+    border:none;
+    border-radius:999px;
+    padding:10px 18px;
+    font-family:'Poppins', sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    cursor:pointer;
+    background:rgba(255,255,255,0.14);
+    color:#fff;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+  }
+  .lightbox-btn:hover{ background:rgba(255,255,255,0.22); }
   .detail-head{
     padding:22px 24px 6px;
     display:flex;
@@ -1023,9 +1040,6 @@ async function loadPriorities() {
 }
 
 // ---- photos (uploaded from the device, persisted as compressed data URLs) ----
-function photoKeyForDest(id) {
-  return 'dest:' + id;
-}
 function photoKeyForHighlight(id, name) {
   return 'dest:' + id + ':highlight:' + name;
 }
@@ -1046,8 +1060,6 @@ async function loadPhotos() {
     if (!res.ok) return;
     const map = await res.json();
     allDestinations().forEach(d => {
-      const destKey = photoKeyForDest(d.id);
-      if (map[destKey]) d.photo = map[destKey];
       d.highlights.forEach(h => {
         const hKey = photoKeyForHighlight(d.id, h.name);
         if (map[hKey]) h.photo = map[hKey];
@@ -1098,6 +1110,41 @@ function pickPhoto(onPicked) {
     }
   });
   input.click();
+}
+
+function showPhotoLightbox(src, alt, onReplace) {
+  const backdrop = el('div', 'lightbox-backdrop');
+
+  const closeBtn = el('button', 'lightbox-close', '×');
+  closeBtn.setAttribute('aria-label', 'Close');
+  backdrop.appendChild(closeBtn);
+
+  const img = document.createElement('img');
+  img.className = 'lightbox-img';
+  img.src = src;
+  img.alt = alt || '';
+  backdrop.appendChild(img);
+
+  const actions = el('div', 'lightbox-actions');
+  const downloadLink = document.createElement('a');
+  downloadLink.className = 'lightbox-btn';
+  downloadLink.href = src;
+  downloadLink.download = (alt || 'photo').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.jpg';
+  downloadLink.textContent = '⬇ Download';
+  actions.appendChild(downloadLink);
+
+  if (onReplace) {
+    const replaceBtn = el('button', 'lightbox-btn', '🔄 Replace');
+    replaceBtn.addEventListener('click', () => { close(); onReplace(); });
+    actions.appendChild(replaceBtn);
+  }
+  backdrop.appendChild(actions);
+
+  function close() { backdrop.remove(); }
+  closeBtn.addEventListener('click', close);
+  backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
+
+  document.body.appendChild(backdrop);
 }
 
 function submitPriorities() {
@@ -1223,20 +1270,6 @@ function toggleFavorite(id) {
   const d = getDest(id);
   d.favorite = !d.favorite;
   render();
-}
-function setPhoto(id) {
-  pickPhoto(dataUrl => {
-    const d = getDest(id);
-    d.photo = dataUrl;
-    render();
-    savePhoto(photoKeyForDest(id), dataUrl);
-  });
-}
-function removePhoto(id) {
-  const d = getDest(id);
-  d.photo = null;
-  render();
-  savePhoto(photoKeyForDest(id), null);
 }
 function addHighlight(id, text) {
   const d = getDest(id);
@@ -1427,35 +1460,17 @@ function renderDetail() {
   card.style.setProperty('--plan-soft1', hexToRgba(plan.color, 0.32));
   card.style.setProperty('--plan-soft2', hexToRgba(plan.dim, 0.22));
 
-  if (d.photo) {
-    const wrap = el('div', 'hero-photo-wrap');
-    const img = document.createElement('img');
-    img.className = 'hero-photo';
-    img.src = d.photo;
-    img.alt = d.city;
-    img.addEventListener('click', () => setPhoto(d.id));
-    wrap.appendChild(img);
-    const removeBtn = el('button', 'hero-photo-remove', '×');
-    removeBtn.setAttribute('aria-label', 'Remove photo');
-    removeBtn.addEventListener('click', (e) => { e.stopPropagation(); removePhoto(d.id); });
-    wrap.appendChild(removeBtn);
-    card.appendChild(wrap);
-  } else {
-    const btn = el('button', 'hero-photo-btn', '📷 Add a photo');
-    btn.addEventListener('click', () => setPhoto(d.id));
-    card.appendChild(btn);
-  }
-
-  const photos = d.highlights.filter(h => h.photo).map(h => h.photo);
-  if (photos.length > 0) {
+  const photoHighlights = d.highlights.map((h, idx) => ({ h, idx })).filter(x => x.h.photo);
+  if (photoHighlights.length > 0) {
     const gallery = el('div', 'gallery');
     gallery.appendChild(el('div', 'gallery-label', 'PHOTOS'));
     const scroller = el('div', 'gallery-scroll');
-    photos.forEach(url => {
+    photoHighlights.forEach(({ h, idx }) => {
       const img = document.createElement('img');
       img.className = 'gallery-thumb';
-      img.src = url;
-      img.alt = d.city;
+      img.src = h.photo;
+      img.alt = h.name;
+      img.addEventListener('click', () => showPhotoLightbox(h.photo, h.name, () => setHighlightPhoto(d.id, idx)));
       scroller.appendChild(img);
     });
     gallery.appendChild(scroller);
@@ -1498,7 +1513,7 @@ function renderDetail() {
       img.className = 'highlight-thumb';
       img.src = h.photo;
       img.alt = h.name;
-      img.addEventListener('click', () => setHighlightPhoto(d.id, idx));
+      img.addEventListener('click', () => showPhotoLightbox(h.photo, h.name, () => setHighlightPhoto(d.id, idx)));
       row.appendChild(img);
     } else {
       const thumbBtn = el('button', 'highlight-thumb-btn', '📷');
