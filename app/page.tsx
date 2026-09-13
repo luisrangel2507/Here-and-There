@@ -967,6 +967,15 @@ const APP_STYLE = `
     margin-top:2px;
     margin-bottom:8px;
   }
+  .add-form-stack{
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .lodging-link{
+    color:var(--turquoise-dim);
+    text-decoration:none;
+  }
+  .lodging-link:hover{ text-decoration:underline; }
   .add-form input{
     flex:1;
     min-width:0;
@@ -1258,7 +1267,7 @@ async function saveLodging(destId) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         destId,
-        lodging: (d.lodging || []).map(l => ({ name: l.name })),
+        lodging: (d.lodging || []).map(l => ({ name: l.name, url: l.url || null })),
       }),
     });
   } catch (e) { /* best-effort only */ }
@@ -1272,16 +1281,18 @@ async function loadLodgingData() {
     Object.keys(map).forEach(destId => {
       const d = getDest(destId);
       if (!d) return;
-      d.lodging = map[destId].map(l => ({ name: l.name }));
+      d.lodging = map[destId].map(l => ({ name: l.name, url: l.url || null }));
     });
   } catch (e) { /* keep defaults */ }
 }
 
-function addLodging(id, text) {
+function addLodging(id, text, url) {
   const d = getDest(id);
   if (!d.lodging) d.lodging = [];
   if (text && text.trim()) {
-    d.lodging.push({ name: text.trim() });
+    let cleanUrl = url && url.trim() ? url.trim() : null;
+    if (cleanUrl && !/^https?:\/\//i.test(cleanUrl)) cleanUrl = 'https://' + cleanUrl;
+    d.lodging.push({ name: text.trim(), url: cleanUrl });
     saveLodging(id);
   }
   openAddLodging = false;
@@ -1970,7 +1981,17 @@ function renderDetail() {
   lodgingList.forEach((l, idx) => {
     const row = el('div', 'highlight-row');
     row.style.animationDelay = (idx * 0.05) + 's';
-    row.appendChild(el('div', 'highlight-name', l.name));
+    if (l.url) {
+      const link = document.createElement('a');
+      link.className = 'highlight-name lodging-link';
+      link.href = l.url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = l.name + ' 🔗';
+      row.appendChild(link);
+    } else {
+      row.appendChild(el('div', 'highlight-name', l.name));
+    }
     const del = el('button', 'highlight-del', '×');
     del.addEventListener('click', () => removeLodging(d.id, idx));
     row.appendChild(del);
@@ -1979,13 +2000,19 @@ function renderDetail() {
   lodgingSection.appendChild(lodgingBox);
 
   if (openAddLodging) {
-    const form = el('div', 'add-form');
-    const input = document.createElement('input');
-    input.placeholder = 'e.g. Rosewood San Miguel';
+    const form = el('div', 'add-form add-form-stack');
+    const nameInput = document.createElement('input');
+    nameInput.placeholder = 'e.g. Rosewood San Miguel';
+    const urlInput = document.createElement('input');
+    urlInput.type = 'url';
+    urlInput.placeholder = 'Link (Airbnb, hotel site…) — optional';
     const addBtn = el('button', null, 'Add');
-    addBtn.addEventListener('click', () => addLodging(d.id, input.value));
-    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') addLodging(d.id, input.value); });
-    form.appendChild(input);
+    const submitLodging = () => addLodging(d.id, nameInput.value, urlInput.value);
+    addBtn.addEventListener('click', submitLodging);
+    nameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitLodging(); });
+    urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitLodging(); });
+    form.appendChild(nameInput);
+    form.appendChild(urlInput);
     form.appendChild(addBtn);
     lodgingSection.appendChild(form);
   } else {
