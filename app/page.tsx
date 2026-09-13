@@ -81,6 +81,94 @@ const APP_STYLE = `
   }
   .wrap{max-width:680px;margin:0 auto;position:relative;z-index:1;}
 
+  .passcode-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(20,10,30,0.45);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    z-index:100;
+    animation:fadeIn .18s ease both;
+  }
+  @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+  .passcode-card{
+    width:100%;
+    max-width:300px;
+    background:rgba(255,251,244,0.94);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    border-radius:20px;
+    padding:26px 22px 0;
+    text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,0.4);
+    animation:popIn .3s ease both;
+  }
+  .passcode-card.shake{ animation:passcodeShake .4s ease; }
+  @keyframes passcodeShake{
+    10%,90%{ transform:translateX(-1px); }
+    20%,80%{ transform:translateX(2px); }
+    30%,50%,70%{ transform:translateX(-4px); }
+    40%,60%{ transform:translateX(4px); }
+  }
+  .passcode-icon{ font-size:28px; margin-bottom:8px; }
+  .passcode-title{
+    font-family:'Fraunces', serif;
+    font-size:19px;
+    font-weight:700;
+    color:var(--ink);
+    margin-bottom:4px;
+  }
+  .passcode-sub{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-bottom:18px;
+  }
+  .passcode-input{
+    width:100%;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    font-size:18px;
+    letter-spacing:4px;
+    text-align:center;
+    outline:none;
+    background:rgba(255,255,255,0.7);
+    color:var(--ink);
+    font-family:'Poppins', sans-serif;
+  }
+  .passcode-input:focus{ border-color:var(--coral); }
+  .passcode-error{
+    font-size:12px;
+    font-weight:600;
+    color:#e14f40;
+    height:30px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .passcode-actions{
+    display:flex;
+    border-top:1px solid var(--line);
+    margin:0 -22px;
+  }
+  .passcode-btn{
+    flex:1;
+    border:none;
+    background:transparent;
+    padding:14px 0;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:'Poppins', sans-serif;
+  }
+  .passcode-cancel{ color:var(--ink-soft); border-right:1px solid var(--line); border-radius:0 0 0 20px; }
+  .passcode-ok{ color:var(--coral); border-radius:0 0 20px 0; }
+  .passcode-cancel:active, .passcode-ok:active{ background:rgba(43,27,51,0.06); }
+
   @keyframes fadeSlideUp{
     from{opacity:0; transform:translateY(14px);}
     to{opacity:1; transform:translateY(0);}
@@ -1041,16 +1129,70 @@ function selectProfile(p) {
     render();
     return;
   }
-  const code = window.prompt('Passcode for Luis:');
-  if (code === null) return;
-  if (code.trim().toLowerCase() === ADMIN_CODE) {
+  showPasscodeModal().then(unlocked => {
+    if (!unlocked) return;
     profile = 'luis';
     isAdmin = true;
     view = 'map';
     render();
-  } else {
-    window.alert('Wrong passcode.');
-  }
+  });
+}
+
+function showPasscodeModal() {
+  return new Promise((resolve) => {
+    const backdrop = el('div', 'passcode-backdrop');
+    const card = el('div', 'passcode-card');
+    card.appendChild(el('div', 'passcode-icon', '🔒'));
+    card.appendChild(el('div', 'passcode-title', 'Enter Passcode'));
+    card.appendChild(el('div', 'passcode-sub', 'This unlocks Luis\\'s view.'));
+
+    const input = document.createElement('input');
+    input.type = 'password';
+    input.autocomplete = 'off';
+    input.autocapitalize = 'off';
+    input.spellcheck = false;
+    input.className = 'passcode-input';
+    input.placeholder = '••••••••';
+    card.appendChild(input);
+
+    const error = el('div', 'passcode-error');
+    card.appendChild(error);
+
+    const actions = el('div', 'passcode-actions');
+    const cancelBtn = el('button', 'passcode-btn passcode-cancel', 'Cancel');
+    const okBtn = el('button', 'passcode-btn passcode-ok', 'Unlock');
+    actions.appendChild(cancelBtn);
+    actions.appendChild(okBtn);
+    card.appendChild(actions);
+
+    backdrop.appendChild(card);
+    document.body.appendChild(backdrop);
+    setTimeout(() => input.focus(), 50);
+
+    function close(unlocked) {
+      backdrop.remove();
+      resolve(unlocked);
+    }
+    function tryUnlock() {
+      if (input.value.trim().toLowerCase() === ADMIN_CODE) {
+        close(true);
+        return;
+      }
+      error.textContent = 'Incorrect passcode';
+      input.value = '';
+      input.focus();
+      card.classList.remove('shake');
+      void card.offsetWidth; // restart the animation
+      card.classList.add('shake');
+    }
+    cancelBtn.addEventListener('click', () => close(false));
+    okBtn.addEventListener('click', tryUnlock);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') tryUnlock();
+      if (e.key === 'Escape') close(false);
+    });
+    backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(false); });
+  });
 }
 function goIntro() {
   view = 'intro';
