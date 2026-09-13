@@ -29,6 +29,17 @@ const APP_STYLE = `
   .pin{ transition:transform .12s ease; }
   .pin:active .pin-dot-wrap{ transform:scale(0.85); }
   html, body{margin:0; background:#4e4a66;}
+  .splash-screen{
+    position:fixed;
+    inset:0;
+    background:#0c2340;
+  }
+  .splash-img{
+    width:100%;
+    height:100%;
+    display:block;
+    object-fit:cover;
+  }
   .app{
     position:relative;
     overflow-x:hidden;
@@ -1116,6 +1127,7 @@ const APP_SCRIPT = `
 
 const MEXICO_MAP_IMG = '/images/mexico-map.jpg';
 const INTRO_HERO_IMG = '/images/intro-hero.jpg';
+const SPLASH_IMG = '/images/splash.jpg';
 const USA_MAP_IMG = '/images/usa-map.jpg';
 const BG_PHOTO_IMG = '/images/bg-photo.jpg';
 const PLAN_META = {
@@ -1567,7 +1579,7 @@ function changeTodaysPick() {
 }
 
 // ---- state ----
-let view = 'intro'; // 'intro' | 'map' | 'detail'
+let view = 'splash'; // 'splash' | 'intro' | 'map' | 'detail'
 let region = 'mexico'; // 'mexico' | 'usa'
 let detailId = null;
 let openAddHighlight = false;
@@ -2305,6 +2317,18 @@ function renderPriorities() {
 function render() {
   const root = document.getElementById('root');
   root.innerHTML = '';
+
+  if (view === 'splash') {
+    const splash = el('div', 'splash-screen');
+    const img = document.createElement('img');
+    img.className = 'splash-img';
+    img.src = SPLASH_IMG;
+    img.alt = 'Here & There';
+    splash.appendChild(img);
+    root.appendChild(splash);
+    return;
+  }
+
   const app = el('div', 'app');
   app.classList.add('photo-bg');
   const bgImg = document.createElement('img');
@@ -2334,6 +2358,9 @@ function render() {
 }
 
 render();
+setTimeout(() => {
+  if (view === 'splash') { view = 'intro'; render(); }
+}, 3000);
 Promise.all([
   loadPriorities().then(loadCustomDestinations),
   loadHighlightsData(),
