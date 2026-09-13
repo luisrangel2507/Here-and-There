@@ -1291,7 +1291,9 @@ function addLodging(id, text, url) {
   if (!d.lodging) d.lodging = [];
   if (text && text.trim()) {
     let cleanUrl = url && url.trim() ? url.trim() : null;
-    if (cleanUrl && !/^https?:\/\//i.test(cleanUrl)) cleanUrl = 'https://' + cleanUrl;
+    if (cleanUrl && cleanUrl.toLowerCase().indexOf('http://') !== 0 && cleanUrl.toLowerCase().indexOf('https://') !== 0) {
+      cleanUrl = 'https://' + cleanUrl;
+    }
     d.lodging.push({ name: text.trim(), url: cleanUrl });
     saveLodging(id);
   }
