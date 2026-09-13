@@ -655,9 +655,10 @@ const APP_STYLE = `
   }
   .dest-row{
     display:flex;
-    flex-direction:column;
-    align-items:flex-start;
-    gap:6px;
+    flex-direction:row;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
     background:linear-gradient(160deg, rgba(255,255,255,0.2), rgba(255,255,255,0.08));
     backdrop-filter:blur(8px);
     border:1.5px solid rgba(255,255,255,0.3);
@@ -669,10 +670,11 @@ const APP_STYLE = `
     transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
   }
   .dest-row:hover{transform:translateY(-2px);background:linear-gradient(160deg, rgba(255,255,255,0.28), rgba(255,255,255,0.12));box-shadow:0 12px 26px rgba(20,10,30,0.3);}
+  .dest-row-left{min-width:0;}
   .dest-row-name{font-size:12.5px;font-weight:600;color:#fff;line-height:1.25;}
-  .dest-row-plan{font-size:9.5px;font-weight:600;color:rgba(255,255,255,0.75);margin-top:1px;}
   .dest-row-note{font-size:9.5px;color:rgba(255,255,255,0.7);margin-top:1px;}
-  .dest-row-right{display:flex;align-items:center;gap:6px;width:100%;justify-content:space-between;}
+  .dest-row-right{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
+  .dest-row-plan-emoji{font-size:16px;}
   .dest-row-price{font-family:'Fraunces', serif;font-style:italic;font-weight:700;font-size:13.5px;color:var(--sun);}
   .dest-row-heart{font-size:13px;}
 
@@ -1804,12 +1806,12 @@ function renderMap() {
     const plan = planOf(d);
     const row = el('div', 'dest-row');
     row.style.setProperty('--plan-color', plan.color);
-    const left = el('div');
+    const left = el('div', 'dest-row-left');
     left.appendChild(el('div', 'dest-row-name', d.city));
-    left.appendChild(el('div', 'dest-row-plan', plan.emoji + ' ' + plan.label));
     if (d.note) left.appendChild(el('div', 'dest-row-note', d.note));
     row.appendChild(left);
     const right = el('div', 'dest-row-right');
+    right.appendChild(el('span', 'dest-row-plan-emoji', plan.emoji));
     if (d.favorite) right.appendChild(el('span', 'dest-row-heart', '💛'));
     if (isAdmin) right.appendChild(el('div', 'dest-row-price', money(destTotal(d))));
     row.appendChild(right);
