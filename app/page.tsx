@@ -1137,7 +1137,7 @@ function renderIntro() {
   const hero = document.createElement('img');
   hero.className = 'intro-hero';
   hero.src = INTRO_HERO_IMG;
-  hero.alt = 'Here & There — Aquí & Allá';
+  hero.alt = 'Eleny and Luis';
   view_.appendChild(hero);
 
   const header = el('div');
