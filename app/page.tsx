@@ -1101,7 +1101,6 @@ async function loadPriorities() {
         blockedIds = parsed.blockedIds || [];
         priorityOrder = (parsed.priorityOrder || defaultOrder()).filter(id => !blockedIds.includes(id));
         lastSubmitAt = parsed.lastSubmitAt || null;
-        render();
       }
     }
   } catch (e) { /* keep defaults */ }
@@ -1132,7 +1131,6 @@ async function loadHighlightsData() {
       if (!d) return;
       d.highlights = map[destId].map(h => ({ name: h.name, city: h.city || null, photo: null }));
     });
-    render();
   } catch (e) { /* keep defaults */ }
 }
 
@@ -1162,7 +1160,6 @@ async function loadPhotos() {
         if (map[hKey]) h.photo = map[hKey];
       });
     });
-    render();
   } catch (e) { /* keep defaults */ }
 }
 
@@ -1805,9 +1802,10 @@ function render() {
   root.appendChild(app);
 }
 
-loadPriorities();
-loadHighlightsData().then(loadPhotos);
 render();
+Promise.all([loadPriorities(), loadHighlightsData()])
+  .then(loadPhotos)
+  .then(render);
 
 `;
 
