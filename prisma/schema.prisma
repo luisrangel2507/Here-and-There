@@ -19,15 +19,25 @@ model AppState {
   @@map("app_state")
 }
 
-// One row per uploaded photo, keyed by where it's shown
-// ("dest:<id>" for a destination's hero photo, "dest:<id>:highlight:<name>"
-// for a highlight thumbnail). Storing the image itself (as a compressed
-// data URL) instead of a filename, since Railway's filesystem isn't
-// persistent across deploys.
+// One row per uploaded highlight photo, keyed "dest:<id>:highlight:<name>".
+// Storing the image itself (as a compressed data URL) instead of a
+// filename, since Railway's filesystem isn't persistent across deploys.
 model Photo {
   key       String   @id
   dataUrl   String   @map("data_url")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("photos")
+}
+
+// One row per destination that has had its highlights list customized
+// (added/removed/re-tagged by city). `highlights` is the full replacement
+// list for that destination: [{ name, city }, ...]. Photos for each
+// highlight are still tracked separately in Photo, matched by name.
+model DestinationHighlights {
+  destId     String   @id @map("dest_id")
+  highlights Json
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("destination_highlights")
 }

@@ -744,6 +744,27 @@ const APP_STYLE = `
     color:var(--turquoise-dim);
     margin-bottom:10px;
   }
+  .city-tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .city-tab{
+    border:1.5px solid var(--line);
+    background:#fff;
+    color:var(--ink-soft);
+    font-family:'Poppins', sans-serif;
+    font-weight:600;
+    font-size:11.5px;
+    padding:6px 13px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .city-tab.active{
+    background:var(--coral);
+    border-color:var(--coral);
+    color:#fff;
+  }
   .highlights{
     display:flex;
     flex-direction:column;
@@ -985,6 +1006,7 @@ const REGIONS = {
       {
         id: 'austin', city: 'Austin / San Antonio', country: 'USA', code: 'AUS', plan: 'city',
         costs: { edu: 3000, eleny: 4500 }, note: null,
+        cities: ['Austin', 'San Antonio'],
         highlights: [],
         photo: null, favorite: false, pin: { x: 49.8, y: 66.3 },
       },
@@ -1066,6 +1088,35 @@ async function loadPriorities() {
         render();
       }
     }
+  } catch (e) { /* keep defaults */ }
+}
+
+// ---- highlights list (names + city tags; photos are tracked separately) ----
+async function saveHighlights(destId) {
+  const d = getDest(destId);
+  try {
+    await fetch('/api/highlights', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        destId,
+        highlights: d.highlights.map(h => ({ name: h.name, city: h.city || null })),
+      }),
+    });
+  } catch (e) { /* best-effort only */ }
+}
+
+async function loadHighlightsData() {
+  try {
+    const res = await fetch('/api/highlights');
+    if (!res.ok) return;
+    const map = await res.json();
+    Object.keys(map).forEach(destId => {
+      const d = getDest(destId);
+      if (!d) return;
+      d.highlights = map[destId].map(h => ({ name: h.name, city: h.city || null, photo: null }));
+    });
+    render();
   } catch (e) { /* keep defaults */ }
 }
 
@@ -1209,6 +1260,7 @@ let view = 'intro'; // 'intro' | 'map' | 'detail'
 let region = 'mexico'; // 'mexico' | 'usa'
 let detailId = null;
 let openAddHighlight = false;
+let selectedHighlightCity = null;
 let profile = null; // 'eleny' | 'luis'
 let isAdmin = false;
 
@@ -1299,6 +1351,7 @@ function goDetail(id) {
   detailId = id;
   view = 'detail';
   openAddHighlight = false;
+  selectedHighlightCity = d.cities ? d.cities[0] : null;
   render();
 }
 function goMap() {
@@ -1313,7 +1366,10 @@ function toggleFavorite(id) {
 }
 function addHighlight(id, text) {
   const d = getDest(id);
-  if (text && text.trim()) d.highlights.push({ name: text.trim(), photo: null });
+  if (text && text.trim()) {
+    d.highlights.push({ name: text.trim(), photo: null, city: d.cities ? selectedHighlightCity : null });
+    saveHighlights(id);
+  }
   openAddHighlight = false;
   render();
 }
@@ -1322,6 +1378,7 @@ function removeHighlight(id, idx) {
   const h = d.highlights[idx];
   d.highlights.splice(idx, 1);
   render();
+  saveHighlights(id);
   if (h.photo) savePhoto(photoKeyForHighlight(id, h.name), null);
 }
 function setHighlightPhoto(id, idx) {
@@ -1545,12 +1602,24 @@ function renderDetail() {
   const section = el('div', 'detail-section');
   section.appendChild(el('div', 'detail-label', 'HIGHLIGHTS'));
 
-  if (d.highlights.length === 0 && !openAddHighlight) {
+  if (d.cities) {
+    const cityTabs = el('div', 'city-tabs');
+    d.cities.forEach(cityName => {
+      const tab = el('button', 'city-tab' + (selectedHighlightCity === cityName ? ' active' : ''), cityName);
+      tab.addEventListener('click', () => { selectedHighlightCity = cityName; render(); });
+      cityTabs.appendChild(tab);
+    });
+    section.appendChild(cityTabs);
+  }
+
+  const visibleHighlights = d.highlights.filter(h => !d.cities || h.city === selectedHighlightCity);
+  if (visibleHighlights.length === 0 && !openAddHighlight) {
     section.appendChild(el('div', 'highlight-empty', 'No highlights added yet.'));
   }
 
   const highlightsBox = el('div', 'highlights');
   d.highlights.forEach((h, idx) => {
+    if (d.cities && h.city !== selectedHighlightCity) return;
     const row = el('div', 'highlight-row');
     row.style.animationDelay = (idx * 0.05) + 's';
     if (h.photo) {
@@ -1720,7 +1789,7 @@ function render() {
 }
 
 loadPriorities();
-loadPhotos();
+loadHighlightsData().then(loadPhotos);
 render();
 
 `;
