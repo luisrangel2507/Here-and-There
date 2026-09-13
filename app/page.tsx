@@ -1249,6 +1249,51 @@ async function loadHighlightsData() {
   } catch (e) { /* keep defaults */ }
 }
 
+// ---- lodging list ----
+async function saveLodging(destId) {
+  const d = getDest(destId);
+  try {
+    await fetch('/api/lodging', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        destId,
+        lodging: (d.lodging || []).map(l => ({ name: l.name })),
+      }),
+    });
+  } catch (e) { /* best-effort only */ }
+}
+
+async function loadLodgingData() {
+  try {
+    const res = await fetch('/api/lodging');
+    if (!res.ok) return;
+    const map = await res.json();
+    Object.keys(map).forEach(destId => {
+      const d = getDest(destId);
+      if (!d) return;
+      d.lodging = map[destId].map(l => ({ name: l.name }));
+    });
+  } catch (e) { /* keep defaults */ }
+}
+
+function addLodging(id, text) {
+  const d = getDest(id);
+  if (!d.lodging) d.lodging = [];
+  if (text && text.trim()) {
+    d.lodging.push({ name: text.trim() });
+    saveLodging(id);
+  }
+  openAddLodging = false;
+  render();
+}
+function removeLodging(id, idx) {
+  const d = getDest(id);
+  d.lodging.splice(idx, 1);
+  render();
+  saveLodging(id);
+}
+
 // ---- custom destinations (added from the map via "+ Add city") ----
 async function saveCustomDestinations(regionKey) {
   try {
@@ -1440,6 +1485,7 @@ let view = 'intro'; // 'intro' | 'map' | 'detail'
 let region = 'mexico'; // 'mexico' | 'usa'
 let detailId = null;
 let openAddHighlight = false;
+let openAddLodging = false;
 let selectedHighlightCity = null;
 let addingCity = null; // null | { step: 'pin' } | { step: 'form', pin: {x,y} }
 let profile = null; // 'eleny' | 'luis'
@@ -1532,6 +1578,7 @@ function goDetail(id) {
   detailId = id;
   view = 'detail';
   openAddHighlight = false;
+  openAddLodging = false;
   addingCity = null;
   selectedHighlightCity = d.cities ? d.cities[0] : null;
   render();
@@ -1911,6 +1958,44 @@ function renderDetail() {
 
   card.appendChild(section);
 
+  const lodgingSection = el('div', 'detail-section');
+  lodgingSection.appendChild(el('div', 'detail-label', 'LODGING'));
+
+  const lodgingList = d.lodging || [];
+  if (lodgingList.length === 0 && !openAddLodging) {
+    lodgingSection.appendChild(el('div', 'highlight-empty', 'No lodging added yet.'));
+  }
+
+  const lodgingBox = el('div', 'highlights');
+  lodgingList.forEach((l, idx) => {
+    const row = el('div', 'highlight-row');
+    row.style.animationDelay = (idx * 0.05) + 's';
+    row.appendChild(el('div', 'highlight-name', l.name));
+    const del = el('button', 'highlight-del', '×');
+    del.addEventListener('click', () => removeLodging(d.id, idx));
+    row.appendChild(del);
+    lodgingBox.appendChild(row);
+  });
+  lodgingSection.appendChild(lodgingBox);
+
+  if (openAddLodging) {
+    const form = el('div', 'add-form');
+    const input = document.createElement('input');
+    input.placeholder = 'e.g. Rosewood San Miguel';
+    const addBtn = el('button', null, 'Add');
+    addBtn.addEventListener('click', () => addLodging(d.id, input.value));
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') addLodging(d.id, input.value); });
+    form.appendChild(input);
+    form.appendChild(addBtn);
+    lodgingSection.appendChild(form);
+  } else {
+    const addLodgingRow = el('div', 'add-row', '+ add lodging');
+    addLodgingRow.addEventListener('click', () => { openAddLodging = true; render(); });
+    lodgingSection.appendChild(addLodgingRow);
+  }
+
+  card.appendChild(lodgingSection);
+
   const favBtn = el('button', 'fav-btn' + (d.favorite ? ' is-fav' : ''));
   favBtn.innerHTML = d.favorite
     ? '<span class="heart">💛</span> On the shortlist'
@@ -2041,6 +2126,7 @@ render();
 Promise.all([
   loadPriorities().then(loadCustomDestinations),
   loadHighlightsData(),
+  loadLodgingData(),
 ])
   .then(loadPhotos)
   .then(render);

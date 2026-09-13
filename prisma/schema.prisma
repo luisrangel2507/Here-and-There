@@ -52,3 +52,13 @@ model CustomDestinations {
 
   @@map("custom_destinations")
 }
+
+// One row per destination that has had its lodging list customized.
+// `lodging` is the full replacement list for that destination: [{ name }, ...].
+model DestinationLodging {
+  destId    String   @id @map("dest_id")
+  lodging   Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("destination_lodging")
+}
