@@ -1850,7 +1850,7 @@ function renderMap() {
   const view_ = el('div', 'view');
   view_.appendChild(appTitle());
 
-  const priBtn = el('button', 'confirm-btn', '🗳️ Daily priority pick');
+  const priBtn = el('button', 'confirm-btn', '🗳️ Pick your destination ranking');
   priBtn.style.marginBottom = '6px';
   priBtn.addEventListener('click', goPriorities);
   view_.appendChild(priBtn);
@@ -1858,7 +1858,7 @@ function renderMap() {
   const priRemaining = cooldownRemaining();
   view_.appendChild(el('div', 'priority-status', priRemaining > 0
     ? '🔒 Next pick in ' + formatCountdown(priRemaining)
-    : '✅ Ready to rank today'));
+    : 'Last daily pick will be erased.'));
 
   if (isAdmin) {
     const rankBanner = el('button', 'admin-pick-map-banner', '👑 My ranking (only you and Eleny can see this)');
