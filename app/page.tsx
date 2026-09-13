@@ -226,6 +226,14 @@ const APP_STYLE = `
     animation-delay:.1s;
   }
 
+  .priority-status{
+    text-align:center;
+    font-size:12px;
+    font-weight:600;
+    color:rgba(255,255,255,0.85);
+    margin-bottom:18px;
+  }
+
   /* region tabs */
   .region-tabs{
     display:flex;
@@ -1356,9 +1364,14 @@ function renderMap() {
   view_.appendChild(appTitle());
 
   const priBtn = el('button', 'confirm-btn', '🗳️ Daily priority pick');
-  priBtn.style.marginBottom = '18px';
+  priBtn.style.marginBottom = '6px';
   priBtn.addEventListener('click', goPriorities);
   view_.appendChild(priBtn);
+
+  const priRemaining = cooldownRemaining();
+  view_.appendChild(el('div', 'priority-status', priRemaining > 0
+    ? '🔒 Next pick in ' + formatCountdown(priRemaining)
+    : '✅ Ready to rank today'));
 
   const tabs = el('div', 'region-tabs');
   Object.keys(REGIONS).forEach(key => {
