@@ -1133,16 +1133,16 @@ function renderIntro() {
   logo.alt = 'Here & There';
   view_.appendChild(logo);
 
-  const header = el('div');
-  header.style.textAlign = 'center';
-  header.appendChild(el('h1', null, 'Where should we <em>run away</em> to?'));
-  view_.appendChild(header);
-
   const hero = document.createElement('img');
   hero.className = 'intro-hero';
   hero.src = INTRO_HERO_IMG;
   hero.alt = 'Eleny and Luis';
   view_.appendChild(hero);
+
+  const header = el('div');
+  header.style.textAlign = 'center';
+  header.appendChild(el('h1', null, 'Where should we <em>run away</em> to?'));
+  view_.appendChild(header);
 
   const chooseLabel = el('div', 'sub', 'Choose the traveler');
   chooseLabel.style.textAlign = 'center';
