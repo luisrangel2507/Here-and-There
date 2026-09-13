@@ -20,7 +20,7 @@ const APP_STYLE = `
     --line:rgba(43,27,51,0.14);
   }
   *{box-sizing:border-box;}
-  body{margin:0;}
+  html, body{margin:0; background:#241a30;}
   .app{
     position:relative;
     overflow-x:hidden;
