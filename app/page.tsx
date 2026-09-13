@@ -427,6 +427,20 @@ const APP_STYLE = `
     margin-bottom:14px;
   }
   .add-city-form input:focus{ outline:none; border-color:var(--coral); }
+  .profile-select{
+    width:100%;
+    border:1.5px solid rgba(255,255,255,0.35);
+    border-radius:10px;
+    padding:9px 12px;
+    font-size:16px;
+    font-family:'Poppins', sans-serif;
+    background:rgba(255,255,255,0.9);
+    color:var(--ink);
+    margin-bottom:14px;
+    -webkit-appearance:none;
+    appearance:none;
+  }
+  .profile-select:focus{ outline:none; border-color:var(--coral); }
   .add-city-plans{
     display:flex;
     flex-wrap:wrap;
@@ -1714,10 +1728,12 @@ function backFromProfile() {
   view = profileReturnView;
   render();
 }
+let profileSaveTimer = null;
 function saveProfileInfo(field, value) {
   if (!profileInfo[profile]) profileInfo[profile] = {};
   profileInfo[profile][field] = value;
-  savePriorities();
+  clearTimeout(profileSaveTimer);
+  profileSaveTimer = setTimeout(() => savePriorities(), 400);
 }
 
 function goDetail(id) {
@@ -2047,23 +2063,36 @@ function renderProfile() {
   const fields = [
     { key: 'contactName', label: 'Emergency contact name', placeholder: 'e.g. Mom — Carmen Rangel' },
     { key: 'contactPhone', label: 'Emergency contact phone', placeholder: '+52 555 000 0000' },
-    { key: 'bloodType', label: 'Blood type', placeholder: 'e.g. O+' },
   ];
   fields.forEach(f => {
     card.appendChild(el('div', 'add-city-label', f.label));
     const input = document.createElement('input');
     input.value = info[f.key] || '';
     input.placeholder = f.placeholder;
-    input.addEventListener('change', () => saveProfileInfo(f.key, input.value));
+    input.addEventListener('input', () => saveProfileInfo(f.key, input.value));
     card.appendChild(input);
   });
+
+  card.appendChild(el('div', 'add-city-label', 'Blood type'));
+  const bloodSelect = document.createElement('select');
+  bloodSelect.className = 'profile-select';
+  const bloodOptions = ['', 'O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'];
+  bloodOptions.forEach(opt => {
+    const optEl = document.createElement('option');
+    optEl.value = opt;
+    optEl.textContent = opt || 'Select…';
+    if ((info.bloodType || '') === opt) optEl.selected = true;
+    bloodSelect.appendChild(optEl);
+  });
+  bloodSelect.addEventListener('change', () => saveProfileInfo('bloodType', bloodSelect.value));
+  card.appendChild(bloodSelect);
 
   card.appendChild(el('div', 'add-city-label', 'Allergies / medical notes'));
   const textarea = document.createElement('textarea');
   textarea.className = 'profile-textarea';
   textarea.value = info.allergies || '';
   textarea.placeholder = 'e.g. Penicillin, shellfish…';
-  textarea.addEventListener('change', () => saveProfileInfo('allergies', textarea.value));
+  textarea.addEventListener('input', () => saveProfileInfo('allergies', textarea.value));
   card.appendChild(textarea);
 
   view_.appendChild(card);
