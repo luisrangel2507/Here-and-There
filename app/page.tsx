@@ -1302,9 +1302,11 @@ function addLodging(id, text, url) {
 }
 function removeLodging(id, idx) {
   const d = getDest(id);
+  const l = d.lodging[idx];
   d.lodging.splice(idx, 1);
   render();
   saveLodging(id);
+  if (l.photo) savePhoto(photoKeyForLodging(id, l.name), null);
 }
 
 // ---- custom destinations (added from the map via "+ Add city") ----
@@ -1363,6 +1365,9 @@ function addCustomDestination(city, plan) {
 function photoKeyForHighlight(id, name) {
   return 'dest:' + id + ':highlight:' + name;
 }
+function photoKeyForLodging(id, name) {
+  return 'dest:' + id + ':lodging:' + name;
+}
 
 async function savePhoto(key, dataUrl) {
   try {
@@ -1383,6 +1388,10 @@ async function loadPhotos() {
       d.highlights.forEach(h => {
         const hKey = photoKeyForHighlight(d.id, h.name);
         if (map[hKey]) h.photo = map[hKey];
+      });
+      (d.lodging || []).forEach(l => {
+        const lKey = photoKeyForLodging(d.id, l.name);
+        if (map[lKey]) l.photo = map[lKey];
       });
     });
   } catch (e) { /* keep defaults */ }
@@ -1632,6 +1641,15 @@ function setHighlightPhoto(id, idx) {
     savePhoto(photoKeyForHighlight(id, h.name), dataUrl);
   });
 }
+function setLodgingPhoto(id, idx) {
+  pickPhoto(dataUrl => {
+    const d = getDest(id);
+    const l = d.lodging[idx];
+    l.photo = dataUrl;
+    render();
+    savePhoto(photoKeyForLodging(id, l.name), dataUrl);
+  });
+}
 
 function el(tag, className, html) {
   const node = document.createElement(tag);
@@ -1867,7 +1885,8 @@ function renderDetail() {
   card.style.setProperty('--plan-soft2', hexToRgba(plan.dim, 0.22));
 
   const photoHighlights = d.highlights.map((h, idx) => ({ h, idx })).filter(x => x.h.photo);
-  if (photoHighlights.length > 0) {
+  const photoLodging = (d.lodging || []).map((l, idx) => ({ l, idx })).filter(x => x.l.photo);
+  if (photoHighlights.length > 0 || photoLodging.length > 0) {
     const gallery = el('div', 'gallery');
     gallery.appendChild(el('div', 'gallery-label', 'PHOTOS'));
     const scroller = el('div', 'gallery-scroll');
@@ -1877,6 +1896,14 @@ function renderDetail() {
       img.src = h.photo;
       img.alt = h.name;
       img.addEventListener('click', () => showPhotoLightbox(h.photo, h.name, () => setHighlightPhoto(d.id, idx)));
+      scroller.appendChild(img);
+    });
+    photoLodging.forEach(({ l, idx }) => {
+      const img = document.createElement('img');
+      img.className = 'gallery-thumb';
+      img.src = l.photo;
+      img.alt = l.name;
+      img.addEventListener('click', () => showPhotoLightbox(l.photo, l.name, () => setLodgingPhoto(d.id, idx)));
       scroller.appendChild(img);
     });
     gallery.appendChild(scroller);
@@ -1983,6 +2010,19 @@ function renderDetail() {
   lodgingList.forEach((l, idx) => {
     const row = el('div', 'highlight-row');
     row.style.animationDelay = (idx * 0.05) + 's';
+    if (l.photo) {
+      const img = document.createElement('img');
+      img.className = 'highlight-thumb';
+      img.src = l.photo;
+      img.alt = l.name;
+      img.addEventListener('click', () => showPhotoLightbox(l.photo, l.name, () => setLodgingPhoto(d.id, idx)));
+      row.appendChild(img);
+    } else {
+      const thumbBtn = el('button', 'highlight-thumb-btn', '📷');
+      thumbBtn.setAttribute('aria-label', 'Add photo');
+      thumbBtn.addEventListener('click', () => setLodgingPhoto(d.id, idx));
+      row.appendChild(thumbBtn);
+    }
     if (l.url) {
       const link = document.createElement('a');
       link.className = 'highlight-name lodging-link';
