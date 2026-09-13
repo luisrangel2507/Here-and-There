@@ -3,7 +3,15 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Here & There ☀️',
   description: 'Aquí & Allá — trip proposal',
-  icons: { icon: '/images/logo.png' },
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    title: 'Here & There',
+    statusBarStyle: 'black-translucent',
+  },
+  icons: {
+    icon: '/images/logo.png',
+    apple: '/images/apple-touch-icon.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
