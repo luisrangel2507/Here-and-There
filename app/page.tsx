@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef } from 'react';
+import Sortable from 'sortablejs';
 
 const APP_STYLE = `
 
@@ -436,6 +437,9 @@ const APP_STYLE = `
     box-shadow:0 14px 30px rgba(0,0,0,0.35);
     background:rgba(255,255,255,0.28);
     z-index:5;
+  }
+  .priority-row-ghost{
+    opacity:0.35;
   }
   .priority-rank{
     flex:0 0 auto;
@@ -1548,76 +1552,22 @@ function renderDetail() {
   return view_;
 }
 
-function makeRowDraggable(row, listEl) {
-  let dragging = false;
-  let startY = 0;
-
-  row.addEventListener('pointerdown', (e) => {
-    dragging = true;
-    startY = e.clientY;
-    row.setPointerCapture(e.pointerId);
-    row.classList.add('dragging');
-    e.preventDefault();
-  });
-
-  row.addEventListener('pointermove', (e) => {
-    if (!dragging) return;
-    e.preventDefault();
-    const deltaY = e.clientY - startY;
-    row.style.transform = 'translateY(' + deltaY + 'px)';
-
-    // Hide the dragged row from hit-testing first: while it holds pointer
-    // capture, elementFromPoint can otherwise keep resolving back to it
-    // instead of whatever row is actually under the finger.
-    row.style.pointerEvents = 'none';
-    const overEl = document.elementFromPoint(e.clientX, e.clientY);
-    row.style.pointerEvents = '';
-    const overRow = overEl ? overEl.closest('.priority-row') : null;
-    if (overRow && overRow !== row && listEl.contains(overRow)) {
-      const rect = overRow.getBoundingClientRect();
-      const midpoint = rect.top + rect.height / 2;
-
-      // FLIP the other rows into their new spot so they visibly slide
-      // instead of snapping.
-      const siblings = Array.from(listEl.children).filter(c => c !== row);
-      const before = new Map(siblings.map(c => [c, c.getBoundingClientRect().top]));
-
-      // Move the OTHER row around the one being dragged, never the dragged
-      // row itself — reparenting the pointer-captured element mid-gesture
-      // silently drops touch capture on iOS Safari and freezes the drag.
-      if (e.clientY < midpoint) {
-        listEl.insertBefore(overRow, row.nextSibling);
-      } else {
-        listEl.insertBefore(overRow, row);
-      }
-      startY = e.clientY;
-      row.style.transform = 'translateY(0px)';
-
-      siblings.forEach(c => {
-        const diff = before.get(c) - c.getBoundingClientRect().top;
-        if (!diff) return;
-        c.style.transition = 'none';
-        c.style.transform = 'translateY(' + diff + 'px)';
-        requestAnimationFrame(() => {
-          c.style.transition = 'transform 0.18s ease';
-          c.style.transform = '';
-          setTimeout(() => { c.style.transition = ''; }, 200);
-        });
-      });
-    }
-  });
-
-  function endDrag(e) {
-    if (!dragging) return;
-    dragging = false;
-    try { row.releasePointerCapture(e.pointerId); } catch (err) {}
-    row.classList.remove('dragging');
-    row.style.transform = '';
-    priorityOrder = Array.from(listEl.children).map(c => c.dataset.id);
-    render();
+let sortableInstance = null;
+function initSortable(listEl) {
+  if (sortableInstance) {
+    sortableInstance.destroy();
+    sortableInstance = null;
   }
-  row.addEventListener('pointerup', endDrag);
-  row.addEventListener('pointercancel', endDrag);
+  sortableInstance = new Sortable(listEl, {
+    animation: 150,
+    forceFallback: true, // consistent touch handling instead of flaky native HTML5 DnD on iOS
+    fallbackClass: 'dragging',
+    ghostClass: 'priority-row-ghost',
+    onEnd: function () {
+      priorityOrder = Array.from(listEl.children).map(c => c.dataset.id);
+      render();
+    },
+  });
 }
 
 function renderPriorities() {
@@ -1669,9 +1619,9 @@ function renderPriorities() {
     row.appendChild(mid);
     row.appendChild(el('div', 'priority-grip', remaining > 0 ? '🔒' : '⠿'));
     list.appendChild(row);
-    if (remaining === 0) makeRowDraggable(row, list);
   });
   view_.appendChild(list);
+  if (remaining === 0) initSortable(list);
 
   if (remaining === 0) {
     const confirmBtn = el('button', 'confirm-btn', 'Lock in today\\'s ranking →');
@@ -1717,6 +1667,7 @@ export default function Page() {
   useEffect(() => {
     if (ranRef.current) return; // avoid double-run under React 18 strict mode in dev
     ranRef.current = true;
+    (window as any).Sortable = Sortable;
     const script = document.createElement('script');
     script.textContent = APP_SCRIPT;
     document.body.appendChild(script);
