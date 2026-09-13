@@ -727,7 +727,7 @@ const APP_STYLE = `
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:9px;
-    margin-bottom:18px;
+    margin-bottom:40px;
     animation:fadeSlideUp .7s ease both;
     animation-delay:.2s;
   }
