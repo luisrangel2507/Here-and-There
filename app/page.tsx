@@ -347,6 +347,7 @@ const APP_STYLE = `
     opacity:0.85;
     box-shadow:0 14px 30px rgba(0,0,0,0.35);
     background:rgba(255,255,255,0.28);
+    z-index:5;
   }
   .priority-rank{
     flex:0 0 auto;
@@ -1136,7 +1137,7 @@ function renderIntro() {
   const hero = document.createElement('img');
   hero.className = 'intro-hero';
   hero.src = INTRO_HERO_IMG;
-  hero.alt = 'Eleny and Luis';
+  hero.alt = 'Here & There — Aquí & Allá';
   view_.appendChild(hero);
 
   const header = el('div');
@@ -1414,10 +1415,12 @@ function makeRowDraggable(row, listEl) {
     startY = e.clientY;
     row.setPointerCapture(e.pointerId);
     row.classList.add('dragging');
+    e.preventDefault();
   });
 
   row.addEventListener('pointermove', (e) => {
     if (!dragging) return;
+    e.preventDefault();
     const deltaY = e.clientY - startY;
     row.style.transform = 'translateY(' + deltaY + 'px)';
 
@@ -1426,10 +1429,13 @@ function makeRowDraggable(row, listEl) {
     if (overRow && overRow !== row && listEl.contains(overRow)) {
       const rect = overRow.getBoundingClientRect();
       const midpoint = rect.top + rect.height / 2;
+      // Move the OTHER row around the one being dragged, never the dragged
+      // row itself — reparenting the pointer-captured element mid-gesture
+      // silently drops touch capture on iOS Safari and freezes the drag.
       if (e.clientY < midpoint) {
-        listEl.insertBefore(row, overRow);
+        listEl.insertBefore(overRow, row.nextSibling);
       } else {
-        listEl.insertBefore(row, overRow.nextSibling);
+        listEl.insertBefore(overRow, row);
       }
       startY = e.clientY;
       row.style.transform = 'translateY(0px)';
