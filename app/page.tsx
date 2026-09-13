@@ -441,15 +441,6 @@ const APP_STYLE = `
   }
 
   /* intro / profile select */
-  .app-logo{
-    display:block;
-    width:170px;
-    height:170px;
-    border-radius:34px;
-    margin:0 auto 14px;
-    box-shadow:0 16px 36px rgba(75,56,105,0.45);
-    animation:popIn .5s ease both;
-  }
   .intro-hero{
     width:100%;
     height:230px;
@@ -591,6 +582,11 @@ const APP_STYLE = `
     text-shadow:0 1px 8px rgba(0,0,0,0.2);
     margin-bottom:18px;
     letter-spacing:0.02em;
+  }
+  .intro-title{
+    font-size:34px;
+    margin-bottom:24px;
+    animation:popIn .5s ease both;
   }
   .app-title-amp{
     font-family:'Poppins', sans-serif;
@@ -1009,7 +1005,6 @@ const APP_STYLE = `
 const APP_SCRIPT = `
 
 const MEXICO_MAP_IMG = '/images/mexico-map.jpg';
-const LOGO_IMG = '/images/logo.png';
 const INTRO_HERO_IMG = '/images/intro-hero.jpg';
 const USA_MAP_IMG = '/images/usa-map.jpg';
 const BG_PHOTO_IMG = '/images/bg-photo.jpg';
@@ -1544,17 +1539,15 @@ function el(tag, className, html) {
   return node;
 }
 function appTitle() {
-  return el('div', 'app-title', '🌵 Here <span class="app-title-amp">&</span> There 🌁');
+  return el('div', 'app-title', '🌵 Here <span class="app-title-amp">&</span> There');
 }
 
 function renderIntro() {
   const view_ = el('div', 'view');
 
-  const logo = document.createElement('img');
-  logo.className = 'app-logo';
-  logo.src = LOGO_IMG;
-  logo.alt = 'Here & There';
-  view_.appendChild(logo);
+  const introTitle = appTitle();
+  introTitle.classList.add('intro-title');
+  view_.appendChild(introTitle);
 
   const hero = document.createElement('img');
   hero.className = 'intro-hero';
