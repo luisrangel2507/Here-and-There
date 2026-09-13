@@ -376,7 +376,7 @@ const APP_STYLE = `
     border:1.5px solid rgba(255,255,255,0.35);
     border-radius:10px;
     padding:9px 12px;
-    font-size:13px;
+    font-size:16px;
     font-family:'Poppins', sans-serif;
     background:rgba(255,255,255,0.9);
     color:var(--ink);
@@ -948,7 +948,7 @@ const APP_STYLE = `
     flex:1;
     min-width:0;
     font-family:'Poppins', sans-serif;
-    font-size:12px;
+    font-size:16px;
     border:1.5px solid var(--line);
     border-radius:10px;
     padding:9px 10px;
@@ -1068,6 +1068,7 @@ const REGIONS = {
         id: 'bajio', city: 'Guanajuato', country: 'Mexico', code: 'BJX', plan: 'colonial',
         vibe: 'A hillside maze of candy-colored houses, underground tunnel roads, and callejones too narrow for cars — plus San Miguel de Allende\\'s cathedral-postcard streets a short drive away. Storybook colonial Mexico, best explored on foot and slightly lost.',
         price: 7807, note: 'San Miguel de Allende / Guanajuato Capital',
+        cities: ['Guanajuato Capital', 'San Miguel de Allende'],
         highlights: [{ name: 'Ciudad de México', photo: null }, { name: 'Guanajuato capital', photo: null }, { name: 'San Miguel de Allende', photo: null }],
         photo: null, favorite: false, pin: { x: 51.2, y: 57.3 },
       },
@@ -1823,14 +1824,18 @@ function renderDetail() {
     section.appendChild(cityTabs);
   }
 
-  const visibleHighlights = d.highlights.filter(h => !d.cities || h.city === selectedHighlightCity);
+  // Highlights added before this destination had city tabs have no city
+  // set — keep showing those under every tab instead of hiding them.
+  const matchesCity = h => !d.cities || !h.city || h.city === selectedHighlightCity;
+
+  const visibleHighlights = d.highlights.filter(matchesCity);
   if (visibleHighlights.length === 0 && !openAddHighlight) {
     section.appendChild(el('div', 'highlight-empty', 'No highlights added yet.'));
   }
 
   const highlightsBox = el('div', 'highlights');
   d.highlights.forEach((h, idx) => {
-    if (d.cities && h.city !== selectedHighlightCity) return;
+    if (!matchesCity(h)) return;
     const row = el('div', 'highlight-row');
     row.style.animationDelay = (idx * 0.05) + 's';
     if (h.photo) {
