@@ -335,6 +335,65 @@ const APP_STYLE = `
     font-size:11px;
     filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4));
   }
+  .map-stage.placing{ cursor:crosshair; }
+  .pin-preview{ cursor:default; animation:popIn .3s ease both; }
+  .pin-preview .pin-dot{ background:#fff; border-color:var(--coral); }
+  .add-city-form{
+    background:rgba(255,255,255,0.16);
+    backdrop-filter:blur(8px);
+    border:1.5px solid rgba(255,255,255,0.35);
+    border-radius:16px;
+    padding:16px;
+    margin-bottom:16px;
+  }
+  .add-city-label{
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:0.08em;
+    color:rgba(255,255,255,0.7);
+    margin-bottom:6px;
+  }
+  .add-city-form input{
+    width:100%;
+    border:1.5px solid rgba(255,255,255,0.35);
+    border-radius:10px;
+    padding:9px 12px;
+    font-size:13px;
+    font-family:'Poppins', sans-serif;
+    background:rgba(255,255,255,0.9);
+    color:var(--ink);
+    margin-bottom:14px;
+  }
+  .add-city-form input:focus{ outline:none; border-color:var(--coral); }
+  .add-city-plans{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .add-city-actions{
+    display:flex;
+    gap:10px;
+  }
+  .add-city-cancel-btn, .add-city-add-btn{
+    flex:1;
+    border:none;
+    border-radius:999px;
+    padding:10px 16px;
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    font-size:12.5px;
+    cursor:pointer;
+  }
+  .add-city-cancel-btn{
+    background:rgba(255,255,255,0.16);
+    color:#fff;
+    border:1.5px solid rgba(255,255,255,0.35);
+  }
+  .add-city-add-btn{
+    background:linear-gradient(90deg, var(--coral), var(--sun));
+    color:var(--ink);
+  }
   .map-hint{
     font-size:11.5px;
     color:rgba(255,255,255,0.75);
@@ -1052,7 +1111,8 @@ function getDest(id) {
   return null;
 }
 function destTotal(d) {
-  return d.price != null ? d.price : (d.costs.edu + d.costs.eleny);
+  if (d.price != null) return d.price;
+  return d.costs ? d.costs.edu + d.costs.eleny : 0;
 }
 
 const ADMIN_CODE = 'aguacate9';
@@ -1132,6 +1192,58 @@ async function loadHighlightsData() {
       d.highlights = map[destId].map(h => ({ name: h.name, city: h.city || null, photo: null }));
     });
   } catch (e) { /* keep defaults */ }
+}
+
+// ---- custom destinations (added from the map via "+ Add city") ----
+async function saveCustomDestinations(regionKey) {
+  try {
+    await fetch('/api/destinations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        region: regionKey,
+        destinations: REGIONS[regionKey].destinations.filter(d => d.custom),
+      }),
+    });
+  } catch (e) { /* best-effort only */ }
+}
+
+async function loadCustomDestinations() {
+  try {
+    const res = await fetch('/api/destinations');
+    if (!res.ok) return;
+    const map = await res.json();
+    Object.keys(map).forEach(regionKey => {
+      const r = REGIONS[regionKey];
+      if (!r) return;
+      map[regionKey].forEach(d => {
+        if (r.destinations.some(existing => existing.id === d.id)) return;
+        r.destinations.push(d);
+        if (!priorityOrder.includes(d.id) && !blockedIds.includes(d.id)) priorityOrder.push(d.id);
+      });
+    });
+  } catch (e) { /* keep defaults */ }
+}
+
+function addCustomDestination(city, plan) {
+  if (!city || !city.trim() || !addingCity || addingCity.step !== 'form') return;
+  const r = REGIONS[region];
+  const id = 'custom-' + Date.now();
+  const d = {
+    id, city: city.trim(),
+    country: region === 'mexico' ? 'Mexico' : 'USA',
+    code: city.trim().slice(0, 3).toUpperCase(),
+    plan, price: 0, note: null,
+    highlights: [], photo: null, favorite: false,
+    pin: addingCity.pin,
+    custom: true,
+  };
+  r.destinations.push(d);
+  priorityOrder.push(id);
+  addingCity = null;
+  render();
+  saveCustomDestinations(region);
+  savePriorities();
 }
 
 // ---- photos (uploaded from the device, persisted as compressed data URLs) ----
@@ -1274,6 +1386,7 @@ let region = 'mexico'; // 'mexico' | 'usa'
 let detailId = null;
 let openAddHighlight = false;
 let selectedHighlightCity = null;
+let addingCity = null; // null | { step: 'pin' } | { step: 'form', pin: {x,y} }
 let profile = null; // 'eleny' | 'luis'
 let isAdmin = false;
 
@@ -1364,6 +1477,7 @@ function goDetail(id) {
   detailId = id;
   view = 'detail';
   openAddHighlight = false;
+  addingCity = null;
   selectedHighlightCity = d.cities ? d.cities[0] : null;
   render();
 }
@@ -1481,8 +1595,17 @@ function renderMap() {
   const r = { ...REGIONS[region], destinations: REGIONS[region].destinations.filter(d => !blockedIds.includes(d.id)) };
 
   const mapCard = el('div', 'map-card');
-  const stage = el('div', 'map-stage');
+  const stage = el('div', 'map-stage' + (addingCity && addingCity.step === 'pin' ? ' placing' : ''));
   stage.style.aspectRatio = r.aspect;
+  if (addingCity && addingCity.step === 'pin') {
+    stage.addEventListener('click', (e) => {
+      const rect = stage.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      addingCity = { step: 'form', pin: { x, y } };
+      render();
+    });
+  }
 
   if (r.type === 'image') {
     const img = document.createElement('img');
@@ -1517,8 +1640,20 @@ function renderMap() {
     stage.appendChild(pin);
   });
 
+  if (addingCity && addingCity.step === 'form') {
+    const previewPin = el('div', 'pin pin-preview');
+    previewPin.style.left = addingCity.pin.x + '%';
+    previewPin.style.top = addingCity.pin.y + '%';
+    const dotWrap = el('div', 'pin-dot-wrap');
+    dotWrap.appendChild(el('div', 'pin-dot'));
+    previewPin.appendChild(dotWrap);
+    stage.appendChild(previewPin);
+  }
+
   mapCard.appendChild(stage);
-  mapCard.appendChild(el('div', 'map-hint', 'Tap any pin to open the full proposal'));
+  mapCard.appendChild(el('div', 'map-hint', addingCity && addingCity.step === 'pin'
+    ? '📍 Tap the map where this city goes'
+    : 'Tap any pin to open the full proposal'));
 
   const plansUsed = [...new Set(r.destinations.map(d => d.plan))];
   const legend = el('div', 'legend');
@@ -1551,6 +1686,49 @@ function renderMap() {
     list.appendChild(row);
   });
   view_.appendChild(list);
+
+  if (addingCity && addingCity.step === 'form') {
+    const form = el('div', 'add-city-form');
+    form.appendChild(el('div', 'add-city-label', 'New city name'));
+    const input = document.createElement('input');
+    input.placeholder = 'e.g. Oaxaca';
+    form.appendChild(input);
+
+    form.appendChild(el('div', 'add-city-label', 'Type'));
+    const planPicker = el('div', 'add-city-plans');
+    let chosenPlan = 'city';
+    Object.keys(PLAN_META).forEach(planKey => {
+      const meta = PLAN_META[planKey];
+      const btn = el('button', 'city-tab' + (planKey === chosenPlan ? ' active' : ''), meta.emoji + ' ' + meta.label);
+      btn.addEventListener('click', () => {
+        chosenPlan = planKey;
+        planPicker.querySelectorAll('.city-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+      planPicker.appendChild(btn);
+    });
+    form.appendChild(planPicker);
+
+    const actions = el('div', 'add-city-actions');
+    const cancelBtn = el('button', 'add-city-cancel-btn', 'Cancel');
+    cancelBtn.addEventListener('click', () => { addingCity = null; render(); });
+    const addBtn = el('button', 'add-city-add-btn', 'Add city');
+    addBtn.addEventListener('click', () => addCustomDestination(input.value, chosenPlan));
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') addCustomDestination(input.value, chosenPlan); });
+    actions.appendChild(cancelBtn);
+    actions.appendChild(addBtn);
+    form.appendChild(actions);
+
+    view_.appendChild(form);
+  } else if (addingCity && addingCity.step === 'pin') {
+    const cancelRow = el('button', 'add-row', 'Cancel adding a city');
+    cancelRow.addEventListener('click', () => { addingCity = null; render(); });
+    view_.appendChild(cancelRow);
+  } else {
+    const addCityRow = el('div', 'add-row', '+ add city');
+    addCityRow.addEventListener('click', () => { addingCity = { step: 'pin' }; render(); });
+    view_.appendChild(addCityRow);
+  }
 
   const switchBtn = el('button', 'switch-profile', '↺ Switch profile (' + (profile === 'luis' ? 'Luis' : 'Eleny') + ')');
   switchBtn.addEventListener('click', goIntro);
@@ -1803,7 +1981,10 @@ function render() {
 }
 
 render();
-Promise.all([loadPriorities(), loadHighlightsData()])
+Promise.all([
+  loadPriorities().then(loadCustomDestinations),
+  loadHighlightsData(),
+])
   .then(loadPhotos)
   .then(render);
 

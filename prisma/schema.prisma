@@ -41,3 +41,14 @@ model DestinationHighlights {
 
   @@map("destination_highlights")
 }
+
+// One row per region ("mexico" | "usa") holding the custom destinations
+// added from the map screen ("+ Add city"). `destinations` is the full
+// replacement list of custom-added destination objects for that region.
+model CustomDestinations {
+  region       String   @id
+  destinations Json
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("custom_destinations")
+}
