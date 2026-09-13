@@ -1890,17 +1890,6 @@ function renderMap() {
     ? '🔒 Next pick in ' + formatCountdown(priRemaining)
     : 'Last daily pick will be erased.'));
 
-  if (isAdmin) {
-    const rankBanner = el('button', 'admin-pick-map-banner', '👑 My ranking (only you and Eleny can see this)');
-    rankBanner.addEventListener('click', goAdminRanking);
-    view_.appendChild(rankBanner);
-  } else if (adminRanking.length > 0) {
-    const topPick = getDest(adminRanking[0]);
-    const rankBanner = el('button', 'admin-pick-map-banner', '👑 See Luis\\'s ranking — top pick: ' + (topPick ? topPick.city : '—'));
-    rankBanner.addEventListener('click', goAdminRanking);
-    view_.appendChild(rankBanner);
-  }
-
   const tabs = el('div', 'region-tabs');
   Object.keys(REGIONS).forEach(key => {
     const btn = el('button', 'region-tab' + (region === key ? ' active' : ''), REGIONS[key].label);
@@ -2363,6 +2352,17 @@ function renderPriorities() {
 
   view_.appendChild(el('div', 'eyebrow', '🗳️ DAILY PRIORITY PICK'));
   view_.appendChild(el('h1', null, 'Rank today\\'s <em>favorites</em>'));
+
+  if (isAdmin) {
+    const rankBanner = el('button', 'admin-pick-map-banner', '👑 My ranking (only you and Eleny can see this)');
+    rankBanner.addEventListener('click', goAdminRanking);
+    view_.appendChild(rankBanner);
+  } else if (adminRanking.length > 0) {
+    const topPick = getDest(adminRanking[0]);
+    const rankBanner = el('button', 'admin-pick-map-banner', '👑 Luis\\'s choice: ' + (topPick ? topPick.city : '—'));
+    rankBanner.addEventListener('click', goAdminRanking);
+    view_.appendChild(rankBanner);
+  }
 
   if (justEliminatedId) {
     const gone = getDest(justEliminatedId);
