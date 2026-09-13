@@ -20,6 +20,14 @@ const APP_STYLE = `
     --line:rgba(43,27,51,0.14);
   }
   *{box-sizing:border-box;}
+  button, .dest-row, .highlight-row, .add-city-row{
+    transition:transform .12s ease, box-shadow .12s ease, background .15s ease;
+  }
+  button:active, .dest-row:active, .add-city-row:active{
+    transform:scale(0.96);
+  }
+  .pin{ transition:transform .12s ease; }
+  .pin:active .pin-dot-wrap{ transform:scale(0.85); }
   html, body{margin:0; background:#4e4a66;}
   .app{
     position:relative;
@@ -268,12 +276,14 @@ const APP_STYLE = `
 
   /* map */
   .map-card{
-    background:rgba(255,255,255,0.14);
+    position:relative;
+    background:linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.08));
     backdrop-filter:blur(10px);
-    border:1.5px solid rgba(255,255,255,0.35);
+    border:1.5px solid rgba(255,255,255,0.4);
     border-radius:26px;
     padding:18px;
     margin-bottom:18px;
+    box-shadow:0 20px 50px rgba(20,10,30,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
     animation:fadeSlideUp .65s ease both;
     animation-delay:.16s;
   }
@@ -283,6 +293,7 @@ const APP_STYLE = `
     border-radius:18px;
     overflow:hidden;
     background:radial-gradient(circle at 30% 20%, rgba(255,255,255,0.14), transparent 60%);
+    box-shadow:0 10px 30px rgba(0,0,0,0.35);
   }
   .map-svg{width:100%;height:100%;display:block;}
   .map-svg path{
@@ -296,6 +307,15 @@ const APP_STYLE = `
     display:block;
     object-fit:cover;
     border-radius:18px;
+    filter:saturate(1.08) contrast(1.03);
+  }
+  .map-stage::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    border-radius:18px;
+    box-shadow:inset 0 0 40px rgba(20,10,30,0.35);
+    pointer-events:none;
   }
   .pin{
     position:absolute;
@@ -312,6 +332,7 @@ const APP_STYLE = `
   .pin-dot-wrap{
     position:relative;
     width:15px;height:15px;
+    transition:transform .12s ease;
   }
   .pin-ring{
     position:absolute;
@@ -319,6 +340,11 @@ const APP_STYLE = `
     border-radius:50%;
     background:var(--plan-color, var(--coral));
     opacity:0.25;
+    animation:pinPulse 2.2s ease-in-out infinite;
+  }
+  @keyframes pinPulse{
+    0%,100%{ transform:scale(1); opacity:0.25; }
+    50%{ transform:scale(1.35); opacity:0.08; }
   }
   .pin-dot{
     position:relative;
@@ -326,7 +352,7 @@ const APP_STYLE = `
     border-radius:50%;
     background:var(--plan-color, var(--coral));
     border:2px solid #fff;
-    box-shadow:0 3px 8px rgba(0,0,0,0.3);
+    box-shadow:0 3px 8px rgba(0,0,0,0.35), 0 0 12px var(--plan-color, var(--coral));
   }
   .pin-star{
     position:absolute;
@@ -632,16 +658,17 @@ const APP_STYLE = `
     flex-direction:column;
     align-items:flex-start;
     gap:6px;
-    background:rgba(255,255,255,0.14);
+    background:linear-gradient(160deg, rgba(255,255,255,0.2), rgba(255,255,255,0.08));
     backdrop-filter:blur(8px);
     border:1.5px solid rgba(255,255,255,0.3);
     border-left:4px solid var(--plan-color, rgba(255,255,255,0.3));
     border-radius:16px;
     padding:12px 14px;
     cursor:pointer;
-    transition:transform .15s ease, background .15s ease;
+    box-shadow:0 8px 20px rgba(20,10,30,0.22);
+    transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
   }
-  .dest-row:hover{transform:translateY(-1px);background:rgba(255,255,255,0.2);}
+  .dest-row:hover{transform:translateY(-2px);background:linear-gradient(160deg, rgba(255,255,255,0.28), rgba(255,255,255,0.12));box-shadow:0 12px 26px rgba(20,10,30,0.3);}
   .dest-row-name{font-size:12.5px;font-weight:600;color:#fff;line-height:1.25;}
   .dest-row-plan{font-size:9.5px;font-weight:600;color:rgba(255,255,255,0.75);margin-top:1px;}
   .dest-row-note{font-size:9.5px;color:rgba(255,255,255,0.7);margin-top:1px;}
@@ -675,7 +702,7 @@ const APP_STYLE = `
     color:var(--ink);
     border-radius:24px;
     overflow:hidden;
-    box-shadow:0 24px 55px rgba(75,56,105,0.4);
+    box-shadow:0 28px 60px rgba(75,56,105,0.45), 0 2px 0 rgba(255,255,255,0.5) inset;
     animation:fadeSlideUp .5s ease both;
     animation-delay:.05s;
   }
@@ -978,6 +1005,20 @@ const APP_STYLE = `
     cursor:pointer;
     box-shadow:0 10px 26px rgba(255,107,91,0.4);
     transition:transform .15s ease;
+  }
+  .confirm-btn{
+    display:block;
+    width:100%;
+    border:none;
+    border-radius:999px;
+    padding:15px;
+    background:linear-gradient(90deg, var(--coral), var(--sun));
+    color:var(--ink);
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    box-shadow:0 12px 28px rgba(255,107,91,0.4);
   }
   .fav-btn:hover{transform:translateY(-1px);}
   .fav-btn.is-fav{
