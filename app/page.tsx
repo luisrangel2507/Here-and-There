@@ -1099,26 +1099,6 @@ const APP_STYLE = `
     box-shadow:0 10px 26px rgba(14,165,160,0.4);
   }
   .fav-btn .heart{display:inline-block;animation:popIn .35s ease;}
-  .admin-pick-btn{
-    display:block;
-    width:calc(100% - 48px);
-    margin:0 24px 14px;
-    padding:13px;
-    border:1.5px solid rgba(255,201,60,0.5);
-    border-radius:999px;
-    background:none;
-    color:#b8860b;
-    font-family:'Poppins', sans-serif;
-    font-weight:700;
-    font-size:13px;
-    cursor:pointer;
-  }
-  .admin-pick-btn.is-pick{
-    background:linear-gradient(90deg, #FFC93C, #FF9F68);
-    color:var(--ink);
-    border-color:transparent;
-    box-shadow:0 10px 24px rgba(255,201,60,0.4);
-  }
   .admin-pick-banner{
     display:inline-block;
     font-size:11px;
@@ -1318,7 +1298,7 @@ let priorityOrder = defaultOrder();
 let blockedIds = [];
 let hiddenIds = [];
 let profileInfo = {};
-let adminPickId = null;
+let adminRanking = [];
 let lastSubmitAt = null;
 let justEliminatedId = null;
 
@@ -1339,7 +1319,7 @@ async function savePriorities() {
     await fetch('/api/state', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ priorityOrder, blockedIds, hiddenIds, profileInfo, adminPickId, lastSubmitAt }),
+      body: JSON.stringify({ priorityOrder, blockedIds, hiddenIds, profileInfo, adminRanking, lastSubmitAt }),
     });
   } catch (e) { /* best-effort only */ }
 }
@@ -1352,7 +1332,7 @@ async function loadPriorities() {
         blockedIds = parsed.blockedIds || [];
         hiddenIds = parsed.hiddenIds || [];
         profileInfo = parsed.profileInfo || {};
-        adminPickId = parsed.adminPickId || null;
+        adminRanking = parsed.adminRanking || [];
         priorityOrder = (parsed.priorityOrder || defaultOrder()).filter(id => !blockedIds.includes(id) && !hiddenIds.includes(id));
         lastSubmitAt = parsed.lastSubmitAt || null;
       }
@@ -1769,10 +1749,16 @@ function toggleFavorite(id) {
   d.favorite = !d.favorite;
   render();
 }
-function toggleAdminPick(id) {
-  adminPickId = adminPickId === id ? null : id;
+function adminRankedList() {
+  const validIds = allDestinations().map(d => d.id).filter(id => !blockedIds.includes(id) && !hiddenIds.includes(id));
+  const ranked = adminRanking.filter(id => validIds.includes(id));
+  validIds.forEach(id => { if (!ranked.includes(id)) ranked.push(id); });
+  return ranked;
+}
+function goAdminRanking() {
+  if (adminRanking.length === 0) adminRanking = adminRankedList();
+  view = 'adminRanking';
   render();
-  savePriorities();
 }
 function addHighlight(id, text) {
   const d = getDest(id);
@@ -1874,11 +1860,15 @@ function renderMap() {
     ? '🔒 Next pick in ' + formatCountdown(priRemaining)
     : '✅ Ready to rank today'));
 
-  const adminPickDest = adminPickId ? getDest(adminPickId) : null;
-  if (adminPickDest) {
-    const pickBanner = el('button', 'admin-pick-map-banner', '👑 Luis\\'s pick: ' + adminPickDest.city);
-    pickBanner.addEventListener('click', () => goDetail(adminPickDest.id));
-    view_.appendChild(pickBanner);
+  if (isAdmin) {
+    const rankBanner = el('button', 'admin-pick-map-banner', '👑 My ranking (only you and Eleny can see this)');
+    rankBanner.addEventListener('click', goAdminRanking);
+    view_.appendChild(rankBanner);
+  } else if (adminRanking.length > 0) {
+    const topPick = getDest(adminRanking[0]);
+    const rankBanner = el('button', 'admin-pick-map-banner', '👑 See Luis\\'s ranking — top pick: ' + (topPick ? topPick.city : '—'));
+    rankBanner.addEventListener('click', goAdminRanking);
+    view_.appendChild(rankBanner);
   }
 
   const tabs = el('div', 'region-tabs');
@@ -1932,7 +1922,7 @@ function renderMap() {
     dotWrap.appendChild(el('div', 'pin-ring'));
     dotWrap.appendChild(el('div', 'pin-dot'));
     if (d.favorite) dotWrap.appendChild(el('div', 'pin-star', '⭐'));
-    if (adminPickId === d.id) dotWrap.appendChild(el('div', 'pin-crown', '👑'));
+    if (adminRanking[0] === d.id) dotWrap.appendChild(el('div', 'pin-crown', '👑'));
     pin.appendChild(dotWrap);
     pin.addEventListener('click', () => goDetail(d.id));
     stage.appendChild(pin);
@@ -1977,7 +1967,7 @@ function renderMap() {
     row.appendChild(left);
     const right = el('div', 'dest-row-right');
     right.appendChild(el('span', 'dest-row-plan-emoji', plan.emoji));
-    if (adminPickId === d.id) right.appendChild(el('span', 'dest-row-heart', '👑'));
+    if (adminRanking[0] === d.id) right.appendChild(el('span', 'dest-row-heart', '👑'));
     if (d.favorite) right.appendChild(el('span', 'dest-row-heart', '💛'));
     if (isAdmin) right.appendChild(el('div', 'dest-row-price', money(destTotal(d))));
     row.appendChild(right);
@@ -2126,7 +2116,9 @@ function renderDetail() {
   const head = el('div', 'detail-head');
   const headLeft = el('div', 'detail-head-left');
   headLeft.appendChild(el('div', 'detail-city', d.city));
-  if (adminPickId === d.id) headLeft.appendChild(el('div', 'admin-pick-banner', '👑 Luis\\'s pick'));
+  const rankPos = adminRanking.indexOf(d.id);
+  if (rankPos === 0) headLeft.appendChild(el('div', 'admin-pick-banner', '👑 Luis\\'s top pick'));
+  else if (rankPos > 0) headLeft.appendChild(el('div', 'admin-pick-banner', '👑 #' + (rankPos + 1) + ' on Luis\\'s list'));
   headLeft.appendChild(el('div', 'detail-country', d.country));
   headLeft.appendChild(el('div', 'detail-plan-chip', plan.emoji + ' ' + plan.label));
   if (d.note) headLeft.appendChild(el('div', 'detail-note', d.note));
@@ -2290,15 +2282,6 @@ function renderDetail() {
     card.appendChild(el('div', 'fav-note', 'Noted — this one just made the cut.'));
   }
 
-  if (isAdmin) {
-    const isPick = adminPickId === d.id;
-    const pickBtn = el('button', 'admin-pick-btn' + (isPick ? ' is-pick' : ''), isPick
-      ? '👑 This is my pick'
-      : '👑 Mark as my pick');
-    pickBtn.addEventListener('click', () => toggleAdminPick(d.id));
-    card.appendChild(pickBtn);
-  }
-
   const deleteBtn = el('button', 'delete-city-btn', '🗑 Delete this city');
   deleteBtn.addEventListener('click', () => deleteDestination(d.id));
   card.appendChild(deleteBtn);
@@ -2309,7 +2292,7 @@ function renderDetail() {
 }
 
 let sortableInstance = null;
-function initSortable(listEl) {
+function initSortable(listEl, onReorder) {
   if (sortableInstance) {
     sortableInstance.destroy();
     sortableInstance = null;
@@ -2320,7 +2303,8 @@ function initSortable(listEl) {
     fallbackClass: 'dragging',
     ghostClass: 'priority-row-ghost',
     onEnd: function () {
-      priorityOrder = Array.from(listEl.children).map(c => c.dataset.id);
+      const newOrder = Array.from(listEl.children).map(c => c.dataset.id);
+      onReorder(newOrder);
       render();
     },
   });
@@ -2380,13 +2364,55 @@ function renderPriorities() {
     list.appendChild(row);
   });
   view_.appendChild(list);
-  if (remaining === 0) initSortable(list);
+  if (remaining === 0) initSortable(list, (newOrder) => { priorityOrder = newOrder; });
 
   if (remaining === 0) {
     const confirmBtn = el('button', 'confirm-btn', 'Lock in today\\'s ranking →');
     confirmBtn.addEventListener('click', submitPriorities);
     view_.appendChild(confirmBtn);
     view_.appendChild(el('div', 'priority-hint', 'Whatever lands last is out — no take-backs.'));
+  }
+
+  return view_;
+}
+
+function renderAdminRanking() {
+  const view_ = el('div', 'view');
+  view_.appendChild(appTitle());
+
+  const backBtn = el('button', 'back-btn', '← Back to map');
+  backBtn.addEventListener('click', goMap);
+  view_.appendChild(backBtn);
+
+  view_.appendChild(el('div', 'eyebrow', '👑 LUIS\\'S RANKING'));
+  view_.appendChild(el('h1', null, isAdmin ? 'Rank them <em>your way</em>' : 'Luis\\'s <em>ranking</em>'));
+  view_.appendChild(el('p', 'sub', isAdmin
+    ? 'Drag to rank all destinations — Eleny can see this as your reference, but she still decides.'
+    : 'This is just a reference — you\\'re still the one who decides.'));
+
+  const ids = adminRankedList();
+  const list = el('div', 'priority-list');
+  ids.forEach((id, idx) => {
+    const d = getDest(id);
+    if (!d) return;
+    const plan = planOf(d);
+    const row = el('div', 'priority-row' + (isAdmin ? '' : ' locked'));
+    row.dataset.id = id;
+    row.style.setProperty('--plan-color', plan.color);
+    row.appendChild(el('div', 'priority-rank', String(idx + 1)));
+    const mid = el('div', 'priority-mid');
+    mid.appendChild(el('div', 'priority-name', d.city));
+    row.appendChild(mid);
+    row.appendChild(el('div', 'priority-grip', isAdmin ? '⠿' : '👑'));
+    list.appendChild(row);
+  });
+  view_.appendChild(list);
+
+  if (isAdmin) {
+    initSortable(list, (newOrder) => {
+      adminRanking = newOrder;
+      savePriorities();
+    });
   }
 
   return view_;
@@ -2421,6 +2447,7 @@ function render() {
   else if (view === 'detail') content = renderDetail();
   else if (view === 'priorities') content = renderPriorities();
   else if (view === 'profile') content = renderProfile();
+  else if (view === 'adminRanking') content = renderAdminRanking();
   else content = renderMap();
   wrap.appendChild(content);
   app.appendChild(wrap);
