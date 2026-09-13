@@ -458,10 +458,12 @@ const APP_STYLE = `
     font-size:11px;
     font-weight:700;
     display:flex;align-items:center;justify-content:center;
+    touch-action:none;
   }
-  .priority-name{flex:1;min-width:0;font-size:13px;font-weight:600;color:#fff;}
-  .priority-plan{font-size:10px;color:rgba(255,255,255,0.7);margin-top:1px;}
-  .priority-grip{flex:0 0 auto;font-size:15px;color:rgba(255,255,255,0.5);cursor:grab;padding:2px 4px;}
+  .priority-mid{ flex:1; min-width:0; touch-action:none; }
+  .priority-name{flex:1;min-width:0;font-size:13px;font-weight:600;color:#fff;touch-action:none;}
+  .priority-plan{font-size:10px;color:rgba(255,255,255,0.7);margin-top:1px;touch-action:none;}
+  .priority-grip{flex:0 0 auto;font-size:15px;color:rgba(255,255,255,0.5);cursor:grab;padding:2px 4px;touch-action:none;}
   .priority-hint{
     font-size:11.5px;
     color:rgba(255,255,255,0.65);
@@ -1675,9 +1677,7 @@ function renderPriorities() {
     row.dataset.id = id;
     row.style.setProperty('--plan-color', plan.color);
     row.appendChild(el('div', 'priority-rank', String(idx + 1)));
-    const mid = el('div');
-    mid.style.flex = '1';
-    mid.style.minWidth = '0';
+    const mid = el('div', 'priority-mid');
     mid.appendChild(el('div', 'priority-name', d.city));
     mid.appendChild(el('div', 'priority-plan', plan.emoji + ' ' + plan.label));
     row.appendChild(mid);
