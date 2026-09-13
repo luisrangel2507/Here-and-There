@@ -338,6 +338,24 @@ const APP_STYLE = `
   .map-stage.placing{ cursor:crosshair; }
   .pin-preview{ cursor:default; animation:popIn .3s ease both; }
   .pin-preview .pin-dot{ background:#fff; border-color:var(--coral); }
+  .add-city-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    border:1.5px dashed rgba(255,255,255,0.4);
+    border-radius:12px;
+    padding:11px 13px;
+    font-family:'Poppins', sans-serif;
+    font-size:12.5px;
+    font-weight:600;
+    color:rgba(255,255,255,0.85);
+    background:none;
+    cursor:pointer;
+    width:100%;
+    margin-bottom:16px;
+  }
+  .add-city-row:hover{ border-color:#fff; color:#fff; }
   .add-city-form{
     background:rgba(255,255,255,0.16);
     backdrop-filter:blur(8px);
@@ -1721,11 +1739,11 @@ function renderMap() {
 
     view_.appendChild(form);
   } else if (addingCity && addingCity.step === 'pin') {
-    const cancelRow = el('button', 'add-row', 'Cancel adding a city');
+    const cancelRow = el('button', 'add-city-row', 'Cancel adding a city');
     cancelRow.addEventListener('click', () => { addingCity = null; render(); });
     view_.appendChild(cancelRow);
   } else {
-    const addCityRow = el('div', 'add-row', '+ add city');
+    const addCityRow = el('div', 'add-city-row', '+ add city');
     addCityRow.addEventListener('click', () => { addingCity = { step: 'pin' }; render(); });
     view_.appendChild(addCityRow);
   }
