@@ -8,13 +8,14 @@ export async function GET() {
     priorityOrder: row.priorityOrder,
     blockedIds: row.blockedIds,
     hiddenIds: row.hiddenIds,
+    profileInfo: row.profileInfo,
     lastSubmitAt: row.lastSubmitAt ? row.lastSubmitAt.getTime() : null,
   });
 }
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { priorityOrder, blockedIds, hiddenIds, lastSubmitAt } = body ?? {};
+  const { priorityOrder, blockedIds, hiddenIds, profileInfo, lastSubmitAt } = body ?? {};
 
   const row = await prisma.appState.upsert({
     where: { id: 1 },
@@ -23,12 +24,14 @@ export async function POST(req: NextRequest) {
       priorityOrder: priorityOrder ?? [],
       blockedIds: blockedIds ?? [],
       hiddenIds: hiddenIds ?? [],
+      profileInfo: profileInfo ?? {},
       lastSubmitAt: lastSubmitAt ? new Date(lastSubmitAt) : null,
     },
     update: {
       priorityOrder: priorityOrder ?? [],
       blockedIds: blockedIds ?? [],
       hiddenIds: hiddenIds ?? [],
+      profileInfo: profileInfo ?? {},
       lastSubmitAt: lastSubmitAt ? new Date(lastSubmitAt) : null,
     },
   });

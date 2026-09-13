@@ -379,7 +379,7 @@ const APP_STYLE = `
     background:none;
     cursor:pointer;
     width:100%;
-    margin-bottom:16px;
+    margin-bottom:28px;
   }
   .add-city-row:hover{ border-color:#fff; color:#fff; }
   .add-city-form{
@@ -438,6 +438,42 @@ const APP_STYLE = `
     background:linear-gradient(90deg, var(--coral), var(--sun));
     color:var(--ink);
   }
+  .profile-header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:18px;
+    animation:fadeSlideUp .5s ease both;
+  }
+  .profile-header-flag{
+    font-size:34px;
+    width:56px;height:56px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.18);
+    border:1.5px solid rgba(255,255,255,0.4);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .profile-header-name{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:700;
+    font-size:24px;
+    color:#fff;
+  }
+  .profile-info-card{ margin-top:18px; }
+  .profile-textarea{
+    width:100%;
+    min-height:80px;
+    border:1.5px solid rgba(255,255,255,0.35);
+    border-radius:10px;
+    padding:9px 12px;
+    font-size:16px;
+    font-family:'Poppins', sans-serif;
+    background:rgba(255,255,255,0.9);
+    color:var(--ink);
+    resize:vertical;
+  }
+  .profile-textarea:focus{ outline:none; border-color:var(--coral); }
   .map-hint{
     font-size:11.5px;
     color:rgba(255,255,255,0.75);
@@ -619,18 +655,25 @@ const APP_STYLE = `
     font-style:normal;
     font-weight:600;
   }
-  .switch-profile{
-    display:block;
-    margin:22px auto 0;
-    background:none;
-    border:none;
-    color:rgba(255,255,255,0.5);
-    font-family:'Poppins', sans-serif;
-    font-size:10.5px;
+  .profile-fab{
+    position:absolute;
+    top:36px;
+    right:16px;
+    z-index:10;
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    border:1.5px solid rgba(255,255,255,0.45);
+    background:rgba(255,255,255,0.18);
+    backdrop-filter:blur(8px);
+    font-size:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     cursor:pointer;
-    padding:6px 10px;
+    box-shadow:0 8px 18px rgba(20,10,30,0.3);
   }
-  .switch-profile:hover{color:rgba(255,255,255,0.85);}
+  .profile-fab:hover{ background:rgba(255,255,255,0.28); }
 
   .admin-toggle{
     display:block;
@@ -1210,6 +1253,7 @@ function defaultOrder() {
 let priorityOrder = defaultOrder();
 let blockedIds = [];
 let hiddenIds = [];
+let profileInfo = {};
 let lastSubmitAt = null;
 let justEliminatedId = null;
 
@@ -1230,7 +1274,7 @@ async function savePriorities() {
     await fetch('/api/state', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ priorityOrder, blockedIds, hiddenIds, lastSubmitAt }),
+      body: JSON.stringify({ priorityOrder, blockedIds, hiddenIds, profileInfo, lastSubmitAt }),
     });
   } catch (e) { /* best-effort only */ }
 }
@@ -1242,6 +1286,7 @@ async function loadPriorities() {
       if (parsed) {
         blockedIds = parsed.blockedIds || [];
         hiddenIds = parsed.hiddenIds || [];
+        profileInfo = parsed.profileInfo || {};
         priorityOrder = (parsed.priorityOrder || defaultOrder()).filter(id => !blockedIds.includes(id) && !hiddenIds.includes(id));
         lastSubmitAt = parsed.lastSubmitAt || null;
       }
@@ -1613,6 +1658,22 @@ function goIntro() {
   render();
 }
 
+let profileReturnView = 'map';
+function goProfile() {
+  profileReturnView = view;
+  view = 'profile';
+  render();
+}
+function backFromProfile() {
+  view = profileReturnView;
+  render();
+}
+function saveProfileInfo(field, value) {
+  if (!profileInfo[profile]) profileInfo[profile] = {};
+  profileInfo[profile][field] = value;
+  savePriorities();
+}
+
 function goDetail(id) {
   const d = getDest(id);
   region = d.country === 'Mexico' ? 'mexico' : 'usa';
@@ -1888,9 +1949,54 @@ function renderMap() {
     view_.appendChild(addCityRow);
   }
 
-  const switchBtn = el('button', 'switch-profile', '↺ Switch profile (' + (profile === 'luis' ? 'Luis' : 'Eleny') + ')');
+  return view_;
+}
+
+function renderProfile() {
+  const view_ = el('div', 'view');
+  view_.appendChild(appTitle());
+
+  const backBtn = el('button', 'back-btn', '← Back');
+  backBtn.addEventListener('click', backFromProfile);
+  view_.appendChild(backBtn);
+
+  const header = el('div', 'profile-header');
+  header.appendChild(el('div', 'profile-header-flag', profile === 'luis' ? '🇲🇽' : '🇺🇸'));
+  header.appendChild(el('div', 'profile-header-name', profile === 'luis' ? 'Luis' : 'Eleny'));
+  view_.appendChild(header);
+
+  const switchBtn = el('button', 'add-city-row', '↺ Switch to ' + (profile === 'luis' ? 'Eleny' : 'Luis'));
   switchBtn.addEventListener('click', goIntro);
   view_.appendChild(switchBtn);
+
+  const info = profileInfo[profile] || {};
+
+  const card = el('div', 'add-city-form profile-info-card');
+  card.appendChild(el('div', 'add-city-label', '🚨 IN CASE OF EMERGENCY'));
+
+  const fields = [
+    { key: 'contactName', label: 'Emergency contact name', placeholder: 'e.g. Mom — Carmen Rangel' },
+    { key: 'contactPhone', label: 'Emergency contact phone', placeholder: '+52 555 000 0000' },
+    { key: 'bloodType', label: 'Blood type', placeholder: 'e.g. O+' },
+  ];
+  fields.forEach(f => {
+    card.appendChild(el('div', 'add-city-label', f.label));
+    const input = document.createElement('input');
+    input.value = info[f.key] || '';
+    input.placeholder = f.placeholder;
+    input.addEventListener('change', () => saveProfileInfo(f.key, input.value));
+    card.appendChild(input);
+  });
+
+  card.appendChild(el('div', 'add-city-label', 'Allergies / medical notes'));
+  const textarea = document.createElement('textarea');
+  textarea.className = 'profile-textarea';
+  textarea.value = info.allergies || '';
+  textarea.placeholder = 'e.g. Penicillin, shellfish…';
+  textarea.addEventListener('change', () => saveProfileInfo('allergies', textarea.value));
+  card.appendChild(textarea);
+
+  view_.appendChild(card);
 
   return view_;
 }
@@ -2109,10 +2215,6 @@ function renderDetail() {
 
   view_.appendChild(card);
 
-  const switchBtn = el('button', 'switch-profile', '↺ Switch profile (' + (profile === 'luis' ? 'Luis' : 'Eleny') + ')');
-  switchBtn.addEventListener('click', goIntro);
-  view_.appendChild(switchBtn);
-
   return view_;
 }
 
@@ -2216,9 +2318,18 @@ function render() {
   if (view === 'intro') content = renderIntro();
   else if (view === 'detail') content = renderDetail();
   else if (view === 'priorities') content = renderPriorities();
+  else if (view === 'profile') content = renderProfile();
   else content = renderMap();
   wrap.appendChild(content);
   app.appendChild(wrap);
+
+  if (view !== 'intro' && view !== 'profile') {
+    const profileFab = el('button', 'profile-fab', profile === 'luis' ? '🇲🇽' : '🇺🇸');
+    profileFab.setAttribute('aria-label', 'Profile');
+    profileFab.addEventListener('click', goProfile);
+    app.appendChild(profileFab);
+  }
+
   root.appendChild(app);
 }
 
