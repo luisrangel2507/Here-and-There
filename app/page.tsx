@@ -490,6 +490,11 @@ const APP_STYLE = `
     margin-bottom:18px;
     letter-spacing:0.02em;
   }
+  .app-title-amp{
+    font-family:'Poppins', sans-serif;
+    font-style:normal;
+    font-weight:600;
+  }
   .switch-profile{
     display:block;
     margin:22px auto 0;
@@ -1301,7 +1306,7 @@ function el(tag, className, html) {
   return node;
 }
 function appTitle() {
-  return el('div', 'app-title', '🌵 Here & There 🌁');
+  return el('div', 'app-title', '🌵 Here <span class="app-title-amp">&</span> There 🌁');
 }
 
 function renderIntro() {
