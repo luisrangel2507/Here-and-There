@@ -1545,15 +1545,13 @@ function render() {
   const root = document.getElementById('root');
   root.innerHTML = '';
   const app = el('div', 'app');
-  if (view !== 'intro') {
-    app.classList.add('photo-bg');
-    const bgImg = document.createElement('img');
-    bgImg.className = 'bg-photo';
-    bgImg.src = BG_PHOTO_IMG;
-    bgImg.alt = '';
-    app.appendChild(bgImg);
-    app.appendChild(el('div', 'bg-overlay'));
-  }
+  app.classList.add('photo-bg');
+  const bgImg = document.createElement('img');
+  bgImg.className = 'bg-photo';
+  bgImg.src = BG_PHOTO_IMG;
+  bgImg.alt = '';
+  app.appendChild(bgImg);
+  app.appendChild(el('div', 'bg-overlay'));
   const wrap = el('div', 'wrap');
   let content;
   if (view === 'intro') content = renderIntro();
