@@ -427,7 +427,7 @@ const APP_STYLE = `
     margin-bottom:14px;
   }
   .add-city-form input:focus{ outline:none; border-color:var(--coral); }
-  .profile-select{
+  .blood-type-select{
     width:100%;
     border:1.5px solid rgba(255,255,255,0.35);
     border-radius:10px;
@@ -440,7 +440,7 @@ const APP_STYLE = `
     -webkit-appearance:none;
     appearance:none;
   }
-  .profile-select:focus{ outline:none; border-color:var(--coral); }
+  .blood-type-select:focus{ outline:none; border-color:var(--coral); }
   .add-city-plans{
     display:flex;
     flex-wrap:wrap;
@@ -2075,7 +2075,7 @@ function renderProfile() {
 
   card.appendChild(el('div', 'add-city-label', 'Blood type'));
   const bloodSelect = document.createElement('select');
-  bloodSelect.className = 'profile-select';
+  bloodSelect.className = 'blood-type-select';
   const bloodOptions = ['', 'O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'];
   bloodOptions.forEach(opt => {
     const optEl = document.createElement('option');
