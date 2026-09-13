@@ -691,6 +691,12 @@ const APP_STYLE = `
     color:rgba(43,27,51,0.65);
     margin-top:4px;
   }
+  .detail-vibe{
+    margin:14px 24px 0;
+    font-size:13px;
+    line-height:1.6;
+    color:var(--ink-soft);
+  }
   .detail-code{
     font-family:'Fraunces', serif;
     font-weight:700;
@@ -955,30 +961,35 @@ const REGIONS = {
     destinations: [
       {
         id: 'cdmx', city: 'Ciudad de México', country: 'Mexico', code: 'CDMX', plan: 'city',
+        vibe: 'Huge, chaotic, and endlessly good — ancient pyramids on the edge of town, world-class museums and cantinas downtown, and rooftop mezcal in Roma/Condesa at night. High altitude, big energy, a taco stand on every corner.',
         price: 7807, note: null,
         highlights: [{ name: 'Pirámides', photo: null }, { name: 'Trajineras', photo: null }, { name: 'Chapultepec', photo: null }, { name: 'Bellas Artes', photo: null }, { name: 'Polanco', photo: null }, { name: 'La Mexicana', photo: null }, { name: 'Bar hopping Roma', photo: null }],
         photo: null, favorite: false, pin: { x: 58.0, y: 64.1 },
       },
       {
         id: 'cabo', city: 'Los Cabos', country: 'Mexico', code: 'SJD', plan: 'beach',
+        vibe: 'Desert cliffs dropping straight into turquoise water, the Arch, and a resort strip built for doing nothing productive on purpose. Loud beach clubs by day, quiet marina dinners by night — polished and a little touristy, in a good way.',
         price: 7920, note: null,
         highlights: [{ name: 'Mango Deck', photo: null }, { name: 'Bar hopping', photo: null }, { name: 'All-inclusive Rosewood · $5k/night', photo: null }],
         photo: null, favorite: false, pin: { x: 24.7, y: 48.3 },
       },
       {
         id: 'gdl', city: 'Guadalajara', country: 'Mexico', code: 'GDL', plan: 'city',
+        vibe: 'The birthplace of mariachi and tequila, with a walkable colonial centro, leafy plazas, and Tlaquepaque\\'s craft markets just outside town. Calmer and cheaper than CDMX, with a food scene that punches well above its size.',
         price: 8000, note: null,
         highlights: [],
         photo: null, favorite: false, pin: { x: 44.6, y: 58.5 },
       },
       {
         id: 'pvr', city: 'Puerto Vallarta', country: 'Mexico', code: 'PVR', plan: 'beach',
+        vibe: 'Cobblestone streets and a jungle-covered mountainside meet the Pacific along a long malecón made for sunset walks. Romantic, a little bohemian, and famously LGBTQ+-friendly — fish tacos on the beach, then rooftop drinks watching the sky turn orange.',
         price: 9739, note: null,
         highlights: [],
         photo: null, favorite: false, pin: { x: 38.9, y: 59.2 },
       },
       {
         id: 'bajio', city: 'Guanajuato', country: 'Mexico', code: 'BJX', plan: 'colonial',
+        vibe: 'A hillside maze of candy-colored houses, underground tunnel roads, and callejones too narrow for cars — plus San Miguel de Allende\\'s cathedral-postcard streets a short drive away. Storybook colonial Mexico, best explored on foot and slightly lost.',
         price: 7807, note: 'San Miguel de Allende / Guanajuato Capital',
         highlights: [{ name: 'Ciudad de México', photo: null }, { name: 'Guanajuato capital', photo: null }, { name: 'San Miguel de Allende', photo: null }],
         photo: null, favorite: false, pin: { x: 51.2, y: 57.3 },
@@ -993,18 +1004,21 @@ const REGIONS = {
     destinations: [
       {
         id: 'tahoe', city: 'Lake Tahoe', country: 'USA', code: 'RNO', plan: 'nature',
+        vibe: 'A ridiculously blue alpine lake ringed by pine forest and mountains — hike or paddleboard in summer, ski slopes minutes from the shore in winter. Crisp air, cozy cabins, and views that make you stop mid-sentence.',
         price: 7920, note: 'via SF Airport',
         highlights: [],
         photo: null, favorite: false, pin: { x: 16.65, y: 32.9 },
       },
       {
         id: 'vegas', city: 'Las Vegas', country: 'USA', code: 'LAS', plan: 'nightlife',
+        vibe: 'Neon Strip, all-night casinos, pool parties, and a headline show for every mood. Nobody sleeps, everything\\'s open at 3am, and the whole trip can be as extra (or as chill by the pool) as you want it to be.',
         costs: { edu: 4000, eleny: 3000 }, note: null,
         highlights: [],
         photo: null, favorite: false, pin: { x: 23.4, y: 46.25 },
       },
       {
         id: 'austin', city: 'Austin / San Antonio', country: 'USA', code: 'AUS', plan: 'city',
+        vibe: 'Two very different Texas cities an hour apart: Austin\\'s live music, food trucks, and lake days versus San Antonio\\'s Alamo, River Walk, and old-Texas history. Easy to combine into one relaxed road-trip-style visit.',
         costs: { edu: 3000, eleny: 4500 }, note: null,
         cities: ['Austin', 'San Antonio'],
         highlights: [],
@@ -1012,12 +1026,14 @@ const REGIONS = {
       },
       {
         id: 'miami', city: 'Miami', country: 'USA', code: 'MIA', plan: 'beach',
+        vibe: 'Art Deco pastels on South Beach, Cuban coffee on every block, and a nightlife scene that starts late and doesn\\'t apologize for it. Hot, glamorous, and unmistakably Latin — beach by day, salsa by night.',
         costs: { edu: 7261, eleny: 6000 }, note: null,
         highlights: [],
         photo: null, favorite: false, pin: { x: 81.1, y: 73.4 },
       },
       {
         id: 'sandiego', city: 'San Diego', country: 'USA', code: 'SAN', plan: 'beach',
+        vibe: 'Laid-back surf town energy, near-perfect weather year-round, and a craft beer scene to match. Balboa Park, easy beach days, and a short hop to Mexico if you want tacos on the other side of the border.',
         price: 6500, note: null,
         highlights: [],
         photo: null, favorite: false, pin: { x: 19.15, y: 54.6 },
@@ -1588,6 +1604,8 @@ function renderDetail() {
   head.appendChild(headLeft);
   head.appendChild(el('div', 'detail-code', d.code));
   card.appendChild(head);
+
+  if (d.vibe) card.appendChild(el('p', 'detail-vibe', d.vibe));
 
   const priceBlock = el('div', 'price-block');
   priceBlock.appendChild(el('div', 'price-total-label', 'ESTIMATED TOTAL'));
