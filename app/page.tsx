@@ -1127,12 +1127,6 @@ function appTitle() {
 function renderIntro() {
   const view_ = el('div', 'view');
 
-  const hero = document.createElement('img');
-  hero.className = 'intro-hero';
-  hero.src = INTRO_HERO_IMG;
-  hero.alt = 'Eleny and Luis';
-  view_.appendChild(hero);
-
   const logo = document.createElement('img');
   logo.className = 'app-logo';
   logo.src = LOGO_IMG;
@@ -1144,6 +1138,12 @@ function renderIntro() {
   header.appendChild(el('h1', null, 'Where should we <em>run away</em> to?'));
   view_.appendChild(header);
 
+  const hero = document.createElement('img');
+  hero.className = 'intro-hero';
+  hero.src = INTRO_HERO_IMG;
+  hero.alt = 'Eleny and Luis';
+  view_.appendChild(hero);
+
   const chooseLabel = el('div', 'sub', 'Choose the traveler');
   chooseLabel.style.textAlign = 'center';
   chooseLabel.style.marginTop = '4px';
@@ -1151,15 +1151,15 @@ function renderIntro() {
 
   const select = el('div', 'profile-select');
 
-  const elenyCard = el('div', 'profile-card');
-  elenyCard.innerHTML = '<div class="profile-emoji">🇺🇸</div><div class="profile-name">Eleny</div><div class="profile-hint">tap to enter</div>';
-  elenyCard.addEventListener('click', () => selectProfile('eleny'));
-  select.appendChild(elenyCard);
-
   const luisCard = el('div', 'profile-card');
   luisCard.innerHTML = '<div class="profile-emoji">🇲🇽</div><div class="profile-name">Luis</div><div class="profile-hint">passcode required</div>';
   luisCard.addEventListener('click', () => selectProfile('luis'));
   select.appendChild(luisCard);
+
+  const elenyCard = el('div', 'profile-card');
+  elenyCard.innerHTML = '<div class="profile-emoji">🇺🇸</div><div class="profile-name">Eleny</div><div class="profile-hint">tap to enter</div>';
+  elenyCard.addEventListener('click', () => selectProfile('eleny'));
+  select.appendChild(elenyCard);
 
   view_.appendChild(select);
 
