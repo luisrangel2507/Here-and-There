@@ -20,11 +20,12 @@ const APP_STYLE = `
     --line:rgba(43,27,51,0.14);
   }
   *{box-sizing:border-box;}
-  html, body{margin:0; background:#241a30;}
+  html, body{margin:0; background:#4e4a66;}
   .app{
     position:relative;
     overflow-x:hidden;
-    min-height:100%;
+    min-height:100vh;
+    min-height:100dvh;
     padding:36px 16px 80px;
     font-family:'Poppins', sans-serif;
     color:#fff;
