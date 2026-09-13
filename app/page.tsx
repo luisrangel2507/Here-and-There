@@ -2360,7 +2360,7 @@ function render() {
 render();
 setTimeout(() => {
   if (view === 'splash') { view = 'intro'; render(); }
-}, 3000);
+}, 5000);
 Promise.all([
   loadPriorities().then(loadCustomDestinations),
   loadHighlightsData(),
