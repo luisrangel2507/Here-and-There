@@ -468,6 +468,21 @@ const APP_STYLE = `
     text-align:center;
     margin-top:12px;
   }
+  .change-pick-btn{
+    display:block;
+    margin:0 auto 18px;
+    background:rgba(255,255,255,0.14);
+    backdrop-filter:blur(6px);
+    border:1.5px solid rgba(255,255,255,0.35);
+    color:#fff;
+    font-family:'Poppins', sans-serif;
+    font-weight:600;
+    font-size:12px;
+    padding:9px 16px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .change-pick-btn:hover{ background:rgba(255,255,255,0.22); }
   .winner-card{
     text-align:center;
     padding:36px 20px;
@@ -1177,6 +1192,16 @@ function goPriorities() {
   render();
 }
 
+function changeTodaysPick() {
+  if (blockedIds.length === 0) return;
+  const restoredId = blockedIds.pop();
+  priorityOrder.push(restoredId);
+  lastSubmitAt = null;
+  justEliminatedId = null;
+  savePriorities();
+  render();
+}
+
 // ---- state ----
 let view = 'intro'; // 'intro' | 'map' | 'detail'
 let region = 'mexico'; // 'mexico' | 'usa'
@@ -1634,6 +1659,12 @@ function renderPriorities() {
   view_.appendChild(el('p', 'sub', remaining > 0
     ? 'Ranking locked for today — next pick in ' + formatCountdown(remaining) + '.'
     : 'Drag to rank them — whichever ends up last gets cut for good.'));
+
+  if (remaining > 0 && blockedIds.length > 0) {
+    const changeBtn = el('button', 'change-pick-btn', '✏️ Change my pick (restarts the 24h clock)');
+    changeBtn.addEventListener('click', changeTodaysPick);
+    view_.appendChild(changeBtn);
+  }
 
   const list = el('div', 'priority-list');
   priorityOrder.forEach((id, idx) => {
