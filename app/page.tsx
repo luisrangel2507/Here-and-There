@@ -1580,7 +1580,7 @@ function el(tag, className, html) {
   return node;
 }
 function appTitle() {
-  return el('div', 'app-title', '🌵 Here <span class="app-title-amp">&</span> There');
+  return el('div', 'app-title', '🌵 Here <span class="app-title-amp">&</span> There 🌁');
 }
 
 function renderIntro() {
