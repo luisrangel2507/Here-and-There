@@ -1842,7 +1842,16 @@ function goDetail(id) {
   addingCity = null;
   selectedHighlightCity = d.cities ? d.cities[0] : null;
   render();
-  loadPhotosFor(id).then(render);
+  loadPhotosFor(id).then(() => refreshDetailCard(id));
+}
+function refreshDetailCard(id) {
+  if (view !== 'detail' || detailId !== id) return;
+  const oldCard = document.querySelector('.detail-card');
+  if (!oldCard) return;
+  const d = getDest(id);
+  const newCard = buildDetailCard(d, planOf(d));
+  newCard.style.animation = 'none';
+  oldCard.replaceWith(newCard);
 }
 function goMap() {
   view = 'map';
@@ -2223,6 +2232,12 @@ function renderDetail() {
   backBtn.addEventListener('click', goMap);
   view_.appendChild(backBtn);
 
+  view_.appendChild(buildDetailCard(d, plan));
+
+  return view_;
+}
+
+function buildDetailCard(d, plan) {
   const card = el('div', 'detail-card');
   card.style.setProperty('--plan-color', plan.color);
   card.style.setProperty('--plan-dim', plan.dim);
@@ -2459,9 +2474,7 @@ function renderDetail() {
   deleteBtn.addEventListener('click', () => deleteDestination(d.id));
   card.appendChild(deleteBtn);
 
-  view_.appendChild(card);
-
-  return view_;
+  return card;
 }
 
 let sortableInstance = null;
