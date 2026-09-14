@@ -3,8 +3,11 @@ import { prisma } from '@/lib/db';
 
 const MAX_DATA_URL_LENGTH = 8_000_000; // ~6MB image, generous over the client-side compressed size
 
-export async function GET() {
-  const rows = await prisma.photo.findMany();
+export async function GET(req: NextRequest) {
+  const destId = req.nextUrl.searchParams.get('destId');
+  const rows = destId
+    ? await prisma.photo.findMany({ where: { key: { startsWith: 'dest:' + destId + ':' } } })
+    : await prisma.photo.findMany();
   const map: Record<string, string> = {};
   for (const row of rows) map[row.key] = row.dataUrl;
   return NextResponse.json(map);

@@ -1595,20 +1595,23 @@ async function savePhoto(key, dataUrl) {
   } catch (e) { /* best-effort only */ }
 }
 
-async function loadPhotos() {
+const loadedPhotoDestIds = new Set();
+async function loadPhotosFor(destId) {
+  if (loadedPhotoDestIds.has(destId)) return;
+  const d = getDest(destId);
+  if (!d) return;
   try {
-    const res = await fetch('/api/photos');
+    const res = await fetch('/api/photos?destId=' + encodeURIComponent(destId));
     if (!res.ok) return;
     const map = await res.json();
-    allDestinations().forEach(d => {
-      d.highlights.forEach(h => {
-        const hKey = photoKeyForHighlight(d.id, h.name);
-        if (map[hKey]) h.photo = map[hKey];
-      });
-      (d.lodging || []).forEach(l => {
-        const lKey = photoKeyForLodging(d.id, l.name);
-        if (map[lKey]) l.photo = map[lKey];
-      });
+    loadedPhotoDestIds.add(destId);
+    d.highlights.forEach(h => {
+      const hKey = photoKeyForHighlight(d.id, h.name);
+      if (map[hKey]) h.photo = map[hKey];
+    });
+    (d.lodging || []).forEach(l => {
+      const lKey = photoKeyForLodging(d.id, l.name);
+      if (map[lKey]) l.photo = map[lKey];
     });
   } catch (e) { /* keep defaults */ }
 }
@@ -1839,6 +1842,7 @@ function goDetail(id) {
   addingCity = null;
   selectedHighlightCity = d.cities ? d.cities[0] : null;
   render();
+  loadPhotosFor(id).then(render);
 }
 function goMap() {
   view = 'map';
@@ -2648,7 +2652,6 @@ Promise.all([
   loadLodgingData(),
   loadCostsData(),
 ])
-  .then(loadPhotos)
   .then(render);
 
 `;
