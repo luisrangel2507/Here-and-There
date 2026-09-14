@@ -1197,6 +1197,21 @@ const APP_STYLE = `
     cursor:pointer;
   }
   .delete-city-btn:hover{ background:rgba(225,79,64,0.08); }
+  .move-pin-btn{
+    display:block;
+    width:calc(100% - 48px);
+    margin:0 24px 12px;
+    padding:11px;
+    border:1.5px solid rgba(14,165,160,0.35);
+    border-radius:999px;
+    background:none;
+    color:var(--turquoise-dim);
+    font-family:'Poppins', sans-serif;
+    font-weight:600;
+    font-size:12px;
+    cursor:pointer;
+  }
+  .move-pin-btn:hover{ background:rgba(14,165,160,0.08); }
 
   @media (max-width:480px){
     .detail-city{font-size:23px;}
@@ -1711,6 +1726,7 @@ let openAddHighlight = false;
 let openAddLodging = false;
 let selectedHighlightCity = null;
 let addingCity = null; // null | { step: 'pin' } | { step: 'form', pin: {x,y} }
+let movingPinId = null; // id of a custom destination currently being repositioned, or null
 let profile = null; // 'eleny' | 'luis'
 let isAdmin = false;
 
@@ -1836,6 +1852,14 @@ function deleteDestination(id) {
   priorityOrder = priorityOrder.filter(pid => pid !== id);
   savePriorities();
   goMap();
+}
+function startMovingPin(id) {
+  const d = getDest(id);
+  if (!d) return;
+  region = REGIONS.mexico.destinations.includes(d) ? 'mexico' : 'usa';
+  movingPinId = id;
+  view = 'map';
+  render();
 }
 function toggleFavorite(id) {
   const d = getDest(id);
@@ -1964,7 +1988,7 @@ function renderMap() {
   const r = { ...REGIONS[region], destinations: REGIONS[region].destinations.filter(d => !blockedIds.includes(d.id) && !hiddenIds.includes(d.id)) };
 
   const mapCard = el('div', 'map-card');
-  const stage = el('div', 'map-stage' + (addingCity && addingCity.step === 'pin' ? ' placing' : ''));
+  const stage = el('div', 'map-stage' + ((addingCity && addingCity.step === 'pin') || movingPinId ? ' placing' : ''));
   stage.style.aspectRatio = r.aspect;
   if (addingCity && addingCity.step === 'pin') {
     stage.addEventListener('click', (e) => {
@@ -1973,6 +1997,17 @@ function renderMap() {
       const y = ((e.clientY - rect.top) / rect.height) * 100;
       addingCity = { step: 'form', pin: { x, y } };
       render();
+    });
+  } else if (movingPinId) {
+    stage.addEventListener('click', (e) => {
+      const rect = stage.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      const d = getDest(movingPinId);
+      d.pin = { x, y };
+      movingPinId = null;
+      render();
+      saveCustomDestinations(region);
     });
   }
 
@@ -2023,7 +2058,15 @@ function renderMap() {
   mapCard.appendChild(stage);
   mapCard.appendChild(el('div', 'map-hint', addingCity && addingCity.step === 'pin'
     ? '📍 Tap the map where this city goes'
+    : movingPinId
+    ? '📍 Tap the map to move this pin'
     : 'Tap any pin to open the full proposal'));
+
+  if (movingPinId) {
+    const cancelMoveRow = el('button', 'add-city-row', 'Cancel moving pin');
+    cancelMoveRow.addEventListener('click', () => { movingPinId = null; render(); });
+    view_.appendChild(cancelMoveRow);
+  }
 
   const plansUsed = [...new Set(r.destinations.map(d => d.plan))];
   const legend = el('div', 'legend');
@@ -2400,6 +2443,12 @@ function renderDetail() {
 
   if (d.favorite) {
     card.appendChild(el('div', 'fav-note', 'Noted — this one just made the cut.'));
+  }
+
+  if (isAdmin && d.custom) {
+    const moveBtn = el('button', 'move-pin-btn', '📍 Move pin');
+    moveBtn.addEventListener('click', () => startMovingPin(d.id));
+    card.appendChild(moveBtn);
   }
 
   const deleteBtn = el('button', 'delete-city-btn', '🗑 Delete this city');
