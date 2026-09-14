@@ -569,6 +569,42 @@ const APP_STYLE = `
   .profile-name{font-family:'Fraunces', serif;font-style:italic;font-weight:700;font-size:18px;}
   .profile-hint{font-size:10.5px;color:rgba(255,255,255,0.7);margin-top:4px;}
 
+  .intro-logo-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin-top:40px;
+    animation:fadeSlideUp .7s ease both;
+    animation-delay:.25s;
+  }
+  .intro-logo{
+    width:136px;
+    height:136px;
+    border-radius:30px;
+    object-fit:cover;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.28),
+      0 22px 50px rgba(75,56,105,0.55),
+      0 0 60px rgba(255,201,60,0.4);
+    animation:logoGlow 3.5s ease-in-out infinite;
+  }
+  @keyframes logoGlow{
+    0%,100%{ transform:scale(1); filter:brightness(1); }
+    50%{ transform:scale(1.035); filter:brightness(1.06); }
+  }
+  .intro-logo-tagline{
+    margin:16px 0 4px;
+    max-width:260px;
+    text-align:center;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:13.5px;
+    line-height:1.45;
+    color:rgba(255,255,255,0.88);
+    text-shadow:0 2px 12px rgba(0,0,0,0.3);
+  }
+
   .elim-banner{
     background:rgba(255,255,255,0.18);
     backdrop-filter:blur(8px);
@@ -1242,6 +1278,7 @@ const INTRO_HERO_IMG = '/images/intro-hero.jpg';
 const SPLASH_IMG = '/images/splash.jpg';
 const USA_MAP_IMG = '/images/usa-map.jpg';
 const BG_PHOTO_IMG = '/images/bg-photo.jpg';
+const LOGO_IMG = '/images/logo.png';
 const PLAN_META = {
   beach:     { label: 'Beach',     emoji: '🏖️', color: '#0EA5A0', dim: '#0a7d79' },
   city:      { label: 'City',      emoji: '🏙️', color: '#FF6B5B', dim: '#e14f40' },
@@ -1997,6 +2034,15 @@ function renderIntro() {
   select.appendChild(elenyCard);
 
   view_.appendChild(select);
+
+  const logoWrap = el('div', 'intro-logo-wrap');
+  const logoImg = document.createElement('img');
+  logoImg.className = 'intro-logo';
+  logoImg.src = LOGO_IMG;
+  logoImg.alt = 'Here & There';
+  logoWrap.appendChild(logoImg);
+  logoWrap.appendChild(el('p', 'intro-logo-tagline', 'A private trip planner for two — pick where we run away to.'));
+  view_.appendChild(logoWrap);
 
   return view_;
 }
