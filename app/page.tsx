@@ -1021,12 +1021,16 @@ const APP_STYLE = `
     flex:0 0 auto;
     width:36px;height:36px;
     border-radius:9px;
-    background:rgba(43,27,51,0.08);
-    animation:thumbPulse 1.1s ease-in-out infinite;
+    background:linear-gradient(100deg,
+      rgba(43,27,51,0.08) 30%,
+      rgba(43,27,51,0.18) 50%,
+      rgba(43,27,51,0.08) 70%);
+    background-size:220% 100%;
+    animation:thumbShimmer 1.2s ease-in-out infinite;
   }
-  @keyframes thumbPulse{
-    0%,100%{ opacity:0.5; }
-    50%{ opacity:1; }
+  @keyframes thumbShimmer{
+    0%{ background-position:120% 0; }
+    100%{ background-position:-20% 0; }
   }
   .gallery{
     padding:16px 24px 0;
