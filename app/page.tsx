@@ -1611,27 +1611,31 @@ async function savePhoto(key, dataUrl) {
 }
 
 const loadedPhotoDestIds = new Set();
-const loadingPhotoDestIds = new Set();
-async function loadPhotosFor(destId) {
-  if (loadedPhotoDestIds.has(destId) || loadingPhotoDestIds.has(destId)) return;
+const photoFetchPromises = new Map(); // destId -> in-flight promise, shared by every caller
+function loadPhotosFor(destId) {
+  if (loadedPhotoDestIds.has(destId)) return Promise.resolve();
+  if (photoFetchPromises.has(destId)) return photoFetchPromises.get(destId);
   const d = getDest(destId);
-  if (!d) return;
-  loadingPhotoDestIds.add(destId);
-  try {
-    const res = await fetch('/api/photos?destId=' + encodeURIComponent(destId));
-    if (!res.ok) return;
-    const map = await res.json();
-    loadedPhotoDestIds.add(destId);
-    d.highlights.forEach(h => {
-      const hKey = photoKeyForHighlight(d.id, h.name);
-      if (map[hKey]) h.photo = map[hKey];
-    });
-    (d.lodging || []).forEach(l => {
-      const lKey = photoKeyForLodging(d.id, l.name);
-      if (map[lKey]) l.photo = map[lKey];
-    });
-  } catch (e) { /* keep defaults */ }
-  finally { loadingPhotoDestIds.delete(destId); }
+  if (!d) return Promise.resolve();
+  const p = (async () => {
+    try {
+      const res = await fetch('/api/photos?destId=' + encodeURIComponent(destId));
+      if (!res.ok) return;
+      const map = await res.json();
+      loadedPhotoDestIds.add(destId);
+      d.highlights.forEach(h => {
+        const hKey = photoKeyForHighlight(d.id, h.name);
+        if (map[hKey]) h.photo = map[hKey];
+      });
+      (d.lodging || []).forEach(l => {
+        const lKey = photoKeyForLodging(d.id, l.name);
+        if (map[lKey]) l.photo = map[lKey];
+      });
+    } catch (e) { /* keep defaults */ }
+    finally { photoFetchPromises.delete(destId); }
+  })();
+  photoFetchPromises.set(destId, p);
+  return p;
 }
 function prefetchPhotosFor(ids) {
   ids.forEach(id => { loadPhotosFor(id); });
