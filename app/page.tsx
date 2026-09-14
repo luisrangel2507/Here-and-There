@@ -1611,10 +1611,12 @@ async function savePhoto(key, dataUrl) {
 }
 
 const loadedPhotoDestIds = new Set();
+const loadingPhotoDestIds = new Set();
 async function loadPhotosFor(destId) {
-  if (loadedPhotoDestIds.has(destId)) return;
+  if (loadedPhotoDestIds.has(destId) || loadingPhotoDestIds.has(destId)) return;
   const d = getDest(destId);
   if (!d) return;
+  loadingPhotoDestIds.add(destId);
   try {
     const res = await fetch('/api/photos?destId=' + encodeURIComponent(destId));
     if (!res.ok) return;
@@ -1629,6 +1631,10 @@ async function loadPhotosFor(destId) {
       if (map[lKey]) l.photo = map[lKey];
     });
   } catch (e) { /* keep defaults */ }
+  finally { loadingPhotoDestIds.delete(destId); }
+}
+function prefetchPhotosFor(ids) {
+  ids.forEach(id => { loadPhotosFor(id); });
 }
 
 function fileToCompressedDataUrl(file) {
@@ -2171,6 +2177,8 @@ function renderMap() {
     addCityRow.addEventListener('click', () => { addingCity = { step: 'pin' }; render(); });
     view_.appendChild(addCityRow);
   }
+
+  prefetchPhotosFor(r.destinations.map(d => d.id));
 
   return view_;
 }
