@@ -1017,6 +1017,17 @@ const APP_STYLE = `
     display:flex;align-items:center;justify-content:center;
   }
   .highlight-thumb-btn:hover{border-color:var(--coral);color:var(--coral);}
+  .highlight-thumb-loading{
+    flex:0 0 auto;
+    width:36px;height:36px;
+    border-radius:9px;
+    background:rgba(43,27,51,0.08);
+    animation:thumbPulse 1.1s ease-in-out infinite;
+  }
+  @keyframes thumbPulse{
+    0%,100%{ opacity:0.5; }
+    50%{ opacity:1; }
+  }
   .gallery{
     padding:16px 24px 0;
   }
@@ -2238,6 +2249,7 @@ function renderDetail() {
 }
 
 function buildDetailCard(d, plan) {
+  const photosReady = loadedPhotoDestIds.has(d.id);
   const card = el('div', 'detail-card');
   card.style.setProperty('--plan-color', plan.color);
   card.style.setProperty('--plan-dim', plan.dim);
@@ -2354,6 +2366,8 @@ function buildDetailCard(d, plan) {
       img.alt = h.name;
       img.addEventListener('click', () => showPhotoLightbox(h.photo, h.name, () => setHighlightPhoto(d.id, idx)));
       row.appendChild(img);
+    } else if (!photosReady) {
+      row.appendChild(el('div', 'highlight-thumb-loading'));
     } else {
       const thumbBtn = el('button', 'highlight-thumb-btn', '📷');
       thumbBtn.setAttribute('aria-label', 'Add photo');
@@ -2405,6 +2419,8 @@ function buildDetailCard(d, plan) {
       img.alt = l.name;
       img.addEventListener('click', () => showPhotoLightbox(l.photo, l.name, () => setLodgingPhoto(d.id, idx)));
       row.appendChild(img);
+    } else if (!photosReady) {
+      row.appendChild(el('div', 'highlight-thumb-loading'));
     } else {
       const thumbBtn = el('button', 'highlight-thumb-btn', '📷');
       thumbBtn.setAttribute('aria-label', 'Add photo');
