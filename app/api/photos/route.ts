@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { cloudinary, publicIdForKey } from '@/lib/cloudinary';
 
 const MAX_DATA_URL_LENGTH = 8_000_000; // ~6MB image, generous over the client-side compressed size
 
@@ -23,6 +24,9 @@ export async function POST(req: NextRequest) {
 
   if (!dataUrl) {
     await prisma.photo.deleteMany({ where: { key } });
+    try {
+      await cloudinary.uploader.destroy(publicIdForKey(key));
+    } catch (e) { /* best-effort cleanup */ }
     return NextResponse.json({ ok: true });
   }
 
@@ -34,11 +38,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'invalid photo' }, { status: 400 });
   }
 
+  let hostedUrl: string;
+  try {
+    const uploaded = await cloudinary.uploader.upload(dataUrl, {
+      public_id: publicIdForKey(key),
+      overwrite: true,
+      invalidate: true,
+    });
+    hostedUrl = uploaded.secure_url;
+  } catch (e) {
+    return NextResponse.json({ error: 'upload failed' }, { status: 502 });
+  }
+
   await prisma.photo.upsert({
     where: { key },
-    create: { key, dataUrl },
-    update: { dataUrl },
+    create: { key, dataUrl: hostedUrl },
+    update: { dataUrl: hostedUrl },
   });
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, url: hostedUrl });
 }
