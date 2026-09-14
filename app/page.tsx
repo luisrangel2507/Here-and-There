@@ -86,13 +86,10 @@ const APP_STYLE = `
   .app.photo-bg::after{
     display:none;
   }
-  .bg-photo{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    z-index:0;
+  .app.photo-bg{
+    background-size:cover;
+    background-position:center top;
+    background-repeat:no-repeat;
   }
   .bg-overlay{
     position:absolute;
@@ -2569,11 +2566,7 @@ function render() {
 
   const app = el('div', 'app');
   app.classList.add('photo-bg');
-  const bgImg = document.createElement('img');
-  bgImg.className = 'bg-photo';
-  bgImg.src = BG_PHOTO_IMG;
-  bgImg.alt = '';
-  app.appendChild(bgImg);
+  app.style.backgroundImage = 'url(' + BG_PHOTO_IMG + ')';
   app.appendChild(el('div', 'bg-overlay'));
   const wrap = el('div', 'wrap');
   let content;
