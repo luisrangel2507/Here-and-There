@@ -38,23 +38,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'invalid photo' }, { status: 400 });
   }
 
-  let hostedUrl: string;
-  try {
-    const uploaded = await cloudinary.uploader.upload(dataUrl, {
-      public_id: publicIdForKey(key),
-      overwrite: true,
-      invalidate: true,
-    });
-    hostedUrl = uploaded.secure_url;
-  } catch (e) {
-    return NextResponse.json({ error: 'upload failed' }, { status: 502 });
+  // Prefer Cloudinary (fast, cached), but never block a save on it — if it's
+  // not configured yet or the upload fails, fall back to storing the photo
+  // directly, same as before Cloudinary was wired in.
+  let storedUrl = dataUrl;
+  if (process.env.CLOUDINARY_CLOUD_NAME) {
+    try {
+      const uploaded = await cloudinary.uploader.upload(dataUrl, {
+        public_id: publicIdForKey(key),
+        overwrite: true,
+        invalidate: true,
+      });
+      storedUrl = uploaded.secure_url;
+    } catch (e) { /* fall back to storing dataUrl directly below */ }
   }
 
   await prisma.photo.upsert({
     where: { key },
-    create: { key, dataUrl: hostedUrl },
-    update: { dataUrl: hostedUrl },
+    create: { key, dataUrl: storedUrl },
+    update: { dataUrl: storedUrl },
   });
 
-  return NextResponse.json({ ok: true, url: hostedUrl });
+  return NextResponse.json({ ok: true, url: storedUrl });
 }

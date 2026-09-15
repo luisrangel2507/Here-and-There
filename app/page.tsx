@@ -1609,12 +1609,13 @@ function photoKeyForLodging(id, name) {
 
 async function savePhoto(key, dataUrl) {
   try {
-    await fetch('/api/photos', {
+    const res = await fetch('/api/photos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key, dataUrl }),
     });
-  } catch (e) { /* best-effort only */ }
+    return res.ok;
+  } catch (e) { return false; }
 }
 
 const loadedPhotoDestIds = new Set();
@@ -1943,18 +1944,30 @@ function setHighlightPhoto(id, idx) {
   pickPhoto(dataUrl => {
     const d = getDest(id);
     const h = d.highlights[idx];
+    const previous = h.photo;
     h.photo = dataUrl;
     render();
-    savePhoto(photoKeyForHighlight(id, h.name), dataUrl);
+    savePhoto(photoKeyForHighlight(id, h.name), dataUrl).then(ok => {
+      if (ok) return;
+      h.photo = previous;
+      render();
+      window.alert('That photo didn\\'t save — check your connection and try again.');
+    });
   });
 }
 function setLodgingPhoto(id, idx) {
   pickPhoto(dataUrl => {
     const d = getDest(id);
     const l = d.lodging[idx];
+    const previous = l.photo;
     l.photo = dataUrl;
     render();
-    savePhoto(photoKeyForLodging(id, l.name), dataUrl);
+    savePhoto(photoKeyForLodging(id, l.name), dataUrl).then(ok => {
+      if (ok) return;
+      l.photo = previous;
+      render();
+      window.alert('That photo didn\\'t save — check your connection and try again.');
+    });
   });
 }
 
