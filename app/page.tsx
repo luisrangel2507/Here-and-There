@@ -18,15 +18,17 @@ const APP_STYLE = `
     --ink:#2B1B33;
     --ink-soft:rgba(43,27,51,0.6);
     --line:rgba(43,27,51,0.14);
+    --ease-out:cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring:cubic-bezier(0.34, 1.32, 0.64, 1);
   }
   *{box-sizing:border-box;}
   button, .dest-row, .highlight-row, .add-city-row{
-    transition:transform .12s ease, box-shadow .12s ease, background .15s ease;
+    transition:transform .15s var(--ease-out), box-shadow .15s var(--ease-out), background .15s var(--ease-out);
   }
   button:active, .dest-row:active, .add-city-row:active{
     transform:scale(0.96);
   }
-  .pin{ transition:transform .12s ease; }
+  .pin{ transition:transform .15s var(--ease-out); }
   .pin:active .pin-dot-wrap{ transform:scale(0.85); }
   html, body{margin:0; background:#4e4a66;}
   .splash-screen{
@@ -123,7 +125,7 @@ const APP_STYLE = `
     padding:26px 22px 0;
     text-align:center;
     box-shadow:0 20px 60px rgba(0,0,0,0.4);
-    animation:popIn .3s ease both;
+    animation:popIn .3s var(--ease-spring) both;
   }
   .passcode-card.shake{ animation:passcodeShake .4s ease; }
   @keyframes passcodeShake{
@@ -196,12 +198,11 @@ const APP_STYLE = `
     to{opacity:1; transform:translateX(0);}
   }
   @keyframes popIn{
-    0%{transform:scale(0.6); opacity:0;}
-    60%{transform:scale(1.15); opacity:1;}
-    100%{transform:scale(1);}
+    0%{transform:scale(0.85); opacity:0;}
+    100%{transform:scale(1); opacity:1;}
   }
 
-  .view{animation:fadeSlideUp .45s ease both;}
+  .view{animation:fadeSlideUp .45s var(--ease-out) both;}
 
   /* header */
   .eyebrow{
@@ -211,7 +212,7 @@ const APP_STYLE = `
     color:#fff;
     text-shadow:0 1px 8px rgba(0,0,0,0.15);
     margin-bottom:12px;
-    animation:fadeSlideUp .5s ease both;
+    animation:fadeSlideUp .5s var(--ease-out) both;
   }
   h1{
     font-family:'Fraunces', serif;
@@ -222,7 +223,7 @@ const APP_STYLE = `
     margin:0 0 14px;
     color:#fff;
     text-shadow:0 4px 24px rgba(75,56,105,0.35);
-    animation:fadeSlideUp .55s ease both;
+    animation:fadeSlideUp .55s var(--ease-out) both;
     animation-delay:.05s;
   }
   h1 em{
@@ -239,7 +240,7 @@ const APP_STYLE = `
     max-width:48ch;
     margin:0 0 26px;
     text-shadow:0 1px 10px rgba(0,0,0,0.1);
-    animation:fadeSlideUp .6s ease both;
+    animation:fadeSlideUp .6s var(--ease-out) both;
     animation-delay:.1s;
   }
 
@@ -256,7 +257,7 @@ const APP_STYLE = `
     display:flex;
     gap:10px;
     margin-bottom:20px;
-    animation:fadeSlideUp .6s ease both;
+    animation:fadeSlideUp .6s var(--ease-out) both;
     animation-delay:.12s;
   }
   .region-tab{
@@ -292,7 +293,7 @@ const APP_STYLE = `
     padding:18px;
     margin-bottom:18px;
     box-shadow:0 20px 50px rgba(20,10,30,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
-    animation:fadeSlideUp .65s ease both;
+    animation:fadeSlideUp .65s var(--ease-out) both;
     animation-delay:.16s;
   }
   .map-stage{
@@ -379,7 +380,7 @@ const APP_STYLE = `
     opacity:0.4;
   }
   .map-stage.placing{ cursor:crosshair; }
-  .pin-preview{ cursor:default; animation:popIn .3s ease both; }
+  .pin-preview{ cursor:default; animation:popIn .3s var(--ease-spring) both; }
   .pin-preview .pin-dot{ background:#fff; border-color:var(--coral); }
   .add-city-row{
     display:flex;
@@ -474,7 +475,7 @@ const APP_STYLE = `
     align-items:center;
     gap:12px;
     margin-bottom:18px;
-    animation:fadeSlideUp .5s ease both;
+    animation:fadeSlideUp .5s var(--ease-out) both;
   }
   .profile-header-flag{
     font-size:34px;
@@ -542,13 +543,13 @@ const APP_STYLE = `
     display:block;
     margin-bottom:22px;
     box-shadow:0 20px 45px rgba(75,56,105,0.4);
-    animation:fadeSlideUp .55s ease both;
+    animation:fadeSlideUp .55s var(--ease-out) both;
   }
   .profile-select{
     display:flex;
     gap:12px;
     margin-top:22px;
-    animation:fadeSlideUp .7s ease both;
+    animation:fadeSlideUp .7s var(--ease-out) both;
     animation-delay:.15s;
   }
   .profile-card{
@@ -580,7 +581,7 @@ const APP_STYLE = `
     color:#fff;
     text-align:center;
     margin-bottom:16px;
-    animation:popIn .4s ease both;
+    animation:popIn .4s var(--ease-spring) both;
   }
   .priority-list{
     display:flex;
@@ -653,7 +654,7 @@ const APP_STYLE = `
     backdrop-filter:blur(10px);
     border:1.5px solid rgba(255,255,255,0.4);
     border-radius:24px;
-    animation:popIn .5s ease both;
+    animation:popIn .5s var(--ease-spring) both;
   }
   .winner-trophy{font-size:40px;margin-bottom:10px;}
   .winner-city{
@@ -679,7 +680,7 @@ const APP_STYLE = `
   .intro-title{
     font-size:34px;
     margin-bottom:24px;
-    animation:popIn .5s ease both;
+    animation:popIn .5s var(--ease-spring) both;
   }
   .app-title-amp{
     font-family:'Poppins', sans-serif;
@@ -732,8 +733,6 @@ const APP_STYLE = `
     grid-template-columns:1fr 1fr;
     gap:9px;
     margin-bottom:40px;
-    animation:fadeSlideUp .7s ease both;
-    animation-delay:.2s;
   }
   .dest-row{
     display:flex;
@@ -749,6 +748,7 @@ const APP_STYLE = `
     padding:12px 14px;
     cursor:pointer;
     box-shadow:0 8px 20px rgba(20,10,30,0.22);
+    animation:fadeSlideUp .4s var(--ease-out) both;
     transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
   }
   .dest-row:hover{transform:translateY(-2px);background:linear-gradient(160deg, rgba(255,255,255,0.28), rgba(255,255,255,0.12));box-shadow:0 12px 26px rgba(20,10,30,0.3);}
@@ -784,7 +784,7 @@ const APP_STYLE = `
     cursor:pointer;
     margin-bottom:20px;
     transition:transform .15s ease;
-    animation:fadeSlideRight .4s ease both;
+    animation:fadeSlideRight .4s var(--ease-out) both;
   }
   .back-btn:hover{transform:translateX(-3px);}
 
@@ -794,7 +794,7 @@ const APP_STYLE = `
     border-radius:24px;
     overflow:hidden;
     box-shadow:0 28px 60px rgba(75,56,105,0.45), 0 2px 0 rgba(255,255,255,0.5) inset;
-    animation:fadeSlideUp .5s ease both;
+    animation:fadeSlideUp .5s var(--ease-out) both;
     animation-delay:.05s;
   }
   .lightbox-backdrop{
@@ -1001,7 +1001,7 @@ const APP_STYLE = `
     border:1.5px solid var(--line);
     border-radius:12px;
     padding:10px 14px;
-    animation:fadeSlideUp .35s ease both;
+    animation:fadeSlideUp .35s var(--ease-out) both;
   }
   .highlight-name{font-size:12.5px;font-weight:500;flex:1;min-width:0;}
   .highlight-thumb{
@@ -1165,7 +1165,7 @@ const APP_STYLE = `
     color:#fff;
     box-shadow:0 10px 26px rgba(14,165,160,0.4);
   }
-  .fav-btn .heart{display:inline-block;animation:popIn .35s ease;}
+  .fav-btn .heart{display:inline-block;animation:popIn .35s var(--ease-spring);}
   .admin-pick-banner{
     display:inline-block;
     font-size:11px;
@@ -2140,10 +2140,11 @@ function renderMap() {
   view_.appendChild(mapCard);
 
   const list = el('div', 'dest-list');
-  r.destinations.forEach(d => {
+  r.destinations.forEach((d, idx) => {
     const plan = planOf(d);
     const isTopPick = adminRanking[0] === d.id;
     const row = el('div', 'dest-row' + (isTopPick ? ' is-top-pick' : ''));
+    row.style.animationDelay = (idx * 0.04) + 's';
     row.style.setProperty('--plan-color', plan.color);
     const left = el('div', 'dest-row-left');
     left.appendChild(el('div', 'dest-row-name', d.city));
