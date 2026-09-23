@@ -1358,6 +1358,30 @@ const REGIONS = {
 
 const money = n => '$' + n.toLocaleString('en-US');
 
+// Iconic highlights for custom cities (added via "+ add city") that don't have
+// any yet, keyed by lowercased city name. Only fills in destinations with an
+// empty highlights list — never touches one that already has entries.
+const ICONIC_HIGHLIGHTS_BY_CITY = {
+  'bacalar': ['Laguna de los Siete Colores', 'Cenote Azul', 'Fuerte de San Felipe', 'Canal de los Piratas', 'Los Rápidos', 'Cenote Esmeralda', 'Cenote Cocalitos', 'Isla de los Pájaros', 'Malecón de Bacalar', 'Paseo en velero por la laguna'],
+};
+
+function applyIconicHighlights(d) {
+  if (!d || d.highlights.length) return false;
+  const list = ICONIC_HIGHLIGHTS_BY_CITY[d.city.trim().toLowerCase()];
+  if (!list) return false;
+  d.highlights = list.map(name => ({ name, city: null, photo: null }));
+  return true;
+}
+
+function backfillIconicHighlights() {
+  Object.keys(REGIONS).forEach(regionKey => {
+    const r = REGIONS[regionKey];
+    let changed = false;
+    r.destinations.forEach(d => { if (d.custom && applyIconicHighlights(d)) changed = true; });
+    if (changed) saveCustomDestinations(regionKey);
+  });
+}
+
 function getDest(id) {
   for (const key of Object.keys(REGIONS)) {
     const found = REGIONS[key].destinations.find(d => d.id === id);
@@ -1591,6 +1615,7 @@ function addCustomDestination(city, plan) {
     pin: addingCity.pin,
     custom: true,
   };
+  applyIconicHighlights(d);
   r.destinations.push(d);
   priorityOrder.push(id);
   addingCity = null;
@@ -2718,7 +2743,7 @@ Promise.all([
   loadLodgingData(),
   loadCostsData(),
 ])
-  .then(render);
+  .then(() => { backfillIconicHighlights(); render(); });
 
 `;
 
