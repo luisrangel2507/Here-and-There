@@ -1454,7 +1454,7 @@ async function loadHighlightsData() {
     const map = await res.json();
     Object.keys(map).forEach(destId => {
       const d = getDest(destId);
-      if (!d) return;
+      if (!d || !map[destId].length) return;
       d.highlights = map[destId].map(h => ({ name: h.name, city: h.city || null, photo: null }));
     });
   } catch (e) { /* keep defaults */ }
