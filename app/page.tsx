@@ -1384,14 +1384,51 @@ const money = n => '$' + n.toLocaleString('en-US');
 // Iconic highlights for custom cities (added via "+ add city") that don't have
 // any yet, keyed by lowercased city name. Only fills in destinations with an
 // empty highlights list — never touches one that already has entries.
-const ICONIC_HIGHLIGHTS_BY_CITY = {
-  'bacalar': ['Laguna de los Siete Colores', 'Cenote Azul', 'Fuerte de San Felipe', 'Canal de los Piratas', 'Los Rápidos', 'Cenote Esmeralda', 'Cenote Cocalitos', 'Isla de los Pájaros', 'Malecón de Bacalar', 'Paseo en velero por la laguna'],
-  'merida': ['Paseo de Montejo', 'Catedral de San Ildefonso', 'Gran Museo del Mundo Maya', 'Plaza Grande', 'Mercado Lucas de Gálvez', 'Casa de Montejo', 'Parque de Santa Lucía', 'Palacio de Gobierno de Yucatán', 'Zona Arqueológica de Dzibilchaltún', 'Barrio de Santiago'],
-  'mérida': ['Paseo de Montejo', 'Catedral de San Ildefonso', 'Gran Museo del Mundo Maya', 'Plaza Grande', 'Mercado Lucas de Gálvez', 'Casa de Montejo', 'Parque de Santa Lucía', 'Palacio de Gobierno de Yucatán', 'Zona Arqueológica de Dzibilchaltún', 'Barrio de Santiago'],
-  'puerto escondido': ['Playa Zicatela', 'Playa Carrizalillo', 'Playa Puerto Angelito', 'Laguna de Manialtepec', 'Mirador de la Punta', 'Playa Marinero', 'Punta Zicatela', 'Parque Nacional Lagunas de Chacahua', 'Playa Bacocho', 'El Adoquín'],
-  'mazatlan': ['Malecón de Mazatlán', 'Centro Histórico de Mazatlán', 'Faro de Mazatlán', 'Isla de la Piedra', 'Playa Olas Altas', 'Catedral Basílica de la Inmaculada Concepción', 'Teatro Ángela Peralta', 'Acuario Mazatlán', 'Zona Dorada', 'Cerro del Crestón'],
-  'mazatlán': ['Malecón de Mazatlán', 'Centro Histórico de Mazatlán', 'Faro de Mazatlán', 'Isla de la Piedra', 'Playa Olas Altas', 'Catedral Basílica de la Inmaculada Concepción', 'Teatro Ángela Peralta', 'Acuario Mazatlán', 'Zona Dorada', 'Cerro del Crestón'],
-};
+const ICONIC_HIGHLIGHTS_BY_CITY = {};
+function registerIconic(names, highlights) {
+  names.forEach(name => { ICONIC_HIGHLIGHTS_BY_CITY[name.toLowerCase()] = highlights; });
+}
+// Mexico
+registerIconic(['Bacalar'], ['Laguna de los Siete Colores', 'Cenote Azul', 'Fuerte de San Felipe', 'Canal de los Piratas', 'Los Rápidos', 'Cenote Esmeralda', 'Cenote Cocalitos', 'Isla de los Pájaros', 'Malecón de Bacalar', 'Paseo en velero por la laguna']);
+registerIconic(['Merida', 'Mérida'], ['Paseo de Montejo', 'Catedral de San Ildefonso', 'Gran Museo del Mundo Maya', 'Plaza Grande', 'Mercado Lucas de Gálvez', 'Casa de Montejo', 'Parque de Santa Lucía', 'Palacio de Gobierno de Yucatán', 'Zona Arqueológica de Dzibilchaltún', 'Barrio de Santiago']);
+registerIconic(['Puerto Escondido'], ['Playa Zicatela', 'Playa Carrizalillo', 'Playa Puerto Angelito', 'Laguna de Manialtepec', 'Mirador de la Punta', 'Playa Marinero', 'Punta Zicatela', 'Parque Nacional Lagunas de Chacahua', 'Playa Bacocho', 'El Adoquín']);
+registerIconic(['Mazatlan', 'Mazatlán'], ['Malecón de Mazatlán', 'Centro Histórico de Mazatlán', 'Faro de Mazatlán', 'Isla de la Piedra', 'Playa Olas Altas', 'Catedral Basílica de la Inmaculada Concepción', 'Teatro Ángela Peralta', 'Acuario Mazatlán', 'Zona Dorada', 'Cerro del Crestón']);
+registerIconic(['Tulum'], ['Zona Arqueológica de Tulum', 'Playa Paraíso', 'Gran Cenote', 'Cenote Calavera', 'Playa Ruinas', 'Aldea Zamá', 'Cenote Dos Ojos', 'Punta Piedra', 'Playa Santa Fe', 'Casa Malca área']);
+registerIconic(['Cancun', 'Cancún'], ['Zona Hotelera', 'Playa Delfines', 'Isla Mujeres (ferry)', 'Museo Subacuático de Arte (MUSA)', 'Zona Arqueológica El Rey', 'Mercado 28', 'La Isla Shopping Village', 'Coco Bongo', 'Playa Tortugas', 'Xcaret (excursión)']);
+registerIconic(['Playa del Carmen'], ['Quinta Avenida', 'Playa Mamitas', 'Xcaret Park', 'Xplor Park', 'Rio Secreto', 'Coco Beach', 'Parque Los Fundadores', 'Xel-Há', 'Cenote Cristalino', 'Punta Esmeralda']);
+registerIconic(['Cozumel'], ['Arrecife Palancar', 'Playa Chen Río', 'Zona Arqueológica de San Gervasio', 'Punta Sur Eco Beach Park', 'Playa Palancar', 'Parque Chankanaab', 'Malecón de Cozumel', 'Playa Bonita', 'El Cielo (banco de arena)', 'Faro Celarain']);
+registerIconic(['Isla Mujeres'], ['Playa Norte', 'Punta Sur', 'MUSA (museo subacuático)', 'Isla Contoy (excursión)', 'Garrafón Reef Park', 'Playa Indios', 'Dolphin Discovery', 'Hacienda Mundaca', 'Playa Lancheros', 'Tour de tiburón ballena']);
+registerIconic(['Oaxaca'], ['Zócalo de Oaxaca', 'Templo de Santo Domingo', 'Monte Albán', 'Hierve el Agua', 'Mercado Benito Juárez', 'Fábricas de mezcal', 'Museo Textil de Oaxaca', 'Teotitlán del Valle', 'Árbol del Tule', 'Mercado 20 de Noviembre']);
+registerIconic(['San Miguel de Allende'], ['Parroquia de San Miguel Arcángel', 'El Jardín', 'Fábrica La Aurora', 'Mirador de San Miguel', 'Instituto Allende', 'Mercado de Artesanías', 'La Esquina Museo', 'Parque Juárez', 'Santuario de Atotonilco', 'Callejón del Beso']);
+registerIconic(['Monterrey'], ['Cerro de la Silla', 'Parque Fundidora', 'Macroplaza', 'Barrio Antiguo', 'Paseo Santa Lucía', 'Museo de Historia Mexicana', 'Chipinque', 'Cascada Cola de Caballo', 'Grutas de García', 'Cañón de la Huasteca']);
+registerIconic(['Ensenada'], ['La Bufadora', 'Riviera del Pacífico', 'Valle de Guadalupe (viñedos)', 'Mercado Negro', 'Malecón de Ensenada', 'Playa Hermosa', 'Isla de Todos Santos', 'Estero Beach', 'Bodegas de Santo Tomás', 'Catedral de Nuestra Señora de Guadalupe']);
+registerIconic(['La Paz'], ['Malecón de La Paz', 'Isla Espíritu Santo', 'El Mogote', 'Playa Balandra', 'Nado con tiburón ballena', 'Playa Tecolote', 'Museo Regional de Antropología', 'Isla de la Roca', 'Mercado Municipal', 'Lobos marinos en Los Islotes']);
+registerIconic(['Zihuatanejo'], ['Playa La Ropa', 'Playa Madera', 'Playa Las Gatas', 'Muelle Municipal', 'Museo Arqueológico de la Costa Grande', 'Isla Ixtapa', 'Playa Principal', 'Mirador Cerro del Vigía', 'Paseo del Pescador', 'Marina Ixtapa']);
+registerIconic(['Acapulco'], ['Clavadistas de La Quebrada', 'Playa Condesa', 'Fuerte de San Diego', 'Playa Revolcadero', 'Isla la Roqueta', 'Playa Icacos', 'Zócalo de Acapulco', 'Capilla de la Paz', 'Malecón de Acapulco', 'Playa Caleta']);
+registerIconic(['Huatulco'], ['Bahías de Huatulco', 'Playa Santa Cruz', 'Playa La Entrega', 'Parque Nacional Huatulco', 'Playa Maguey', 'Playa Órgano', 'Mirador Escénico', 'La Crucecita', 'Playa Conejos', 'Cascadas Copalitilla']);
+registerIconic(['San Cristobal de las Casas', 'San Cristóbal de las Casas'], ['Templo de Santo Domingo', 'Andador Turístico', 'Cañón del Sumidero', 'Cerro de San Cristóbal', 'Casa Na Bolom', 'Mercado de Santo Domingo', 'Iglesia de Guadalupe', 'San Juan Chamula', 'Zinacantán', 'Arco del Carmen']);
+registerIconic(['Veracruz'], ['Malecón de Veracruz', 'Zócalo de Veracruz', 'Fuerte de San Juan de Ulúa', 'Isla de Sacrificios', 'Acuario de Veracruz', 'Boca del Río', 'Fuerte de Santiago', 'Museo Naval', 'Playa Villa del Mar', 'Plaza de Armas']);
+registerIconic(['Puebla'], ['Zócalo de Puebla', 'Catedral de Puebla', 'Talleres de Talavera', 'Gran Pirámide de Cholula', 'Callejón de los Sapos', 'Museo Amparo', 'Barrio del Artista', 'Africam Safari', 'Fuertes de Loreto y Guadalupe', 'Capilla del Rosario']);
+// USA
+registerIconic(['New York', 'New York City', 'NYC'], ['Times Square', 'Central Park', 'Statue of Liberty', 'Empire State Building', 'Brooklyn Bridge', 'The Met', 'The High Line', 'Rockefeller Center', 'SoHo', 'Broadway show']);
+registerIconic(['Los Angeles', 'LA'], ['Hollywood Sign', 'Santa Monica Pier', 'Griffith Observatory', 'Venice Beach', 'Rodeo Drive', 'Getty Center', 'Universal Studios', 'Hollywood Walk of Fame', 'The Grove', 'Malibu']);
+registerIconic(['San Francisco'], ['Golden Gate Bridge', 'Alcatraz Island', "Fisherman's Wharf", 'Lombard Street', 'Chinatown', 'Painted Ladies', 'Pier 39', 'Union Square', 'Twin Peaks', 'Golden Gate Park']);
+registerIconic(['Seattle'], ['Space Needle', 'Pike Place Market', 'Chihuly Garden and Glass', 'Museum of Pop Culture', 'Kerry Park', 'Gas Works Park', 'Pioneer Square', 'Fremont Troll', 'Olympic Sculpture Park', 'Snoqualmie Falls']);
+registerIconic(['Portland'], ["Powell's City of Books", 'Washington Park', 'International Rose Test Garden', 'Pioneer Courthouse Square', 'Multnomah Falls', 'Portland Saturday Market', 'Portland Japanese Garden', 'Forest Park', 'Pittock Mansion', 'Food cart pods']);
+registerIconic(['Chicago'], ['Millennium Park (The Bean)', 'Navy Pier', 'Willis Tower Skydeck', 'Art Institute of Chicago', 'Magnificent Mile', 'Lincoln Park Zoo', 'Wrigley Field', 'Chicago Riverwalk', 'Museum Campus', 'Deep-dish pizza tour']);
+registerIconic(['New Orleans'], ['French Quarter', 'Bourbon Street', 'Jackson Square', 'Garden District', 'St. Louis Cathedral', 'Café du Monde', 'Frenchmen Street', 'National WWII Museum', 'Streetcar ride', 'City Park']);
+registerIconic(['Orlando'], ['Walt Disney World', 'Universal Orlando Resort', 'Lake Eola Park', 'ICON Park', 'Gatorland', 'Kennedy Space Center', 'Winter Park', 'Disney Springs', 'SeaWorld Orlando', 'CityWalk']);
+registerIconic(['Key West'], ['Duval Street', 'Southernmost Point', 'Mallory Square sunset', 'Ernest Hemingway Home', 'Key West Lighthouse', 'Dry Tortugas', 'Fort Zachary Taylor Beach', 'Smathers Beach', 'Truman Little White House', 'Conch Tour Train']);
+registerIconic(['Santa Fe'], ['Santa Fe Plaza', 'Canyon Road galleries', "Georgia O'Keeffe Museum", 'Loretto Chapel', 'San Miguel Mission', 'Meow Wolf', 'Palace of the Governors', 'Cathedral Basilica of St. Francis', 'Ten Thousand Waves', 'Museum Hill']);
+registerIconic(['Sedona'], ['Cathedral Rock', 'Bell Rock', 'Chapel of the Holy Cross', 'Oak Creek Canyon', 'Airport Mesa', 'Red Rock State Park', 'Slide Rock State Park', "Devil's Bridge", 'Tlaquepaque Arts Village', 'Boynton Canyon']);
+registerIconic(['Napa Valley', 'Napa'], ['Napa Valley Wine Train', 'Oxbow Public Market', 'Castello di Amorosa', 'Downtown Napa', 'Culinary Institute of America', 'Calistoga hot springs', 'Yountville restaurants', 'Silverado Trail wineries', 'Old Faithful Geyser of California', 'Robert Louis Stevenson State Park']);
+registerIconic(['Nashville'], ['Broadway honky-tonks', 'Country Music Hall of Fame', 'Grand Ole Opry', 'The Parthenon', 'Ryman Auditorium', 'Music Row', 'Centennial Park', 'Johnny Cash Museum', 'Printers Alley', 'RCA Studio B']);
+registerIconic(['Denver'], ['Larimer Square', 'Denver Botanic Gardens', 'Red Rocks Amphitheatre', 'Union Station', 'Denver Art Museum', '16th Street Mall', 'City Park', 'Colorado State Capitol', 'Cherry Creek Trail', 'Empower Field']);
+registerIconic(['Boston'], ['Freedom Trail', 'Fenway Park', 'Boston Common', 'Faneuil Hall', 'Harvard Square', 'North End', 'Boston Public Garden', 'USS Constitution', 'Newbury Street', 'Quincy Market']);
+registerIconic(['Washington DC', 'Washington D.C.', 'DC'], ['National Mall', 'Lincoln Memorial', 'Smithsonian museums', 'U.S. Capitol', 'White House', 'Georgetown', 'Jefferson Memorial', 'Arlington National Cemetery', 'National Gallery of Art', 'Tidal Basin cherry blossoms']);
+registerIconic(['Savannah'], ['Forsyth Park', 'Historic District squares', 'River Street', 'Bonaventure Cemetery', 'Tybee Island', 'Cathedral of St. John the Baptist', 'Mercer Williams House', 'City Market', 'Telfair Museums', 'Wormsloe Historic Site']);
+registerIconic(['Charleston'], ['Rainbow Row', 'Battery Park', 'Charleston City Market', 'Fort Sumter', 'Magnolia Plantation', 'Folly Beach', 'King Street shopping', 'Middleton Place', 'USS Yorktown', 'Angel Oak Tree']);
+registerIconic(['Honolulu', 'Oahu'], ['Waikiki Beach', 'Diamond Head', 'Pearl Harbor', 'Iolani Palace', 'Hanauma Bay', 'Ala Moana Center', "North Shore", 'Byodo-In Temple', 'Kualoa Ranch', 'Polynesian Cultural Center']);
 
 function applyIconicHighlights(d) {
   if (!d || d.highlights.length) return false;
