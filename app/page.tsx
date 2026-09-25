@@ -379,6 +379,8 @@ const APP_STYLE = `
     background:#FFC93C;
     opacity:0.4;
   }
+  .pin-eleny-hidden{ opacity:0.4; }
+  .pin-eleny-hidden .pin-dot{ border-style:dashed; }
   .map-stage.placing{ cursor:crosshair; }
   .pin-preview{ cursor:default; animation:popIn .3s var(--ease-spring) both; }
   .pin-preview .pin-dot{ background:#fff; border-color:var(--coral); }
@@ -766,6 +768,8 @@ const APP_STYLE = `
   .dest-row-plan-emoji{font-size:16px;}
   .dest-row-price{font-family:'Fraunces', serif;font-style:italic;font-weight:700;font-size:13.5px;color:var(--sun);}
   .dest-row-heart{font-size:13px;}
+  .dest-row.is-eleny-hidden{opacity:0.55;}
+  .dest-row-visibility{background:none;border:none;font-size:15px;padding:2px;line-height:1;cursor:pointer;}
 
   /* detail view */
   .back-btn{
@@ -1413,6 +1417,7 @@ function defaultOrder() {
 let priorityOrder = defaultOrder();
 let blockedIds = [];
 let hiddenIds = [];
+let elenyHiddenIds = []; // destinations Luis has hidden from Eleny's map/list (still visible to Luis)
 let profileInfo = {};
 let adminRanking = [];
 let lastSubmitAt = null;
@@ -1435,7 +1440,7 @@ async function savePriorities() {
     await fetch('/api/state', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ priorityOrder, blockedIds, hiddenIds, profileInfo, adminRanking, lastSubmitAt }),
+      body: JSON.stringify({ priorityOrder, blockedIds, hiddenIds, elenyHiddenIds, profileInfo, adminRanking, lastSubmitAt }),
     });
   } catch (e) { /* best-effort only */ }
 }
@@ -1447,6 +1452,7 @@ async function loadPriorities() {
       if (parsed) {
         blockedIds = parsed.blockedIds || [];
         hiddenIds = parsed.hiddenIds || [];
+        elenyHiddenIds = parsed.elenyHiddenIds || [];
         profileInfo = parsed.profileInfo || {};
         adminRanking = parsed.adminRanking || [];
         priorityOrder = (parsed.priorityOrder || defaultOrder()).filter(id => !blockedIds.includes(id) && !hiddenIds.includes(id));
@@ -1937,6 +1943,15 @@ function toggleFavorite(id) {
   d.favorite = !d.favorite;
   render();
 }
+function toggleElenyVisibility(id) {
+  if (elenyHiddenIds.includes(id)) {
+    elenyHiddenIds = elenyHiddenIds.filter(hid => hid !== id);
+  } else {
+    elenyHiddenIds.push(id);
+  }
+  render();
+  savePriorities();
+}
 function adminRankedList() {
   const validIds = allDestinations().map(d => d.id).filter(id => !blockedIds.includes(id) && !hiddenIds.includes(id));
   const ranked = adminRanking.filter(id => validIds.includes(id));
@@ -2068,7 +2083,7 @@ function renderMap() {
   });
   view_.appendChild(tabs);
 
-  const r = { ...REGIONS[region], destinations: REGIONS[region].destinations.filter(d => !blockedIds.includes(d.id) && !hiddenIds.includes(d.id)) };
+  const r = { ...REGIONS[region], destinations: REGIONS[region].destinations.filter(d => !blockedIds.includes(d.id) && !hiddenIds.includes(d.id) && (isAdmin || !elenyHiddenIds.includes(d.id))) };
 
   const mapCard = el('div', 'map-card');
   const stage = el('div', 'map-stage' + ((addingCity && addingCity.step === 'pin') || movingPinId ? ' placing' : ''));
@@ -2114,7 +2129,8 @@ function renderMap() {
 
   r.destinations.forEach(d => {
     const plan = planOf(d);
-    const pin = el('button', 'pin');
+    const hiddenFromEleny = isAdmin && elenyHiddenIds.includes(d.id);
+    const pin = el('button', 'pin' + (hiddenFromEleny ? ' pin-eleny-hidden' : ''));
     pin.style.left = d.pin.x + '%';
     pin.style.top = d.pin.y + '%';
     pin.style.setProperty('--plan-color', plan.color);
@@ -2168,17 +2184,25 @@ function renderMap() {
   r.destinations.forEach((d, idx) => {
     const plan = planOf(d);
     const isTopPick = adminRanking[0] === d.id;
-    const row = el('div', 'dest-row' + (isTopPick ? ' is-top-pick' : ''));
+    const hiddenFromEleny = isAdmin && elenyHiddenIds.includes(d.id);
+    const row = el('div', 'dest-row' + (isTopPick ? ' is-top-pick' : '') + (hiddenFromEleny ? ' is-eleny-hidden' : ''));
     row.style.animationDelay = (idx * 0.04) + 's';
     row.style.setProperty('--plan-color', plan.color);
     const left = el('div', 'dest-row-left');
     left.appendChild(el('div', 'dest-row-name', d.city));
     if (d.note) left.appendChild(el('div', 'dest-row-note', d.note));
+    if (hiddenFromEleny) left.appendChild(el('div', 'dest-row-note', '🙈 Hidden from Eleny'));
     row.appendChild(left);
     const right = el('div', 'dest-row-right');
     right.appendChild(el('span', 'dest-row-plan-emoji', plan.emoji));
     if (d.favorite) right.appendChild(el('span', 'dest-row-heart', '💛'));
     if (isAdmin) right.appendChild(el('div', 'dest-row-price', money(destTotal(d))));
+    if (isAdmin) {
+      const visBtn = el('button', 'dest-row-visibility', hiddenFromEleny ? '🙈' : '👁️');
+      visBtn.setAttribute('aria-label', hiddenFromEleny ? 'Show to Eleny' : 'Hide from Eleny');
+      visBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleElenyVisibility(d.id); });
+      right.appendChild(visBtn);
+    }
     row.appendChild(right);
     row.addEventListener('click', () => goDetail(d.id));
     list.appendChild(row);
