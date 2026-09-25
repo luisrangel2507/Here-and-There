@@ -1386,6 +1386,11 @@ const money = n => '$' + n.toLocaleString('en-US');
 // empty highlights list — never touches one that already has entries.
 const ICONIC_HIGHLIGHTS_BY_CITY = {
   'bacalar': ['Laguna de los Siete Colores', 'Cenote Azul', 'Fuerte de San Felipe', 'Canal de los Piratas', 'Los Rápidos', 'Cenote Esmeralda', 'Cenote Cocalitos', 'Isla de los Pájaros', 'Malecón de Bacalar', 'Paseo en velero por la laguna'],
+  'merida': ['Paseo de Montejo', 'Catedral de San Ildefonso', 'Gran Museo del Mundo Maya', 'Plaza Grande', 'Mercado Lucas de Gálvez', 'Casa de Montejo', 'Parque de Santa Lucía', 'Palacio de Gobierno de Yucatán', 'Zona Arqueológica de Dzibilchaltún', 'Barrio de Santiago'],
+  'mérida': ['Paseo de Montejo', 'Catedral de San Ildefonso', 'Gran Museo del Mundo Maya', 'Plaza Grande', 'Mercado Lucas de Gálvez', 'Casa de Montejo', 'Parque de Santa Lucía', 'Palacio de Gobierno de Yucatán', 'Zona Arqueológica de Dzibilchaltún', 'Barrio de Santiago'],
+  'puerto escondido': ['Playa Zicatela', 'Playa Carrizalillo', 'Playa Puerto Angelito', 'Laguna de Manialtepec', 'Mirador de la Punta', 'Playa Marinero', 'Punta Zicatela', 'Parque Nacional Lagunas de Chacahua', 'Playa Bacocho', 'El Adoquín'],
+  'mazatlan': ['Malecón de Mazatlán', 'Centro Histórico de Mazatlán', 'Faro de Mazatlán', 'Isla de la Piedra', 'Playa Olas Altas', 'Catedral Basílica de la Inmaculada Concepción', 'Teatro Ángela Peralta', 'Acuario Mazatlán', 'Zona Dorada', 'Cerro del Crestón'],
+  'mazatlán': ['Malecón de Mazatlán', 'Centro Histórico de Mazatlán', 'Faro de Mazatlán', 'Isla de la Piedra', 'Playa Olas Altas', 'Catedral Basílica de la Inmaculada Concepción', 'Teatro Ángela Peralta', 'Acuario Mazatlán', 'Zona Dorada', 'Cerro del Crestón'],
 };
 
 function applyIconicHighlights(d) {
