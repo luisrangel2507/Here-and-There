@@ -737,11 +737,13 @@ const APP_STYLE = `
     margin-bottom:40px;
   }
   .dest-row{
+    position:relative;
     display:flex;
     flex-direction:row;
     align-items:center;
     justify-content:space-between;
     gap:8px;
+    min-width:0;
     background:linear-gradient(160deg, rgba(255,255,255,0.2), rgba(255,255,255,0.08));
     backdrop-filter:blur(8px);
     border:1.5px solid rgba(255,255,255,0.3);
@@ -769,7 +771,24 @@ const APP_STYLE = `
   .dest-row-price{font-family:'Fraunces', serif;font-style:italic;font-weight:700;font-size:13.5px;color:var(--sun);}
   .dest-row-heart{font-size:13px;}
   .dest-row.is-eleny-hidden{opacity:0.55;}
-  .dest-row-visibility{background:none;border:none;font-size:15px;padding:2px;line-height:1;cursor:pointer;}
+  .dest-row.has-vis-toggle{padding-right:34px;}
+  .dest-row-visibility{
+    position:absolute;
+    top:50%;
+    right:8px;
+    transform:translateY(-50%);
+    background:rgba(20,10,30,0.35);
+    border:none;
+    border-radius:50%;
+    width:22px;height:22px;
+    flex:0 0 auto;
+    font-size:12px;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
 
   /* detail view */
   .back-btn{
@@ -2185,7 +2204,7 @@ function renderMap() {
     const plan = planOf(d);
     const isTopPick = adminRanking[0] === d.id;
     const hiddenFromEleny = isAdmin && elenyHiddenIds.includes(d.id);
-    const row = el('div', 'dest-row' + (isTopPick ? ' is-top-pick' : '') + (hiddenFromEleny ? ' is-eleny-hidden' : ''));
+    const row = el('div', 'dest-row' + (isTopPick ? ' is-top-pick' : '') + (hiddenFromEleny ? ' is-eleny-hidden' : '') + (isAdmin ? ' has-vis-toggle' : ''));
     row.style.animationDelay = (idx * 0.04) + 's';
     row.style.setProperty('--plan-color', plan.color);
     const left = el('div', 'dest-row-left');
@@ -2197,13 +2216,13 @@ function renderMap() {
     right.appendChild(el('span', 'dest-row-plan-emoji', plan.emoji));
     if (d.favorite) right.appendChild(el('span', 'dest-row-heart', '💛'));
     if (isAdmin) right.appendChild(el('div', 'dest-row-price', money(destTotal(d))));
+    row.appendChild(right);
     if (isAdmin) {
       const visBtn = el('button', 'dest-row-visibility', hiddenFromEleny ? '🙈' : '👁️');
       visBtn.setAttribute('aria-label', hiddenFromEleny ? 'Show to Eleny' : 'Hide from Eleny');
       visBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleElenyVisibility(d.id); });
-      right.appendChild(visBtn);
+      row.appendChild(visBtn);
     }
-    row.appendChild(right);
     row.addEventListener('click', () => goDetail(d.id));
     list.appendChild(row);
   });
