@@ -6,7 +6,8 @@ import { logActivity } from '@/lib/activity';
 function feedEntry(from: string, type: string, city: string): [string, string, string] | null {
   switch (type) {
     case 'city_added': return [from, '📍', 'added ' + city];
-    case 'city_cut': return [from, '💔', 'cut ' + city + ' from the ranking'];
+    case 'city_cut': return [from, '💔', 'swiped ' + city + ' out'];
+    case 'round': return ['both', '🔥', 'Round done — ' + city + ' left. Swipe again!'];
     case 'winner': return ['both', '✈️', 'It\'s decided — you\'re going to ' + city + '!'];
     case 'trip_dates': return [from, '🗓️', 'set the trip dates'];
     case 'availability': return [from, '📅', 'marked new free days'];
@@ -24,9 +25,11 @@ function compose(from: string, type: string, city: string, count: number): PushP
     case 'city_cut':
       return {
         title: '💔 ' + city + ' got cut',
-        body: who + ' just ranked today — ' + count + ' destination' + (count === 1 ? '' : 's') + ' left.',
-        tag: 'ranking',
+        body: who + ' swiped it out — ' + count + ' destination' + (count === 1 ? '' : 's') + ' left.',
+        tag: 'swipes',
       };
+    case 'round':
+      return { title: '🔥 Next round!', body: 'You both said yes to ' + count + ' places — swipe again to narrow it down.', tag: 'round' };
     case 'winner':
       return { title: '✈️ It\'s decided!', body: 'You\'re going to ' + city + '. Open the app for the big reveal.', tag: 'winner' };
     case 'availability':

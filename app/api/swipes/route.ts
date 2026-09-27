@@ -15,14 +15,22 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { profile, destId, choice, reset } = body ?? {};
+  const { profile, destId, choice } = body ?? {};
 
   if (!PROFILES.includes(profile)) {
     return NextResponse.json({ error: 'invalid profile' }, { status: 400 });
   }
 
-  if (reset) {
-    await prisma.swipe.deleteMany({ where: { profile } });
+  // Next round: everyone left said yes, so clear those likes and swipe again.
+  if (Array.isArray(body.resetRound)) {
+    const ids = body.resetRound.filter((id: unknown) => typeof id === 'string');
+    await prisma.swipe.deleteMany({ where: { destId: { in: ids }, choice: 'like' } });
+    return NextResponse.json({ ok: true });
+  }
+
+  // Bring a swiped-out destination back into play.
+  if (typeof body.restore === 'string') {
+    await prisma.swipe.deleteMany({ where: { destId: body.restore, choice: 'nope' } });
     return NextResponse.json({ ok: true });
   }
 

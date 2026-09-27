@@ -1,6 +1,5 @@
 'use client';
 import { useEffect, useRef } from 'react';
-import Sortable from 'sortablejs';
 
 const APP_STYLE = `
 
@@ -244,13 +243,6 @@ const APP_STYLE = `
     animation-delay:.1s;
   }
 
-  .priority-status{
-    text-align:center;
-    font-size:12px;
-    font-weight:600;
-    color:rgba(255,255,255,0.85);
-    margin-bottom:18px;
-  }
 
   /* region tabs */
   .region-tabs{
@@ -369,15 +361,6 @@ const APP_STYLE = `
     right:-8px;
     font-size:11px;
     filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4));
-  }
-  .pin-gold .pin-dot{
-    background:linear-gradient(135deg, #FFE18A, #FFC93C);
-    border-color:#FFF3CE;
-    box-shadow:0 3px 10px rgba(0,0,0,0.35), 0 0 18px rgba(255,201,60,0.9);
-  }
-  .pin-gold .pin-ring{
-    background:#FFC93C;
-    opacity:0.4;
   }
   .pin-eleny-hidden{ opacity:0.4; }
   .pin-eleny-hidden .pin-dot{ border-style:dashed; }
@@ -572,101 +555,6 @@ const APP_STYLE = `
   .profile-name{font-family:'Fraunces', serif;font-style:italic;font-weight:700;font-size:18px;}
   .profile-hint{font-size:10.5px;color:rgba(255,255,255,0.7);margin-top:4px;}
 
-  .elim-banner{
-    background:rgba(255,255,255,0.18);
-    backdrop-filter:blur(8px);
-    border:1.5px solid rgba(255,255,255,0.4);
-    border-radius:14px;
-    padding:12px 16px;
-    font-size:12.5px;
-    font-weight:500;
-    color:#fff;
-    text-align:center;
-    margin-bottom:16px;
-    animation:popIn .4s var(--ease-spring) both;
-  }
-  .priority-list{
-    display:flex;
-    flex-direction:column;
-    gap:9px;
-    margin-bottom:8px;
-  }
-  .priority-row{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    background:rgba(255,255,255,0.16);
-    backdrop-filter:blur(8px);
-    border:1.5px solid rgba(255,255,255,0.35);
-    border-left:4px solid var(--plan-color, rgba(255,255,255,0.35));
-    border-radius:14px;
-    padding:9px 14px;
-    user-select:none;
-    touch-action:none;
-    position:relative;
-  }
-  .priority-row.dragging{
-    opacity:0.85;
-    box-shadow:0 14px 30px rgba(0,0,0,0.35);
-    background:rgba(255,255,255,0.28);
-    z-index:5;
-  }
-  .priority-row-ghost{
-    opacity:0.35;
-  }
-  .priority-rank{
-    flex:0 0 auto;
-    width:22px;height:22px;
-    border-radius:50%;
-    background:rgba(255,255,255,0.25);
-    color:#fff;
-    font-size:11px;
-    font-weight:700;
-    display:flex;align-items:center;justify-content:center;
-    touch-action:none;
-  }
-  .priority-mid{ flex:1; min-width:0; touch-action:none; }
-  .priority-name{flex:1;min-width:0;font-size:13px;font-weight:600;color:#fff;touch-action:none;}
-  .priority-grip{flex:0 0 auto;font-size:15px;color:rgba(255,255,255,0.5);cursor:grab;padding:2px 4px;touch-action:none;}
-  .priority-hint{
-    font-size:11.5px;
-    color:rgba(255,255,255,0.65);
-    text-align:center;
-    margin-top:12px;
-  }
-  .change-pick-btn{
-    display:block;
-    margin:0 auto 18px;
-    background:rgba(255,255,255,0.14);
-    backdrop-filter:blur(6px);
-    border:1.5px solid rgba(255,255,255,0.35);
-    color:#fff;
-    font-family:'Poppins', sans-serif;
-    font-weight:600;
-    font-size:12px;
-    padding:9px 16px;
-    border-radius:999px;
-    cursor:pointer;
-  }
-  .change-pick-btn:hover{ background:rgba(255,255,255,0.22); }
-  .winner-card{
-    text-align:center;
-    padding:36px 20px;
-    background:rgba(255,255,255,0.16);
-    backdrop-filter:blur(10px);
-    border:1.5px solid rgba(255,255,255,0.4);
-    border-radius:24px;
-    animation:popIn .5s var(--ease-spring) both;
-  }
-  .winner-trophy{font-size:40px;margin-bottom:10px;}
-  .winner-city{
-    font-family:'Fraunces', serif;
-    font-style:italic;
-    font-weight:700;
-    font-size:26px;
-    color:#fff;
-  }
-  .winner-sub{font-size:12.5px;color:rgba(255,255,255,0.75);margin-top:8px;}
 
   .app-title{
     text-align:center;
@@ -1203,21 +1091,6 @@ const APP_STYLE = `
     color:var(--ink);
     background:linear-gradient(90deg, #FFE18A, #FFC93C);
     box-shadow:0 4px 14px rgba(255,180,60,0.5);
-  }
-  .admin-pick-map-banner{
-    display:block;
-    width:100%;
-    border:1.5px solid rgba(255,201,60,0.5);
-    border-radius:999px;
-    padding:9px 14px;
-    margin-bottom:14px;
-    background:rgba(255,201,60,0.16);
-    backdrop-filter:blur(6px);
-    color:#fff;
-    font-family:'Poppins', sans-serif;
-    font-weight:600;
-    font-size:12.5px;
-    cursor:pointer;
   }
   .fav-note{
     margin:0 24px 24px;
@@ -1992,7 +1865,6 @@ const APP_STYLE = `
     animation:popIn .5s var(--ease-spring) both;
   }
   .winner-cta-sub{font-size:11px;font-weight:600;opacity:0.7;margin-top:2px;}
-  .winner-action{margin-top:12px;}
 
   /* reveal */
   .reveal-backdrop{
@@ -2230,6 +2102,34 @@ const APP_STYLE = `
   @media (prefers-reduced-motion: reduce){
     *{animation-duration:0.01ms !important;transition-duration:0.01ms !important;}
   }
+
+  .round-banner{
+    padding:12px 16px;
+    margin-bottom:12px;
+    border-radius:16px;
+    background:linear-gradient(90deg, rgba(255,111,145,0.45), rgba(255,159,104,0.45));
+    border:1px solid rgba(255,255,255,0.35);
+    font-size:13px;
+    font-weight:600;
+    animation:popIn .45s var(--ease-spring) both;
+  }
+  .swipe-done.is-winner .confirm-btn{margin-top:4px;}
+  .swipe-out{margin:-24px 0 40px;}
+  .swipe-out-row{display:flex;flex-wrap:wrap;gap:6px;}
+  .out-chip{
+    border:1px solid rgba(255,255,255,0.3);
+    border-radius:999px;
+    padding:6px 12px;
+    background:rgba(20,10,30,0.3);
+    color:rgba(255,255,255,0.75);
+    font-family:'Poppins', sans-serif;
+    font-size:12px;
+    font-weight:600;
+    text-decoration:line-through;
+    text-decoration-color:rgba(255,107,122,0.8);
+    cursor:pointer;
+  }
+  .swipe-out-hint{font-size:11px;opacity:0.65;margin-top:8px;}
 
   /* it's a match */
   .match-backdrop{
@@ -2528,42 +2428,23 @@ function destTotal(d) {
 }
 
 const ADMIN_CODE = 'aguacate9';
-const COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const STORAGE_KEY = 'priorities-state';
 
 function allDestinations() {
   return [...REGIONS.mexico.destinations, ...REGIONS.usa.destinations];
 }
-function defaultOrder() {
-  return allDestinations().map(d => d.id);
-}
 
-let priorityOrder = defaultOrder();
 let blockedIds = [];
 let hiddenIds = [];
 let elenyHiddenIds = []; // destinations Luis has hidden from Eleny's map/list (still visible to Luis)
 let profileInfo = {};
-let adminRanking = [];
-let lastSubmitAt = null;
-let justEliminatedId = null;
 let tripStart = null; // 'YYYY-MM-DD'
 let tripEnd = null;
 
-function cooldownRemaining() {
-  if (!lastSubmitAt) return 0;
-  const remaining = (lastSubmitAt + COOLDOWN_MS) - Date.now();
-  return remaining > 0 ? remaining : 0;
-}
-function formatCountdown(ms) {
-  const totalMin = Math.max(1, Math.ceil(ms / 60000));
-  const h = Math.floor(totalMin / 60);
-  const m = totalMin % 60;
-  return (h > 0 ? h + 'h ' : '') + m + 'm';
-}
 
 // Sends only the named fields, so one phone never overwrites what the other changed.
 async function saveState(fields) {
-  const all = { priorityOrder, blockedIds, hiddenIds, elenyHiddenIds, adminRanking, lastSubmitAt, tripStart, tripEnd };
+  const all = { blockedIds, hiddenIds, elenyHiddenIds, tripStart, tripEnd };
   const body = {};
   fields.forEach(f => { body[f] = all[f]; });
   try {
@@ -2593,9 +2474,6 @@ async function loadPriorities() {
         hiddenIds = parsed.hiddenIds || [];
         elenyHiddenIds = parsed.elenyHiddenIds || [];
         profileInfo = parsed.profileInfo || {};
-        adminRanking = parsed.adminRanking || [];
-        priorityOrder = (parsed.priorityOrder || defaultOrder()).filter(id => !blockedIds.includes(id) && !hiddenIds.includes(id));
-        lastSubmitAt = parsed.lastSubmitAt || null;
         tripStart = parsed.tripStart || null;
         tripEnd = parsed.tripEnd || null;
       }
@@ -2743,7 +2621,6 @@ async function loadCustomDestinations() {
       map[regionKey].forEach(d => {
         if (r.destinations.some(existing => existing.id === d.id)) return;
         r.destinations.push(d);
-        if (!priorityOrder.includes(d.id) && !blockedIds.includes(d.id) && !hiddenIds.includes(d.id)) priorityOrder.push(d.id);
       });
     });
   } catch (e) { /* keep defaults */ }
@@ -2764,7 +2641,6 @@ function addCustomDestination(city, plan) {
   };
   applyIconicHighlights(d);
   r.destinations.push(d);
-  priorityOrder.push(id);
   addingCity = null;
   render();
   saveCustomDestinations(region);
@@ -2922,47 +2798,8 @@ function showPhotoLightbox(src, alt, onReplace) {
   document.body.appendChild(backdrop);
 }
 
-function submitPriorities() {
-  const active = activePriorityOrder();
-  if (cooldownRemaining() > 0 || active.length <= 1) return;
-  const eliminatedId = active[active.length - 1];
-  blockedIds.push(eliminatedId);
-  priorityOrder = priorityOrder.filter(id => id !== eliminatedId);
-  lastSubmitAt = Date.now();
-  justEliminatedId = eliminatedId;
-  saveState(['priorityOrder', 'blockedIds', 'lastSubmitAt']);
-  haptic(25);
-  const left = activePriorityOrder().length;
-  const cut = getDest(eliminatedId);
-  const w = winnerId();
-  if (w) {
-    notifyPartner('winner', getDest(w).city, 0, w);
-    render();
-    setTimeout(() => showReveal(w), 350);
-    return;
-  }
-  notifyPartner('city_cut', cut ? cut.city : '', left, eliminatedId);
-  render();
-}
 
-function goPriorities() {
-  navigate(() => {
-    view = 'priorities';
-    justEliminatedId = null;
-    window.scrollTo(0, 0);
-    render();
-  });
-}
 
-function changeTodaysPick() {
-  if (blockedIds.length === 0) return;
-  const restoredId = blockedIds.pop();
-  priorityOrder.push(restoredId);
-  lastSubmitAt = null;
-  justEliminatedId = null;
-  saveState(['priorityOrder', 'blockedIds', 'lastSubmitAt']);
-  render();
-}
 
 // ---- state ----
 let view = 'splash'; // 'splash' | 'intro' | 'map' | 'detail'
@@ -3122,8 +2959,7 @@ function deleteDestination(id) {
   const d = getDest(id);
   if (!window.confirm('Delete ' + d.city + '? This can\\'t be undone.')) return;
   hiddenIds.push(id);
-  priorityOrder = priorityOrder.filter(pid => pid !== id);
-  saveState(['hiddenIds', 'priorityOrder']);
+  saveState(['hiddenIds']);
   goMap();
 }
 function startMovingPin(id) {
@@ -3150,6 +2986,7 @@ function toggleElenyVisibility(id) {
 }
 // ---- swipe to decide ----
 let swipes = { luis: {}, eleny: {} }; // profile -> { destId: 'like' | 'nope' }
+let pendingSwipes = {}; // my swipes still being saved, re-applied over any refresh
 let swipeDragging = false;
 let swipeRerender = false;
 let detailReturnView = 'map';
@@ -3164,17 +3001,13 @@ function txt(tag, className, text) {
   return node;
 }
 
-async function loadSwipes(onlyPartner) {
+async function loadSwipes() {
   try {
     const res = await fetch('/api/swipes');
     if (!res.ok) return;
     const map = await res.json();
-    if (onlyPartner && profile) {
-      const partner = profile === 'luis' ? 'eleny' : 'luis';
-      swipes[partner] = map[partner] || {};
-    } else {
-      swipes = { luis: map.luis || {}, eleny: map.eleny || {} };
-    }
+    swipes = { luis: map.luis || {}, eleny: map.eleny || {} };
+    if (profile) Object.keys(pendingSwipes).forEach(id => { swipes[profile][id] = pendingSwipes[id]; });
   } catch (e) { /* keep what we have */ }
 }
 async function saveSwipe(destId, choice) {
@@ -3188,9 +3021,55 @@ async function saveSwipe(destId, choice) {
   } catch (e) { return false; }
 }
 
-// A match needs both travelers, so anything hidden from Eleny stays out of the deck.
+// Elimination: a left swipe from either traveler takes a destination out for both.
+// Anything hidden from Eleny isn't in play at all.
+function inPlay(d) {
+  return !hiddenIds.includes(d.id) && !elenyHiddenIds.includes(d.id);
+}
+function isVetoed(id) {
+  return swipes.luis[id] === 'nope' || swipes.eleny[id] === 'nope';
+}
+function isOut(id) {
+  return blockedIds.includes(id) || isVetoed(id);
+}
 function swipeableDestinations() {
-  return allDestinations().filter(d => !blockedIds.includes(d.id) && !hiddenIds.includes(d.id) && !elenyHiddenIds.includes(d.id));
+  return allDestinations().filter(d => inPlay(d) && !isOut(d.id));
+}
+function outDestinations() {
+  return allDestinations().filter(d => inPlay(d) && isOut(d.id));
+}
+// Round done = more than one destination left and both said yes to all of them.
+function maybeAdvanceRound() {
+  const alive = swipeableDestinations();
+  if (alive.length < 2 || !alive.every(d => isMatch(d.id))) return false;
+  const ids = alive.map(d => d.id);
+  ids.forEach(id => { delete swipes.luis[id]; delete swipes.eleny[id]; });
+  fetch('/api/swipes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ profile, resetRound: ids }),
+  }).catch(() => {});
+  notifyPartner('round', String(ids.length), ids.length);
+  roundNotice = ids.length;
+  haptic([20, 40, 20]);
+  return true;
+}
+let roundNotice = null;
+function restoreDestination(id) {
+  const d = getDest(id);
+  if (!d || !window.confirm('Bring ' + d.city + ' back into play?')) return;
+  ['luis', 'eleny'].forEach(who => { if (swipes[who][id] === 'nope') delete swipes[who][id]; });
+  if (blockedIds.includes(id)) {
+    blockedIds = blockedIds.filter(b => b !== id);
+    saveState(['blockedIds']);
+  }
+  fetch('/api/swipes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ profile, restore: id }),
+  }).catch(() => {});
+  haptic(15);
+  render();
 }
 function isMatch(id) {
   return swipes.luis[id] === 'like' && swipes.eleny[id] === 'like';
@@ -3219,7 +3098,8 @@ function goSwipe() {
     render();
   }, fromDetail);
   // The view switch may still be mid-transition when this resolves, so don't gate the match on it.
-  loadSwipes(true).then(() => {
+  loadSwipes().then(() => {
+    maybeAdvanceRound();
     const unseen = unseenMatchIds();
     if (unseen.length) { showMatch(unseen[0]); markMatchesSeen(); }
     if (view === 'swipe' && !swipeDragging) { swipeRerender = true; render(); }
@@ -3228,12 +3108,27 @@ function goSwipe() {
 
 async function commitSwipe(id, choice) {
   swipes[profile][id] = choice;
+  pendingSwipes[id] = choice;
   haptic(choice === 'like' ? 18 : 8);
   render();
   const ok = await saveSwipe(id, choice);
-  if (choice !== 'like') return;
-  if (ok) await loadSwipes(true);
+  delete pendingSwipes[id];
+
+  if (choice === 'nope') {
+    const d = getDest(id);
+    const w = winnerId();
+    if (w) {
+      notifyPartner('winner', getDest(w).city, 0, w);
+      setTimeout(() => showReveal(w), 350);
+    } else {
+      notifyPartner('city_cut', d ? d.city : '', swipeableDestinations().length, id);
+    }
+    return;
+  }
+
+  if (ok) await loadSwipes();
   if (isMatch(id)) { showMatch(id); markMatchesSeen(); }
+  if (maybeAdvanceRound() && view === 'swipe' && !swipeDragging) render();
 }
 
 function flyOut(card, choice, id) {
@@ -3288,16 +3183,6 @@ function attachSwipeDrag(card, id) {
   card.addEventListener('pointercancel', () => end(true));
 }
 
-function resetMySwipes() {
-  if (!window.confirm('Start over and swipe every destination again?')) return;
-  swipes[profile] = {};
-  fetch('/api/swipes', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ profile, reset: true }),
-  }).catch(() => {});
-  render();
-}
 
 function showMatch(id) {
   const d = getDest(id);
@@ -3631,18 +3516,10 @@ function tripCountdown() {
 }
 
 // ---- the final destination ----
-// Cities hidden from Eleny aren't in play, so they never show in (or win) the ranking.
-function activePriorityOrder() {
-  return priorityOrder.filter(id => !elenyHiddenIds.includes(id) && getDest(id));
-}
+// The last destination nobody has swiped out is the winner.
 function winnerId() {
-  const active = activePriorityOrder();
-  return active.length === 1 ? active[0] : null;
-}
-function ensurePriorityOrderComplete() {
-  allDestinations().forEach(d => {
-    if (!priorityOrder.includes(d.id) && !blockedIds.includes(d.id) && !hiddenIds.includes(d.id)) priorityOrder.push(d.id);
-  });
+  const alive = swipeableDestinations();
+  return alive.length === 1 ? alive[0].id : null;
 }
 function revealSeenKey() { return 'seen-winner-' + profile; }
 function revealSeen(id) {
@@ -4004,11 +3881,9 @@ function navigate(update, morphId) {
 }
 let lastSyncAt = Date.now();
 async function syncFromServer() {
-  const tasks = [loadSwipes(true), loadReactions(), loadItineraries(), loadActivity()];
-  if (view !== 'priorities' && view !== 'adminRanking') tasks.push(loadPriorities());
-  await Promise.all(tasks);
+  await Promise.all([loadSwipes(), loadReactions(), loadItineraries(), loadActivity(), loadPriorities()]);
   await loadCustomDestinations();
-  ensurePriorityOrderComplete();
+  maybeAdvanceRound();
   if (swipeDragging || document.querySelector('.reveal-backdrop, .match-backdrop, .rx-picker, .lightbox-backdrop')) return;
   if (view === 'map' || view === 'swipe') { swipeRerender = true; render(); }
   else if (view === 'detail' && detailId) refreshDetailCard(detailId);
@@ -4041,12 +3916,11 @@ function setHome(x, y) {
   haptic([15, 30, 15]);
   render();
 }
+// Arcs go to the winner, or else to this round's matches.
 function routeTargets() {
   const w = winnerId();
   if (w) return [w];
-  const matches = currentMatchIds();
-  if (matches.length) return matches.slice(0, 4);
-  return adminRanking.length ? [adminRanking[0]] : [];
+  return currentMatchIds().slice(0, 4);
 }
 const ROUTE_COLORS = { luis: '#FF6B5B', eleny: '#2EC4B6' };
 const PLANE_PATH = 'M-11,-1.6 L3,-1.6 L9,0 L3,1.6 L-11,1.6 Z M-3,-1.6 L-7,-10 L-3.5,-10 L3,-1.6 Z M-3,1.6 L-7,10 L-3.5,10 L3,1.6 Z M-11,-1.6 L-13,-5 L-10.5,-5 L-8,-1.6 Z M-11,1.6 L-13,5 L-10.5,5 L-8,1.6 Z';
@@ -4351,7 +4225,7 @@ function setupPullToRefresh() {
     startY = null;
     if (!isStandalone() || refreshing || window.scrollY > 0 || !profile || view === 'intro' || view === 'splash') return;
     if (document.querySelector('.reveal-backdrop, .match-backdrop, .lightbox-backdrop')) return;
-    if (e.target.closest && e.target.closest('.swipe-card, .cal-grid, .priority-list, .map-stage')) return;
+    if (e.target.closest && e.target.closest('.swipe-card, .cal-grid, .map-stage')) return;
     startY = e.touches[0].clientY;
   }, { passive: true });
   document.addEventListener('touchmove', (e) => {
@@ -4385,20 +4259,6 @@ function setupPullToRefresh() {
   });
 }
 
-function adminRankedList() {
-  const validIds = allDestinations().map(d => d.id).filter(id => !blockedIds.includes(id) && !hiddenIds.includes(id));
-  const ranked = adminRanking.filter(id => validIds.includes(id));
-  validIds.forEach(id => { if (!ranked.includes(id)) ranked.push(id); });
-  return ranked;
-}
-function goAdminRanking() {
-  if (adminRanking.length === 0) adminRanking = adminRankedList();
-  navigate(() => {
-    view = 'adminRanking';
-    window.scrollTo(0, 0);
-    render();
-  });
-}
 function addHighlight(id, text) {
   const d = getDest(id);
   if (text && text.trim()) {
@@ -4569,7 +4429,7 @@ function renderMap() {
   if (newMatches) swipeBtn.appendChild(txt('span', 'swipe-cta-badge is-match', newMatches + ' new match' + (newMatches > 1 ? 'es' : '') + '!'));
   else if (toSwipe) swipeBtn.appendChild(txt('span', 'swipe-cta-badge', toSwipe + ' to swipe'));
   swipeBtn.addEventListener('click', goSwipe);
-  view_.appendChild(swipeBtn);
+  if (!winner) view_.appendChild(swipeBtn);
 
   if (winner) {
     const winBtn = el('button', 'winner-cta');
@@ -4578,16 +4438,6 @@ function renderMap() {
     winBtn.addEventListener('click', () => showReveal(winner.id));
     view_.appendChild(winBtn);
     if (!revealSeen(winner.id)) setTimeout(() => { if (view === 'map' && !revealSeen(winner.id)) showReveal(winner.id); }, 600);
-  } else {
-    const priBtn = el('button', 'confirm-btn', '🗳️ Pick your destination ranking');
-    priBtn.style.marginBottom = '6px';
-    priBtn.addEventListener('click', goPriorities);
-    view_.appendChild(priBtn);
-
-    const priRemaining = cooldownRemaining();
-    view_.appendChild(el('div', 'priority-status', priRemaining > 0
-      ? '🔒 Next pick in ' + formatCountdown(priRemaining)
-      : 'Last daily pick will be erased.'));
   }
 
   const activityCard = buildActivityCard();
@@ -4601,7 +4451,7 @@ function renderMap() {
   });
   view_.appendChild(tabs);
 
-  const r = { ...REGIONS[region], destinations: REGIONS[region].destinations.filter(d => !blockedIds.includes(d.id) && !hiddenIds.includes(d.id) && (isAdmin || !elenyHiddenIds.includes(d.id))) };
+  const r = { ...REGIONS[region], destinations: REGIONS[region].destinations.filter(d => !isOut(d.id) && !hiddenIds.includes(d.id) && (isAdmin || !elenyHiddenIds.includes(d.id))) };
 
   const mapCard = el('div', 'map-card');
   const stage = el('div', 'map-stage' + ((addingCity && addingCity.step === 'pin') || movingPinId || placingHome ? ' placing' : ''));
@@ -4667,7 +4517,6 @@ function renderMap() {
     dotWrap.appendChild(el('div', 'pin-ring'));
     dotWrap.appendChild(el('div', 'pin-dot'));
     if (d.favorite) dotWrap.appendChild(el('div', 'pin-star', '⭐'));
-    if (adminRanking[0] === d.id) dotWrap.classList.add('pin-gold');
     if (intro) dotWrap.style.animationDelay = (0.25 + pinIdx * 0.07) + 's';
     pin.appendChild(dotWrap);
     pin.addEventListener('click', () => goDetail(d.id));
@@ -4722,9 +4571,8 @@ function renderMap() {
   const list = el('div', 'dest-list');
   r.destinations.forEach((d, idx) => {
     const plan = planOf(d);
-    const isTopPick = adminRanking[0] === d.id;
     const hiddenFromEleny = isAdmin && elenyHiddenIds.includes(d.id);
-    const row = el('div', 'dest-row' + (isTopPick ? ' is-top-pick' : '') + (hiddenFromEleny ? ' is-eleny-hidden' : '') + (isAdmin ? ' has-vis-toggle' : '') + (d.cover ? ' has-cover' : ''));
+    const row = el('div', 'dest-row' + (winnerId() === d.id ? ' is-top-pick' : '') + (hiddenFromEleny ? ' is-eleny-hidden' : '') + (isAdmin ? ' has-vis-toggle' : '') + (d.cover ? ' has-cover' : ''));
     row.style.animationDelay = (idx * 0.04) + 's';
     row.style.setProperty('--plan-color', plan.color);
     row.dataset.coverFor = d.id;
@@ -4817,7 +4665,7 @@ function buildSwipeCard(d, isTop) {
   card.appendChild(el('div', 'swipe-shine'));
   card.appendChild(weatherNode('div', 'swipe-weather', d.id, false));
   card.appendChild(txt('div', 'swipe-stamp stamp-like', 'LET\\'S GO'));
-  card.appendChild(txt('div', 'swipe-stamp stamp-nope', 'NAH'));
+  card.appendChild(txt('div', 'swipe-stamp stamp-nope', 'OUT'));
   const info = el('div', 'swipe-card-info');
   info.appendChild(txt('div', 'swipe-card-meta', plan.emoji + ' ' + plan.label + ' · ' + d.country));
   info.appendChild(txt('div', 'swipe-card-city', d.city));
@@ -4841,14 +4689,35 @@ function renderSwipe() {
   view_.appendChild(backBtn);
 
   view_.appendChild(el('h1', null, 'Would you <em>go</em>?'));
-  view_.appendChild(txt('p', 'sub', 'Right if you\\'d go, left if not. When you and ' + partnerName() + ' both say yes, it\\'s a match.'));
+  view_.appendChild(txt('p', 'sub', 'Right if you\\'d go. Left and it\\'s out — for both of you. The last one standing is where you\\'re going ✈️'));
 
   const all = swipeableDestinations();
   const deck = all.filter(d => !swipes[profile][d.id]);
   const matches = all.filter(d => isMatch(d.id));
+  const out = outDestinations();
+  const winner = winnerId() ? getDest(winnerId()) : null;
 
-  if (deck.length) {
-    view_.appendChild(txt('div', 'swipe-progress', (all.length - deck.length + 1) + ' of ' + all.length));
+  if (roundNotice) {
+    view_.appendChild(txt('div', 'round-banner', '🔥 Round done! You both said yes to ' + roundNotice + ' — swipe again to narrow it down.'));
+    roundNotice = null;
+  }
+
+  if (winner) {
+    const done = el('div', 'swipe-done is-winner');
+    done.appendChild(txt('div', 'swipe-done-emoji', '🏆'));
+    done.appendChild(txt('div', 'swipe-done-title', winner.city));
+    done.appendChild(txt('div', 'swipe-done-sub', 'Last one standing — this is the one.'));
+    const planBtn = el('button', 'confirm-btn', '🗓️ Plan the trip →');
+    planBtn.addEventListener('click', () => { pendingScrollTo = 'itinerary'; goDetail(winner.id); });
+    done.appendChild(planBtn);
+    const replay = el('button', 'match-keep', '🎉 Watch the reveal');
+    replay.addEventListener('click', () => showReveal(winner.id));
+    done.appendChild(replay);
+    view_.appendChild(done);
+  } else if (deck.length) {
+    view_.appendChild(txt('div', 'swipe-progress', all.length <= 3
+      ? '🔥 FINAL ' + all.length + ' · card ' + (all.length - deck.length + 1) + ' of ' + all.length
+      : all.length + ' LEFT · card ' + (all.length - deck.length + 1) + ' of ' + all.length));
     const deckWrap = el('div', 'swipe-deck');
     if (deck[1]) deckWrap.appendChild(buildSwipeCard(deck[1], false));
     const top = buildSwipeCard(deck[0], true);
@@ -4858,7 +4727,7 @@ function renderSwipe() {
 
     const actions = el('div', 'swipe-actions');
     const nopeBtn = el('button', 'swipe-btn swipe-btn-nope', '✕');
-    nopeBtn.setAttribute('aria-label', 'Nah');
+    nopeBtn.setAttribute('aria-label', 'Swipe out');
     nopeBtn.addEventListener('click', () => flyOut(top, 'nope', deck[0].id));
     const infoBtn = el('button', 'swipe-btn swipe-btn-info', 'i');
     infoBtn.setAttribute('aria-label', 'See details');
@@ -4872,19 +4741,14 @@ function renderSwipe() {
     view_.appendChild(actions);
   } else {
     const done = el('div', 'swipe-done');
-    done.appendChild(txt('div', 'swipe-done-emoji', '🎉'));
-    done.appendChild(txt('div', 'swipe-done-title', 'You swiped them all!'));
-    done.appendChild(txt('div', 'swipe-done-sub', matches.length
-      ? 'Check your matches below.'
-      : 'No matches yet — once ' + partnerName() + ' swipes, they\\'ll show up here.'));
-    const again = el('button', 'match-keep', '↺ Swipe again');
-    again.addEventListener('click', resetMySwipes);
-    done.appendChild(again);
+    done.appendChild(txt('div', 'swipe-done-emoji', '⏳'));
+    done.appendChild(txt('div', 'swipe-done-title', 'Round done on your side!'));
+    done.appendChild(txt('div', 'swipe-done-sub', 'Waiting on ' + partnerName() + ' to finish — then the next round starts with whatever you both said yes to.'));
     view_.appendChild(done);
   }
 
   const matchBox = el('div', 'swipe-matches');
-  matchBox.appendChild(txt('div', 'swipe-matches-label', '💘 YOUR MATCHES' + (matches.length ? ' (' + matches.length + ')' : '')));
+  matchBox.appendChild(txt('div', 'swipe-matches-label', '💘 BOTH SAID YES' + (matches.length ? ' (' + matches.length + ')' : '')));
   if (matches.length) {
     const row = el('div', 'swipe-matches-row');
     matches.forEach(d => {
@@ -4903,7 +4767,22 @@ function renderSwipe() {
   } else {
     matchBox.appendChild(txt('div', 'swipe-matches-empty', 'Nothing yet — keep swiping 👀'));
   }
-  view_.appendChild(matchBox);
+  if (!winner) view_.appendChild(matchBox);
+
+  if (out.length) {
+    const outBox = el('div', 'swipe-out');
+    outBox.appendChild(txt('div', 'swipe-matches-label', '💔 OUT (' + out.length + ')'));
+    const row = el('div', 'swipe-out-row');
+    out.forEach(d => {
+      const chip = txt('button', 'out-chip', d.city + ' ↺');
+      chip.setAttribute('aria-label', 'Bring back ' + d.city);
+      chip.addEventListener('click', () => restoreDestination(d.id));
+      row.appendChild(chip);
+    });
+    outBox.appendChild(row);
+    outBox.appendChild(txt('div', 'swipe-out-hint', 'Swiped one out by mistake? Tap it to bring it back.'));
+    view_.appendChild(outBox);
+  }
 
   prefetchCovers(deck.slice(0, 3).map(d => d.id).concat(matches.map(d => d.id)));
   return view_;
@@ -5080,9 +4959,6 @@ function buildDetailCard(d, plan) {
   const headLeft = el('div', 'detail-head-left');
   headLeft.appendChild(el('div', 'detail-city', d.city));
   if (winnerId() === d.id) headLeft.appendChild(txt('div', 'admin-pick-banner is-top-pick', '🏆 Our destination'));
-  const rankPos = adminRanking.indexOf(d.id);
-  if (rankPos === 0) headLeft.appendChild(el('div', 'admin-pick-banner is-top-pick', 'Luis\\'s top pick'));
-  else if (rankPos > 0) headLeft.appendChild(el('div', 'admin-pick-banner', '👑 #' + (rankPos + 1) + ' on Luis\\'s list'));
   headLeft.appendChild(el('div', 'detail-country', d.country));
   headLeft.appendChild(weatherNode('div', 'detail-weather', d.id, true));
   headLeft.appendChild(el('div', 'detail-plan-chip', plan.emoji + ' ' + plan.label));
@@ -5295,153 +5171,8 @@ function buildDetailCard(d, plan) {
   return card;
 }
 
-let sortableInstance = null;
-function initSortable(listEl, onReorder) {
-  if (sortableInstance) {
-    sortableInstance.destroy();
-    sortableInstance = null;
-  }
-  sortableInstance = new Sortable(listEl, {
-    animation: 150,
-    forceFallback: true, // consistent touch handling instead of flaky native HTML5 DnD on iOS
-    fallbackClass: 'dragging',
-    ghostClass: 'priority-row-ghost',
-    onEnd: function () {
-      const newOrder = Array.from(listEl.children).map(c => c.dataset.id);
-      onReorder(newOrder);
-      render();
-    },
-  });
-}
 
-function renderPriorities() {
-  const view_ = el('div', 'view');
-  view_.appendChild(appTitle());
 
-  const backBtn = el('button', 'back-btn', '← Back to map');
-  backBtn.addEventListener('click', goMap);
-  view_.appendChild(backBtn);
-
-  view_.appendChild(el('div', 'eyebrow', '🗳️ DAILY PRIORITY PICK'));
-  view_.appendChild(el('h1', null, 'Rank today\\'s <em>favorites</em>'));
-
-  if (isAdmin) {
-    const rankBanner = el('button', 'admin-pick-map-banner', '👑 My ranking (only you and Eleny can see this)');
-    rankBanner.addEventListener('click', goAdminRanking);
-    view_.appendChild(rankBanner);
-  } else if (adminRanking.length > 0) {
-    const topPick = getDest(adminRanking[0]);
-    const rankBanner = el('button', 'admin-pick-map-banner', '👑 Luis\\'s choice: ' + (topPick ? topPick.city : '—'));
-    rankBanner.addEventListener('click', goAdminRanking);
-    view_.appendChild(rankBanner);
-  }
-
-  if (justEliminatedId) {
-    const gone = getDest(justEliminatedId);
-    if (gone) view_.appendChild(el('div', 'elim-banner', '💔 ' + gone.city + ' just got cut — ' + activePriorityOrder().length + ' left.'));
-  }
-
-  const active = activePriorityOrder();
-  if (active.length <= 1) {
-    const winner = active[0] ? getDest(active[0]) : null;
-    const card = el('div', 'winner-card');
-    card.appendChild(el('div', 'winner-trophy', '🏆'));
-    card.appendChild(el('div', 'winner-city', winner ? winner.city : '—'));
-    card.appendChild(el('div', 'winner-sub', 'That\\'s it — this is the one.'));
-    view_.appendChild(card);
-    if (winner) {
-      const planBtn = el('button', 'confirm-btn winner-action', '🗓️ Plan the trip →');
-      planBtn.addEventListener('click', () => { pendingScrollTo = 'itinerary'; goDetail(winner.id); });
-      view_.appendChild(planBtn);
-      const replayBtn = el('button', 'match-keep winner-action', '🎉 Watch the reveal again');
-      replayBtn.addEventListener('click', () => showReveal(winner.id));
-      view_.appendChild(replayBtn);
-    }
-    return view_;
-  }
-
-  const remaining = cooldownRemaining();
-  view_.appendChild(el('p', 'sub', remaining > 0
-    ? 'Ranking locked for today — next pick in ' + formatCountdown(remaining) + '.'
-    : 'Drag to rank them — whichever ends up last gets cut for good.'));
-
-  if (remaining > 0 && blockedIds.length > 0) {
-    const changeBtn = el('button', 'change-pick-btn', '✏️ Change my pick (restarts the 24h clock)');
-    changeBtn.addEventListener('click', changeTodaysPick);
-    view_.appendChild(changeBtn);
-  }
-
-  const list = el('div', 'priority-list');
-  active.forEach((id, idx) => {
-    const d = getDest(id);
-    if (!d) return;
-    const plan = planOf(d);
-    const row = el('div', 'priority-row' + (remaining > 0 ? ' locked' : ''));
-    row.dataset.id = id;
-    row.style.setProperty('--plan-color', plan.color);
-    row.appendChild(el('div', 'priority-rank', String(idx + 1)));
-    const mid = el('div', 'priority-mid');
-    mid.appendChild(el('div', 'priority-name', d.city));
-    row.appendChild(mid);
-    row.appendChild(el('div', 'priority-grip', remaining > 0 ? '🔒' : '⠿'));
-    list.appendChild(row);
-  });
-  view_.appendChild(list);
-  if (remaining === 0) initSortable(list, (newOrder) => {
-    priorityOrder = newOrder.concat(priorityOrder.filter(id => !newOrder.includes(id)));
-  });
-
-  if (remaining === 0) {
-    const confirmBtn = el('button', 'confirm-btn', 'Lock in today\\'s ranking →');
-    confirmBtn.addEventListener('click', submitPriorities);
-    view_.appendChild(confirmBtn);
-    view_.appendChild(el('div', 'priority-hint', 'Whatever lands last is out — no take-backs.'));
-  }
-
-  return view_;
-}
-
-function renderAdminRanking() {
-  const view_ = el('div', 'view');
-  view_.appendChild(appTitle());
-
-  const backBtn = el('button', 'back-btn', '← Back to map');
-  backBtn.addEventListener('click', goMap);
-  view_.appendChild(backBtn);
-
-  view_.appendChild(el('div', 'eyebrow', '👑 LUIS\\'S RANKING'));
-  view_.appendChild(el('h1', null, isAdmin ? 'Rank them <em>your way</em>' : 'Luis\\'s <em>ranking</em>'));
-  view_.appendChild(el('p', 'sub', isAdmin
-    ? 'Drag to rank all destinations — Eleny can see this as your reference, but she still decides.'
-    : 'This is just a reference — you\\'re still the one who decides.'));
-
-  const ids = adminRankedList();
-  const list = el('div', 'priority-list');
-  ids.forEach((id, idx) => {
-    const d = getDest(id);
-    if (!d) return;
-    const plan = planOf(d);
-    const row = el('div', 'priority-row' + (isAdmin ? '' : ' locked'));
-    row.dataset.id = id;
-    row.style.setProperty('--plan-color', plan.color);
-    row.appendChild(el('div', 'priority-rank', String(idx + 1)));
-    const mid = el('div', 'priority-mid');
-    mid.appendChild(el('div', 'priority-name', d.city));
-    row.appendChild(mid);
-    row.appendChild(el('div', 'priority-grip', isAdmin ? '⠿' : '👑'));
-    list.appendChild(row);
-  });
-  view_.appendChild(list);
-
-  if (isAdmin) {
-    initSortable(list, (newOrder) => {
-      adminRanking = newOrder;
-      saveState(['adminRanking']);
-    });
-  }
-
-  return view_;
-}
 
 function render() {
   const root = document.getElementById('root');
@@ -5468,9 +5199,7 @@ function render() {
   let content;
   if (view === 'intro') content = renderIntro();
   else if (view === 'detail') content = renderDetail();
-  else if (view === 'priorities') content = renderPriorities();
   else if (view === 'profile') content = renderProfile();
-  else if (view === 'adminRanking') content = renderAdminRanking();
   else if (view === 'swipe') content = renderSwipe();
   else content = renderMap();
   wrap.appendChild(content);
@@ -5495,12 +5224,12 @@ Promise.all([
   loadHighlightsData(),
   loadLodgingData(),
   loadCostsData(),
-  loadSwipes(false),
+  loadSwipes(),
   loadReactions(),
   loadItineraries(),
   loadActivity(),
 ])
-  .then(() => { ensurePriorityOrderComplete(); backfillIconicHighlights(); render(); loadWeather(); });
+  .then(() => { backfillIconicHighlights(); render(); loadWeather(); });
 registerServiceWorker();
 setupPullToRefresh();
 
@@ -5512,7 +5241,6 @@ export default function Page() {
   useEffect(() => {
     if (ranRef.current) return; // avoid double-run under React 18 strict mode in dev
     ranRef.current = true;
-    (window as any).Sortable = Sortable;
     const script = document.createElement('script');
     script.textContent = APP_SCRIPT;
     document.body.appendChild(script);
