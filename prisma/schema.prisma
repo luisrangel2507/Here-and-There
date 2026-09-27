@@ -16,6 +16,7 @@ model AppState {
   hiddenIds      Json     @default("[]") @map("hidden_ids")
   profileInfo    Json     @default("{}") @map("profile_info")
   adminRanking   Json     @default("[]") @map("admin_ranking")
+  elenyHiddenIds Json     @default("[]") @map("eleny_hidden_ids")
   lastSubmitAt   DateTime? @map("last_submit_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
@@ -75,4 +76,16 @@ model DestinationCosts {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("destination_costs")
+}
+
+// One row per (traveler, destination) swipe: "like" or "nope". Kept as
+// separate rows so each phone only ever writes its own traveler's swipes.
+model Swipe {
+  profile   String
+  destId    String   @map("dest_id")
+  choice    String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@id([profile, destId])
+  @@map("swipes")
 }

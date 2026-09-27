@@ -10,13 +10,14 @@ export async function GET() {
     hiddenIds: row.hiddenIds,
     profileInfo: row.profileInfo,
     adminRanking: row.adminRanking,
+    elenyHiddenIds: row.elenyHiddenIds,
     lastSubmitAt: row.lastSubmitAt ? row.lastSubmitAt.getTime() : null,
   });
 }
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { priorityOrder, blockedIds, hiddenIds, profileInfo, adminRanking, lastSubmitAt } = body ?? {};
+  const { priorityOrder, blockedIds, hiddenIds, profileInfo, adminRanking, elenyHiddenIds, lastSubmitAt } = body ?? {};
 
   const row = await prisma.appState.upsert({
     where: { id: 1 },
@@ -27,6 +28,7 @@ export async function POST(req: NextRequest) {
       hiddenIds: hiddenIds ?? [],
       profileInfo: profileInfo ?? {},
       adminRanking: adminRanking ?? [],
+      elenyHiddenIds: elenyHiddenIds ?? [],
       lastSubmitAt: lastSubmitAt ? new Date(lastSubmitAt) : null,
     },
     update: {
@@ -35,6 +37,7 @@ export async function POST(req: NextRequest) {
       hiddenIds: hiddenIds ?? [],
       profileInfo: profileInfo ?? {},
       adminRanking: adminRanking ?? [],
+      elenyHiddenIds: elenyHiddenIds ?? [],
       lastSubmitAt: lastSubmitAt ? new Date(lastSubmitAt) : null,
     },
   });

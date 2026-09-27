@@ -1258,6 +1258,373 @@ const APP_STYLE = `
   }
   .move-pin-btn:hover{ background:rgba(14,165,160,0.08); }
 
+  /* cover photos */
+  .dest-row.has-cover{
+    min-height:78px;
+    align-items:flex-end;
+    background-size:cover;
+    background-position:center;
+    border-color:rgba(255,255,255,0.45);
+  }
+  .dest-row.has-cover .dest-row-name{font-size:13.5px;text-shadow:0 1px 8px rgba(0,0,0,0.6);}
+  .dest-row.has-cover .dest-row-note{text-shadow:0 1px 6px rgba(0,0,0,0.6);}
+  .detail-cover{
+    position:relative;
+    height:210px;
+    background-size:cover;
+    background-position:center;
+    cursor:zoom-in;
+    animation:fadeIn .4s ease both;
+  }
+  .detail-cover::after{
+    content:'';
+    position:absolute;
+    inset:auto 0 0 0;
+    height:60px;
+    background:linear-gradient(180deg, transparent, var(--card));
+    pointer-events:none;
+  }
+  .detail-cover-change{
+    position:absolute;
+    top:12px; right:12px;
+    z-index:1;
+    border:none;
+    border-radius:999px;
+    padding:6px 12px;
+    background:rgba(20,10,30,0.5);
+    backdrop-filter:blur(6px);
+    color:#fff;
+    font-family:'Poppins', sans-serif;
+    font-size:11.5px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .detail-cover-add{
+    display:block;
+    width:calc(100% - 48px);
+    margin:20px 24px 0;
+    padding:22px 12px;
+    border:1.5px dashed rgba(43,27,51,0.22);
+    border-radius:16px;
+    background:rgba(43,27,51,0.03);
+    color:var(--ink-soft);
+    font-family:'Poppins', sans-serif;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+  }
+
+  /* swipe entry on the map */
+  .swipe-cta{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    width:100%;
+    border:none;
+    border-radius:999px;
+    padding:15px;
+    margin-bottom:10px;
+    background:linear-gradient(90deg, var(--sky-pink), var(--sky-purple));
+    color:#fff;
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    font-size:14.5px;
+    cursor:pointer;
+    box-shadow:0 12px 28px rgba(255,111,145,0.45);
+    animation:fadeSlideUp .5s var(--ease-out) both;
+  }
+  .swipe-cta-badge{
+    font-size:11px;
+    font-weight:700;
+    padding:3px 9px;
+    border-radius:999px;
+    background:rgba(255,255,255,0.25);
+  }
+  .swipe-cta-badge.is-match{
+    background:#fff;
+    color:var(--sky-pink);
+    animation:badgePulse 1.6s ease-in-out infinite;
+  }
+  @keyframes badgePulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.08);} }
+
+  /* swipe view */
+  .swipe-view.no-anim, .swipe-view.no-anim .eyebrow, .swipe-view.no-anim h1, .swipe-view.no-anim .sub{animation:none;}
+  .swipe-view h1{margin-bottom:6px;}
+  .swipe-view .sub{margin-bottom:10px;font-size:12.5px;}
+  .swipe-progress{
+    text-align:center;
+    font-size:11.5px;
+    font-weight:600;
+    letter-spacing:0.08em;
+    color:rgba(255,255,255,0.8);
+    margin-bottom:10px;
+  }
+  .swipe-deck{
+    position:relative;
+    width:100%;
+    max-width:380px;
+    height:min(48vh, 470px);
+    min-height:300px;
+    margin:0 auto;
+  }
+  .swipe-card{
+    position:absolute;
+    inset:0;
+    border-radius:26px;
+    overflow:hidden;
+    background:linear-gradient(160deg, var(--plan-color), var(--plan-dim) 60%, #2B1B33);
+    background-size:cover;
+    background-position:center;
+    box-shadow:0 26px 50px rgba(20,10,30,0.45);
+    user-select:none;
+    -webkit-user-select:none;
+    touch-action:pan-y;
+    will-change:transform;
+  }
+  .swipe-card.is-top{cursor:grab;animation:cardRise .35s var(--ease-out) both;}
+  .swipe-card.is-top:active{cursor:grabbing;}
+  .swipe-card.is-next{transform:scale(0.94) translateY(14px);filter:brightness(0.8);}
+  @keyframes cardRise{ from{transform:scale(0.94) translateY(14px);} to{transform:none;} }
+  .swipe-card::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg, rgba(20,10,30,0) 35%, rgba(20,10,30,0.88) 100%);
+    pointer-events:none;
+  }
+  .swipe-card-emoji{
+    position:absolute;
+    top:22%;
+    left:0; right:0;
+    text-align:center;
+    font-size:110px;
+    opacity:0.5;
+    filter:drop-shadow(0 10px 30px rgba(0,0,0,0.3));
+  }
+  .swipe-card-info{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    z-index:1;
+    padding:22px 22px 24px;
+    color:#fff;
+  }
+  .swipe-card-meta{font-size:12px;font-weight:600;opacity:0.9;margin-bottom:2px;}
+  .swipe-card-city{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:700;
+    font-size:36px;
+    line-height:1.05;
+    text-shadow:0 2px 18px rgba(0,0,0,0.4);
+  }
+  .swipe-card-vibe{
+    font-size:12.5px;
+    line-height:1.5;
+    margin-top:8px;
+    opacity:0.92;
+    display:-webkit-box;
+    -webkit-line-clamp:3;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .swipe-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+  .swipe-chip{
+    font-size:11px;
+    font-weight:600;
+    padding:4px 10px;
+    border-radius:999px;
+    background:rgba(255,255,255,0.2);
+    backdrop-filter:blur(6px);
+  }
+  .swipe-stamp{
+    position:absolute;
+    top:28px;
+    z-index:2;
+    padding:6px 14px;
+    border:3px solid currentColor;
+    border-radius:12px;
+    font-family:'Poppins', sans-serif;
+    font-weight:800;
+    font-size:26px;
+    letter-spacing:0.06em;
+    opacity:0;
+    pointer-events:none;
+    text-shadow:0 2px 12px rgba(0,0,0,0.25);
+  }
+  .stamp-like{left:22px;color:#5CE1A0;transform:rotate(-14deg);}
+  .stamp-nope{right:22px;color:#FF6B7A;transform:rotate(14deg);}
+  .swipe-actions{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:22px;
+    margin:16px 0 30px;
+  }
+  .swipe-btn{
+    border:none;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    background:#fff;
+    box-shadow:0 12px 26px rgba(20,10,30,0.3);
+  }
+  .swipe-btn-nope, .swipe-btn-like{width:64px;height:64px;font-size:28px;}
+  .swipe-btn-nope{color:#FF5A6E;}
+  .swipe-btn-like{color:#fff;background:linear-gradient(135deg, var(--sky-pink), var(--coral));}
+  .swipe-btn-info{
+    width:44px;height:44px;
+    font-size:18px;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    color:var(--sky-purple);
+  }
+  .swipe-done{
+    text-align:center;
+    padding:34px 20px;
+    border-radius:24px;
+    background:rgba(255,255,255,0.14);
+    backdrop-filter:blur(10px);
+    border:1.5px solid rgba(255,255,255,0.3);
+    margin-bottom:26px;
+  }
+  .swipe-done-emoji{font-size:52px;animation:popIn .5s var(--ease-spring) both;}
+  .swipe-done-title{font-family:'Fraunces', serif;font-style:italic;font-weight:700;font-size:26px;margin-top:6px;}
+  .swipe-done-sub{font-size:13px;opacity:0.9;margin:6px 0 16px;}
+  .swipe-matches{margin-bottom:40px;}
+  .swipe-matches-label{font-size:11px;font-weight:700;letter-spacing:0.16em;margin-bottom:10px;}
+  .swipe-matches-empty{font-size:13px;opacity:0.8;}
+  .swipe-matches-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;}
+  .match-chip{
+    position:relative;
+    flex:0 0 auto;
+    width:118px;
+    height:150px;
+    border:2px solid rgba(255,255,255,0.7);
+    border-radius:18px;
+    overflow:hidden;
+    background:linear-gradient(160deg, var(--plan-color), var(--plan-dim));
+    background-size:cover;
+    background-position:center;
+    cursor:pointer;
+    box-shadow:0 10px 22px rgba(20,10,30,0.3);
+    display:flex;
+    align-items:flex-end;
+    padding:0;
+  }
+  .match-chip::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg, transparent 40%, rgba(20,10,30,0.8));
+  }
+  .match-chip-city{
+    position:relative;
+    z-index:1;
+    padding:10px;
+    color:#fff;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:700;
+    font-size:15px;
+    text-align:left;
+    line-height:1.1;
+  }
+
+  /* it's a match */
+  .match-backdrop{
+    position:fixed;
+    inset:0;
+    z-index:300;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px 16px;
+    overflow:hidden;
+    font-family:'Poppins', sans-serif;
+    background:radial-gradient(circle at 50% 30%, rgba(255,111,145,0.55), rgba(75,56,105,0.95) 70%);
+    backdrop-filter:blur(8px);
+    animation:fadeIn .25s ease both;
+  }
+  .confetti-bit{
+    position:absolute;
+    top:-40px;
+    pointer-events:none;
+    animation-name:confettiFall;
+    animation-timing-function:linear;
+    animation-fill-mode:both;
+  }
+  @keyframes confettiFall{
+    0%{transform:translateY(0) rotate(0deg);opacity:1;}
+    100%{transform:translateY(110vh) rotate(540deg);opacity:0.6;}
+  }
+  .match-box{
+    position:relative;
+    width:100%;
+    max-width:340px;
+    text-align:center;
+    color:#fff;
+    animation:popIn .5s var(--ease-spring) both;
+  }
+  .match-kicker{font-size:12px;font-weight:700;letter-spacing:0.3em;opacity:0.9;}
+  .match-title{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:700;
+    font-size:54px;
+    line-height:1;
+    margin:4px 0 20px;
+    text-shadow:0 6px 30px rgba(255,111,145,0.8);
+  }
+  .match-photo{
+    position:relative;
+    height:230px;
+    border-radius:24px;
+    overflow:hidden;
+    border:3px solid #fff;
+    background:linear-gradient(160deg, var(--plan-color), var(--plan-dim));
+    background-size:cover;
+    background-position:center;
+    box-shadow:0 24px 50px rgba(20,10,30,0.5);
+    margin-bottom:16px;
+    transform:rotate(-2deg);
+  }
+  .match-photo::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg, transparent 50%, rgba(20,10,30,0.75));
+  }
+  .match-photo-emoji{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:90px;opacity:0.6;}
+  .match-photo-city{
+    position:absolute;
+    left:16px; bottom:12px;
+    z-index:1;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:700;
+    font-size:28px;
+  }
+  .match-sub{font-size:14px;line-height:1.5;margin-bottom:20px;opacity:0.95;}
+  .match-keep{
+    display:block;
+    width:100%;
+    margin-top:10px;
+    padding:13px;
+    border:1.5px solid rgba(255,255,255,0.6);
+    border-radius:999px;
+    background:rgba(255,255,255,0.12);
+    color:#fff;
+    font-family:'Poppins', sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    cursor:pointer;
+  }
+
   @media (max-width:480px){
     .detail-city{font-size:23px;}
     .detail-code{font-size:20px;}
@@ -1698,6 +2065,9 @@ function photoKeyForHighlight(id, name) {
 function photoKeyForLodging(id, name) {
   return 'dest:' + id + ':lodging:' + name;
 }
+function photoKeyForCover(id) {
+  return 'dest:' + id + ':cover';
+}
 
 async function savePhoto(key, dataUrl) {
   try {
@@ -1723,6 +2093,7 @@ function loadPhotosFor(destId) {
       if (!res.ok) return;
       const map = await res.json();
       loadedPhotoDestIds.add(destId);
+      if (map[photoKeyForCover(d.id)]) d.cover = map[photoKeyForCover(d.id)];
       d.highlights.forEach(h => {
         const hKey = photoKeyForHighlight(d.id, h.name);
         if (map[hKey]) h.photo = map[hKey];
@@ -1737,8 +2108,27 @@ function loadPhotosFor(destId) {
   photoFetchPromises.set(destId, p);
   return p;
 }
-function prefetchPhotosFor(ids) {
-  ids.forEach(id => { loadPhotosFor(id); });
+const COVER_SHADE = 'linear-gradient(180deg, rgba(20,10,30,0.15), rgba(20,10,30,0.72)), ';
+function coverBackground(d, shaded) {
+  return (shaded ? COVER_SHADE : '') + 'url("' + d.cover + '")';
+}
+// Paints a cover onto already-rendered elements tagged with data-cover-for,
+// so photos arriving after render don't force a full re-render.
+function paintCover(id) {
+  const d = getDest(id);
+  if (!d || !d.cover) return;
+  document.querySelectorAll('[data-cover-for="' + id + '"]').forEach(node => {
+    node.style.backgroundImage = coverBackground(d, !!node.dataset.coverShade);
+    node.classList.add('has-cover');
+    node.classList.remove('no-cover');
+    const emoji = node.querySelector('.swipe-card-emoji');
+    if (emoji) emoji.remove();
+  });
+}
+function prefetchCovers(ids) {
+  ids.filter(id => !loadedPhotoDestIds.has(id)).forEach(id => {
+    loadPhotosFor(id).then(() => paintCover(id));
+  });
 }
 
 function fileToCompressedDataUrl(file) {
@@ -1959,6 +2349,8 @@ function saveProfileInfo(field, value) {
 
 function goDetail(id) {
   const d = getDest(id);
+  detailReturnView = view === 'swipe' ? 'swipe' : 'map';
+  window.scrollTo(0, 0);
   region = d.country === 'Mexico' ? 'mexico' : 'usa';
   detailId = id;
   view = 'detail';
@@ -2013,6 +2405,187 @@ function toggleElenyVisibility(id) {
   render();
   savePriorities();
 }
+// ---- swipe to decide ----
+let swipes = { luis: {}, eleny: {} }; // profile -> { destId: 'like' | 'nope' }
+let swipeDragging = false;
+let swipeRerender = false;
+let detailReturnView = 'map';
+
+function partnerName() { return profile === 'luis' ? 'Eleny' : 'Luis'; }
+function haptic(pattern) {
+  try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) { /* unsupported */ }
+}
+function txt(tag, className, text) {
+  const node = el(tag, className);
+  node.textContent = text;
+  return node;
+}
+
+async function loadSwipes(onlyPartner) {
+  try {
+    const res = await fetch('/api/swipes');
+    if (!res.ok) return;
+    const map = await res.json();
+    if (onlyPartner && profile) {
+      const partner = profile === 'luis' ? 'eleny' : 'luis';
+      swipes[partner] = map[partner] || {};
+    } else {
+      swipes = { luis: map.luis || {}, eleny: map.eleny || {} };
+    }
+  } catch (e) { /* keep what we have */ }
+}
+async function saveSwipe(destId, choice) {
+  try {
+    const res = await fetch('/api/swipes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile, destId, choice }),
+    });
+    return res.ok;
+  } catch (e) { return false; }
+}
+
+// A match needs both travelers, so anything hidden from Eleny stays out of the deck.
+function swipeableDestinations() {
+  return allDestinations().filter(d => !blockedIds.includes(d.id) && !hiddenIds.includes(d.id) && !elenyHiddenIds.includes(d.id));
+}
+function isMatch(id) {
+  return swipes.luis[id] === 'like' && swipes.eleny[id] === 'like';
+}
+function currentMatchIds() {
+  return swipeableDestinations().filter(d => isMatch(d.id)).map(d => d.id);
+}
+function seenMatchKey() { return 'seen-matches-' + profile; }
+function getSeenMatches() {
+  try { return JSON.parse(localStorage.getItem(seenMatchKey()) || '[]'); } catch (e) { return []; }
+}
+function markMatchesSeen() {
+  try { localStorage.setItem(seenMatchKey(), JSON.stringify(currentMatchIds())); } catch (e) { /* private mode */ }
+}
+function unseenMatchIds() {
+  const seen = getSeenMatches();
+  return currentMatchIds().filter(id => !seen.includes(id));
+}
+
+function goSwipe() {
+  view = 'swipe';
+  swipeRerender = false;
+  window.scrollTo(0, 0);
+  render();
+  loadSwipes(true).then(() => {
+    if (view !== 'swipe') return;
+    const unseen = unseenMatchIds();
+    if (!swipeDragging) render();
+    if (unseen.length) { showMatch(unseen[0]); markMatchesSeen(); }
+  });
+}
+
+async function commitSwipe(id, choice) {
+  swipes[profile][id] = choice;
+  haptic(choice === 'like' ? 18 : 8);
+  render();
+  const ok = await saveSwipe(id, choice);
+  if (choice !== 'like') return;
+  if (ok) await loadSwipes(true);
+  if (isMatch(id)) { showMatch(id); markMatchesSeen(); }
+}
+
+function flyOut(card, choice, id) {
+  if (card.dataset.gone) return;
+  card.dataset.gone = '1';
+  const dir = choice === 'like' ? 1 : -1;
+  const stamp = card.querySelector(choice === 'like' ? '.stamp-like' : '.stamp-nope');
+  if (stamp) stamp.style.opacity = '1';
+  card.style.transition = 'transform .34s ease-in, opacity .34s ease-in';
+  card.style.transform = 'translate(' + (dir * window.innerWidth * 1.2) + 'px, 40px) rotate(' + (dir * 22) + 'deg)';
+  card.style.opacity = '0';
+  setTimeout(() => commitSwipe(id, choice), 260);
+}
+
+function attachSwipeDrag(card, id) {
+  const likeStamp = card.querySelector('.stamp-like');
+  const nopeStamp = card.querySelector('.stamp-nope');
+  let startX = 0, startY = 0, dx = 0, dy = 0, active = false, pointerId = null;
+  card.addEventListener('pointerdown', (e) => {
+    if (card.dataset.gone || (e.button && e.button !== 0)) return;
+    active = true;
+    swipeDragging = true;
+    pointerId = e.pointerId;
+    startX = e.clientX; startY = e.clientY; dx = 0; dy = 0;
+    try { card.setPointerCapture(pointerId); } catch (err) { /* ignore */ }
+    card.style.transition = 'none';
+  });
+  card.addEventListener('pointermove', (e) => {
+    if (!active || e.pointerId !== pointerId) return;
+    dx = e.clientX - startX;
+    dy = e.clientY - startY;
+    card.style.transform = 'translate(' + dx + 'px,' + (dy * 0.2) + 'px) rotate(' + (dx / 18) + 'deg)';
+    const p = Math.min(Math.abs(dx) / 100, 1);
+    likeStamp.style.opacity = dx > 0 ? p : 0;
+    nopeStamp.style.opacity = dx < 0 ? p : 0;
+  });
+  function end(cancelled) {
+    if (!active) return;
+    active = false;
+    swipeDragging = false;
+    if (!cancelled && Math.abs(dx) < 6 && Math.abs(dy) < 6) { goDetail(id); return; }
+    if (!cancelled && Math.abs(dx) > 100) { flyOut(card, dx > 0 ? 'like' : 'nope', id); return; }
+    card.style.transition = 'transform .4s var(--ease-spring)';
+    card.style.transform = '';
+    likeStamp.style.opacity = 0;
+    nopeStamp.style.opacity = 0;
+  }
+  card.addEventListener('pointerup', () => end(false));
+  card.addEventListener('pointercancel', () => end(true));
+}
+
+function resetMySwipes() {
+  if (!window.confirm('Start over and swipe every destination again?')) return;
+  swipes[profile] = {};
+  fetch('/api/swipes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ profile, reset: true }),
+  }).catch(() => {});
+  render();
+}
+
+function showMatch(id) {
+  const d = getDest(id);
+  if (!d) return;
+  const plan = planOf(d);
+  haptic([30, 60, 30, 60, 80]);
+  const backdrop = el('div', 'match-backdrop');
+  const bits = ['💘', '✨', '🎉', '🌴', '☀️', '💛', '🥂'];
+  for (let i = 0; i < 40; i++) {
+    const bit = txt('span', 'confetti-bit', bits[i % bits.length]);
+    bit.style.left = (Math.random() * 100) + '%';
+    bit.style.animationDelay = (Math.random() * 0.9) + 's';
+    bit.style.animationDuration = (2.2 + Math.random() * 1.8) + 's';
+    bit.style.fontSize = (14 + Math.random() * 14) + 'px';
+    backdrop.appendChild(bit);
+  }
+  const box = el('div', 'match-box');
+  box.appendChild(txt('div', 'match-kicker', 'IT\\'S A'));
+  box.appendChild(txt('div', 'match-title', 'Match 💘'));
+  const photo = el('div', 'match-photo');
+  photo.style.setProperty('--plan-color', plan.color);
+  photo.style.setProperty('--plan-dim', plan.dim);
+  if (d.cover) photo.style.backgroundImage = 'url("' + d.cover + '")';
+  else photo.appendChild(txt('div', 'match-photo-emoji', plan.emoji));
+  photo.appendChild(txt('div', 'match-photo-city', d.city));
+  box.appendChild(photo);
+  box.appendChild(txt('div', 'match-sub', 'You and ' + partnerName() + ' both want to go to ' + d.city + '.'));
+  const seeBtn = el('button', 'confirm-btn', 'See the trip →');
+  seeBtn.addEventListener('click', () => { backdrop.remove(); goDetail(id); });
+  box.appendChild(seeBtn);
+  const keepBtn = el('button', 'match-keep', 'Keep swiping');
+  keepBtn.addEventListener('click', () => backdrop.remove());
+  box.appendChild(keepBtn);
+  backdrop.appendChild(box);
+  document.body.appendChild(backdrop);
+}
+
 function adminRankedList() {
   const validIds = allDestinations().map(d => d.id).filter(id => !blockedIds.includes(id) && !hiddenIds.includes(id));
   const ranked = adminRanking.filter(id => validIds.includes(id));
@@ -2051,6 +2624,20 @@ function setHighlightPhoto(id, idx) {
     savePhoto(photoKeyForHighlight(id, h.name), dataUrl).then(ok => {
       if (ok) return;
       h.photo = previous;
+      render();
+      window.alert('That photo didn\\'t save — check your connection and try again.');
+    });
+  });
+}
+function setCoverPhoto(id) {
+  pickPhoto(dataUrl => {
+    const d = getDest(id);
+    const previous = d.cover;
+    d.cover = dataUrl;
+    render();
+    savePhoto(photoKeyForCover(id), dataUrl).then(ok => {
+      if (ok) return;
+      d.cover = previous;
       render();
       window.alert('That photo didn\\'t save — check your connection and try again.');
     });
@@ -2125,6 +2712,14 @@ function renderIntro() {
 function renderMap() {
   const view_ = el('div', 'view');
   view_.appendChild(appTitle());
+
+  const toSwipe = swipeableDestinations().filter(d => !swipes[profile][d.id]).length;
+  const newMatches = unseenMatchIds().length;
+  const swipeBtn = el('button', 'swipe-cta', '💘 Swipe destinations');
+  if (newMatches) swipeBtn.appendChild(txt('span', 'swipe-cta-badge is-match', newMatches + ' new match' + (newMatches > 1 ? 'es' : '') + '!'));
+  else if (toSwipe) swipeBtn.appendChild(txt('span', 'swipe-cta-badge', toSwipe + ' to swipe'));
+  swipeBtn.addEventListener('click', goSwipe);
+  view_.appendChild(swipeBtn);
 
   const priBtn = el('button', 'confirm-btn', '🗳️ Pick your destination ranking');
   priBtn.style.marginBottom = '6px';
@@ -2246,9 +2841,12 @@ function renderMap() {
     const plan = planOf(d);
     const isTopPick = adminRanking[0] === d.id;
     const hiddenFromEleny = isAdmin && elenyHiddenIds.includes(d.id);
-    const row = el('div', 'dest-row' + (isTopPick ? ' is-top-pick' : '') + (hiddenFromEleny ? ' is-eleny-hidden' : '') + (isAdmin ? ' has-vis-toggle' : ''));
+    const row = el('div', 'dest-row' + (isTopPick ? ' is-top-pick' : '') + (hiddenFromEleny ? ' is-eleny-hidden' : '') + (isAdmin ? ' has-vis-toggle' : '') + (d.cover ? ' has-cover' : ''));
     row.style.animationDelay = (idx * 0.04) + 's';
     row.style.setProperty('--plan-color', plan.color);
+    row.dataset.coverFor = d.id;
+    row.dataset.coverShade = '1';
+    if (d.cover) row.style.backgroundImage = coverBackground(d, true);
     const left = el('div', 'dest-row-left');
     left.appendChild(el('div', 'dest-row-name', d.city));
     if (d.note) left.appendChild(el('div', 'dest-row-note', d.note));
@@ -2257,6 +2855,7 @@ function renderMap() {
     const right = el('div', 'dest-row-right');
     right.appendChild(el('span', 'dest-row-plan-emoji', plan.emoji));
     if (d.favorite) right.appendChild(el('span', 'dest-row-heart', '💛'));
+    if (isMatch(d.id)) right.appendChild(el('span', 'dest-row-heart', '💘'));
     if (isAdmin) right.appendChild(el('div', 'dest-row-price', money(destTotal(d))));
     row.appendChild(right);
     if (isAdmin) {
@@ -2313,8 +2912,111 @@ function renderMap() {
     view_.appendChild(addCityRow);
   }
 
-  prefetchPhotosFor(r.destinations.map(d => d.id));
+  prefetchCovers(r.destinations.map(d => d.id));
 
+  return view_;
+}
+
+function buildSwipeCard(d, isTop) {
+  const plan = planOf(d);
+  const card = el('div', 'swipe-card ' + (isTop ? 'is-top' : 'is-next'));
+  card.dataset.coverFor = d.id;
+  card.style.setProperty('--plan-color', plan.color);
+  card.style.setProperty('--plan-dim', plan.dim);
+  if (d.cover) card.style.backgroundImage = coverBackground(d, false);
+  else {
+    card.classList.add('no-cover');
+    card.appendChild(txt('div', 'swipe-card-emoji', plan.emoji));
+  }
+  card.appendChild(txt('div', 'swipe-stamp stamp-like', 'LET\\'S GO'));
+  card.appendChild(txt('div', 'swipe-stamp stamp-nope', 'NAH'));
+  const info = el('div', 'swipe-card-info');
+  info.appendChild(txt('div', 'swipe-card-meta', plan.emoji + ' ' + plan.label + ' · ' + d.country));
+  info.appendChild(txt('div', 'swipe-card-city', d.city));
+  if (d.vibe) info.appendChild(txt('div', 'swipe-card-vibe', d.vibe));
+  if (d.highlights.length) {
+    const chips = el('div', 'swipe-chips');
+    d.highlights.slice(0, 3).forEach(h => chips.appendChild(txt('span', 'swipe-chip', h.name)));
+    info.appendChild(chips);
+  }
+  card.appendChild(info);
+  return card;
+}
+
+function renderSwipe() {
+  const view_ = el('div', 'view swipe-view' + (swipeRerender ? ' no-anim' : ''));
+  swipeRerender = true;
+  view_.appendChild(appTitle());
+
+  const backBtn = el('button', 'back-btn', '← Back to map');
+  backBtn.addEventListener('click', goMap);
+  view_.appendChild(backBtn);
+
+  view_.appendChild(el('h1', null, 'Would you <em>go</em>?'));
+  view_.appendChild(txt('p', 'sub', 'Right if you\\'d go, left if not. When you and ' + partnerName() + ' both say yes, it\\'s a match.'));
+
+  const all = swipeableDestinations();
+  const deck = all.filter(d => !swipes[profile][d.id]);
+  const matches = all.filter(d => isMatch(d.id));
+
+  if (deck.length) {
+    view_.appendChild(txt('div', 'swipe-progress', (all.length - deck.length + 1) + ' of ' + all.length));
+    const deckWrap = el('div', 'swipe-deck');
+    if (deck[1]) deckWrap.appendChild(buildSwipeCard(deck[1], false));
+    const top = buildSwipeCard(deck[0], true);
+    deckWrap.appendChild(top);
+    attachSwipeDrag(top, deck[0].id);
+    view_.appendChild(deckWrap);
+
+    const actions = el('div', 'swipe-actions');
+    const nopeBtn = el('button', 'swipe-btn swipe-btn-nope', '✕');
+    nopeBtn.setAttribute('aria-label', 'Nah');
+    nopeBtn.addEventListener('click', () => flyOut(top, 'nope', deck[0].id));
+    const infoBtn = el('button', 'swipe-btn swipe-btn-info', 'i');
+    infoBtn.setAttribute('aria-label', 'See details');
+    infoBtn.addEventListener('click', () => goDetail(deck[0].id));
+    const likeBtn = el('button', 'swipe-btn swipe-btn-like', '♥');
+    likeBtn.setAttribute('aria-label', 'Let\\'s go');
+    likeBtn.addEventListener('click', () => flyOut(top, 'like', deck[0].id));
+    actions.appendChild(nopeBtn);
+    actions.appendChild(infoBtn);
+    actions.appendChild(likeBtn);
+    view_.appendChild(actions);
+  } else {
+    const done = el('div', 'swipe-done');
+    done.appendChild(txt('div', 'swipe-done-emoji', '🎉'));
+    done.appendChild(txt('div', 'swipe-done-title', 'You swiped them all!'));
+    done.appendChild(txt('div', 'swipe-done-sub', matches.length
+      ? 'Check your matches below.'
+      : 'No matches yet — once ' + partnerName() + ' swipes, they\\'ll show up here.'));
+    const again = el('button', 'match-keep', '↺ Swipe again');
+    again.addEventListener('click', resetMySwipes);
+    done.appendChild(again);
+    view_.appendChild(done);
+  }
+
+  const matchBox = el('div', 'swipe-matches');
+  matchBox.appendChild(txt('div', 'swipe-matches-label', '💘 YOUR MATCHES' + (matches.length ? ' (' + matches.length + ')' : '')));
+  if (matches.length) {
+    const row = el('div', 'swipe-matches-row');
+    matches.forEach(d => {
+      const plan = planOf(d);
+      const chip = el('button', 'match-chip');
+      chip.style.setProperty('--plan-color', plan.color);
+      chip.style.setProperty('--plan-dim', plan.dim);
+      chip.dataset.coverFor = d.id;
+      if (d.cover) chip.style.backgroundImage = coverBackground(d, false);
+      chip.appendChild(txt('span', 'match-chip-city', d.city));
+      chip.addEventListener('click', () => goDetail(d.id));
+      row.appendChild(chip);
+    });
+    matchBox.appendChild(row);
+  } else {
+    matchBox.appendChild(txt('div', 'swipe-matches-empty', 'Nothing yet — keep swiping 👀'));
+  }
+  view_.appendChild(matchBox);
+
+  prefetchCovers(deck.slice(0, 3).map(d => d.id).concat(matches.map(d => d.id)));
   return view_;
 }
 
@@ -2386,8 +3088,8 @@ function renderDetail() {
   const plan = planOf(d);
   view_.appendChild(appTitle());
 
-  const backBtn = el('button', 'back-btn', '← Back to map');
-  backBtn.addEventListener('click', goMap);
+  const backBtn = el('button', 'back-btn', detailReturnView === 'swipe' ? '← Back to swiping' : '← Back to map');
+  backBtn.addEventListener('click', detailReturnView === 'swipe' ? goSwipe : goMap);
   view_.appendChild(backBtn);
 
   view_.appendChild(buildDetailCard(d, plan));
@@ -2402,6 +3104,20 @@ function buildDetailCard(d, plan) {
   card.style.setProperty('--plan-dim', plan.dim);
   card.style.setProperty('--plan-soft1', hexToRgba(plan.color, 0.32));
   card.style.setProperty('--plan-soft2', hexToRgba(plan.dim, 0.22));
+
+  if (d.cover) {
+    const hero = el('div', 'detail-cover');
+    hero.style.backgroundImage = 'url("' + d.cover + '")';
+    hero.addEventListener('click', () => showPhotoLightbox(d.cover, d.city, () => setCoverPhoto(d.id)));
+    const changeBtn = el('button', 'detail-cover-change', '📷 Change');
+    changeBtn.addEventListener('click', (e) => { e.stopPropagation(); setCoverPhoto(d.id); });
+    hero.appendChild(changeBtn);
+    card.appendChild(hero);
+  } else {
+    const addCover = el('button', 'detail-cover-add', '📷 Add a cover photo');
+    addCover.addEventListener('click', () => setCoverPhoto(d.id));
+    card.appendChild(addCover);
+  }
 
   const photoHighlights = d.highlights.map((h, idx) => ({ h, idx })).filter(x => x.h.photo);
   const photoLodging = (d.lodging || []).map((l, idx) => ({ l, idx })).filter(x => x.l.photo);
@@ -2804,6 +3520,7 @@ function render() {
   else if (view === 'priorities') content = renderPriorities();
   else if (view === 'profile') content = renderProfile();
   else if (view === 'adminRanking') content = renderAdminRanking();
+  else if (view === 'swipe') content = renderSwipe();
   else content = renderMap();
   wrap.appendChild(content);
   app.appendChild(wrap);
@@ -2827,6 +3544,7 @@ Promise.all([
   loadHighlightsData(),
   loadLodgingData(),
   loadCostsData(),
+  loadSwipes(false),
 ])
   .then(() => { backfillIconicHighlights(); render(); });
 
