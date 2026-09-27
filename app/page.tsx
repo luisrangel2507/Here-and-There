@@ -1543,6 +1543,8 @@ const APP_STYLE = `
     stroke-linecap:round;
     opacity:0.75;
     filter:drop-shadow(0 0 4px var(--route-color));
+  }
+  .map-intro .route-glow{
     stroke-dasharray:1;
     stroke-dashoffset:1;
     animation:routeDraw 1.1s var(--ease-out) forwards;
@@ -1551,10 +1553,12 @@ const APP_STYLE = `
     fill:none;
     stroke:#fff;
     stroke-linecap:round;
-    opacity:0;
-    animation:routeFade .5s ease forwards, routeMarch 1.4s linear infinite;
+    opacity:0.95;
+    animation:routeMarch 1.4s linear infinite;
   }
-  .route-shade{fill:none;stroke:rgba(20,10,30,0.45);stroke-linecap:round;opacity:0;animation:routeFade .5s ease forwards;}
+  .map-intro .route-dash{opacity:0;animation:routeFade .5s ease forwards, routeMarch 1.4s linear infinite;}
+  .route-shade{fill:none;stroke:rgba(20,10,30,0.45);stroke-linecap:round;opacity:0.95;}
+  .map-intro .route-shade{opacity:0;animation:routeFade .5s ease forwards;}
   @keyframes routeDraw{ to{stroke-dashoffset:0;} }
   @keyframes routeFade{ to{opacity:0.95;} }
   @keyframes routeMarch{ to{stroke-dashoffset:calc(var(--dash-cycle, 17) * -1px);} }
@@ -1565,8 +1569,8 @@ const APP_STYLE = `
     width:30px;height:30px;
     transform:translate(-50%,-50%);
     pointer-events:none;
-    animation:popIn .5s var(--ease-spring) .2s both;
   }
+  .map-intro .home-pin{animation:popIn .5s var(--ease-spring) .2s both;}
   .home-pin-flag{
     position:relative;
     width:30px;height:30px;
@@ -1601,7 +1605,7 @@ const APP_STYLE = `
   }
   .home-chip.is-cancel{background:rgba(255,107,91,0.4);}
   .pin, .pin-preview{z-index:3;}
-  .pin-dot-wrap{animation:pinDrop .65s var(--ease-spring) backwards;}
+  .map-intro .pin-dot-wrap{animation:pinDrop .65s var(--ease-spring) backwards;}
   @keyframes pinDrop{
     0%{transform:translateY(-34px) scale(0.5);opacity:0;}
     60%{transform:translateY(3px) scale(1.08);opacity:1;}
@@ -4020,6 +4024,7 @@ document.addEventListener('visibilitychange', () => {
 
 // ---- home bases & flight routes ----
 let placingHome = false;
+let mapIntroPlayed = false; // pin drop / route draw-in play only the first time the map shows
 function homeOf(who) {
   const info = profileInfo[who] || {};
   return info.home && info.home.region ? info.home : null;
@@ -4052,7 +4057,7 @@ function svgEl(tag, attrs) {
 }
 // Arcs from each traveler's home to the winner (or matches, or Luis's top pick).
 // A home on the other country's map enters from the edge facing that country.
-function buildRoutes(r, stageDests) {
+function buildRoutes(r, stageDests, intro) {
   const dims = r.aspect.split('/').map(v => parseFloat(v));
   const w = dims[0], h = dims[1];
   const scale = w / 900;
@@ -4079,21 +4084,20 @@ function buildRoutes(r, stageDests) {
       const delay = (n * 0.35).toFixed(2);
       const g = svgEl('g', { class: 'route' });
       g.style.setProperty('--route-color', ROUTE_COLORS[who]);
-      g.style.animationDelay = delay + 's';
       const glow = svgEl('path', { d, class: 'route-glow', pathLength: '1', 'stroke-width': (7 * scale).toFixed(1) });
-      glow.style.animationDelay = delay + 's';
+      if (intro) glow.style.animationDelay = delay + 's';
       const dash = svgEl('path', { d, class: 'route-dash', 'stroke-width': (2.8 * scale).toFixed(1), 'stroke-dasharray': (9 * scale).toFixed(1) + ' ' + (8 * scale).toFixed(1) });
-      dash.style.animationDelay = (parseFloat(delay) + 0.7).toFixed(2) + 's, 0s';
+      if (intro) dash.style.animationDelay = (parseFloat(delay) + 0.7).toFixed(2) + 's, 0s';
       dash.style.setProperty('--dash-cycle', (17 * scale).toFixed(1));
       const shade = svgEl('path', { d, class: 'route-shade', 'stroke-width': (5 * scale).toFixed(1) });
-      shade.style.animationDelay = (parseFloat(delay) + 0.7).toFixed(2) + 's';
+      if (intro) shade.style.animationDelay = (parseFloat(delay) + 0.7).toFixed(2) + 's';
       g.appendChild(glow);
       g.appendChild(shade);
       g.appendChild(dash);
       const plane = svgEl('g', { class: 'route-plane', opacity: '0' });
       plane.appendChild(svgEl('path', { d: PLANE_PATH, transform: 'scale(' + (1.35 * scale).toFixed(2) + ')' }));
       const dur = (3.2 + dist / (600 * scale)).toFixed(2) + 's';
-      const begin = (parseFloat(delay) + 0.9).toFixed(2) + 's';
+      const begin = (intro ? parseFloat(delay) + 0.9 : n * 0.35).toFixed(2) + 's';
       plane.appendChild(svgEl('animateMotion', { path: d, dur, begin, repeatCount: 'indefinite', rotate: 'auto', calcMode: 'spline', keyTimes: '0;1', keySplines: '0.45 0 0.25 1' }));
       plane.appendChild(svgEl('animate', { attributeName: 'opacity', values: '0;1;1;0', keyTimes: '0;0.08;0.88;1', dur, begin, repeatCount: 'indefinite' }));
       g.appendChild(plane);
@@ -4646,7 +4650,10 @@ function renderMap() {
     stage.appendChild(svg);
   }
 
-  stage.appendChild(buildRoutes(r, r.destinations));
+  const intro = !mapIntroPlayed;
+  mapIntroPlayed = true;
+  if (intro) stage.classList.add('map-intro');
+  stage.appendChild(buildRoutes(r, r.destinations, intro));
   buildHomePins().forEach(pin => stage.appendChild(pin));
 
   r.destinations.forEach((d, pinIdx) => {
@@ -4661,7 +4668,7 @@ function renderMap() {
     dotWrap.appendChild(el('div', 'pin-dot'));
     if (d.favorite) dotWrap.appendChild(el('div', 'pin-star', '⭐'));
     if (adminRanking[0] === d.id) dotWrap.classList.add('pin-gold');
-    dotWrap.style.animationDelay = (0.25 + pinIdx * 0.07) + 's';
+    if (intro) dotWrap.style.animationDelay = (0.25 + pinIdx * 0.07) + 's';
     pin.appendChild(dotWrap);
     pin.addEventListener('click', () => goDetail(d.id));
     stage.appendChild(pin);
