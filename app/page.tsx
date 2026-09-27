@@ -1535,6 +1535,335 @@ const APP_STYLE = `
     line-height:1.1;
   }
 
+  /* countdown */
+  .countdown-card{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    width:100%;
+    text-align:left;
+    border:1.5px solid rgba(255,255,255,0.4);
+    border-radius:22px;
+    padding:14px 18px;
+    margin-bottom:12px;
+    background:linear-gradient(135deg, rgba(255,255,255,0.26), rgba(255,255,255,0.08));
+    backdrop-filter:blur(12px);
+    color:#fff;
+    font-family:'Poppins', sans-serif;
+    cursor:pointer;
+    box-shadow:0 14px 30px rgba(20,10,30,0.22);
+    animation:fadeSlideUp .5s var(--ease-out) both;
+  }
+  .countdown-big{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:700;
+    font-size:46px;
+    line-height:1;
+    min-width:58px;
+    text-align:center;
+    background:linear-gradient(180deg, #fff, var(--sun));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 4px 12px rgba(255,201,60,0.4));
+  }
+  .countdown-label{font-weight:700;font-size:14.5px;line-height:1.25;}
+  .countdown-sub{font-size:11.5px;opacity:0.85;margin-top:2px;}
+
+  /* notifications */
+  .push-banner{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 10px 10px 16px;
+    margin-bottom:12px;
+    border-radius:18px;
+    background:rgba(20,10,30,0.35);
+    backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,0.2);
+    animation:fadeSlideUp .5s var(--ease-out) both;
+  }
+  .push-banner-text{flex:1;font-size:12px;font-weight:500;line-height:1.35;}
+  .push-banner-on{
+    flex:0 0 auto;
+    border:none;
+    border-radius:999px;
+    padding:8px 14px;
+    background:#fff;
+    color:var(--ink);
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    font-size:12px;
+    cursor:pointer;
+  }
+  .push-banner-x{flex:0 0 auto;border:none;background:none;color:rgba(255,255,255,0.7);font-size:20px;cursor:pointer;padding:0 4px;}
+  .notif-status{font-size:12.5px;line-height:1.5;color:var(--ink-soft);}
+  .notif-status.is-on{color:var(--turquoise-dim);font-weight:600;}
+  .trip-dates{display:flex;gap:10px;}
+  .trip-date{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .trip-date input{width:100%;min-height:42px;}
+  .trip-dates-hint{font-size:11.5px;color:var(--ink-soft);margin-top:8px;}
+
+  /* winner */
+  .winner-cta{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:100%;
+    border:none;
+    border-radius:22px;
+    padding:14px;
+    margin-bottom:18px;
+    background:linear-gradient(90deg, #FFE18A, #FFC93C, #FF9F68);
+    color:var(--ink);
+    font-family:'Poppins', sans-serif;
+    font-weight:800;
+    font-size:15px;
+    cursor:pointer;
+    box-shadow:0 14px 32px rgba(255,180,60,0.5);
+    animation:popIn .5s var(--ease-spring) both;
+  }
+  .winner-cta-sub{font-size:11px;font-weight:600;opacity:0.7;margin-top:2px;}
+  .winner-action{margin-top:12px;}
+
+  /* reveal */
+  .reveal-backdrop{
+    position:fixed;
+    inset:0;
+    z-index:320;
+    overflow-y:auto;
+    overflow-x:hidden;
+    font-family:'Poppins', sans-serif;
+    color:#fff;
+    background:
+      radial-gradient(circle at 20% 15%, rgba(255,255,255,0.18) 0 1px, transparent 2px),
+      radial-gradient(circle at 70% 25%, rgba(255,255,255,0.14) 0 1px, transparent 2px),
+      radial-gradient(circle at 40% 60%, rgba(255,255,255,0.12) 0 1px, transparent 2px),
+      radial-gradient(circle at 50% 0%, #4B3869, #1a1030 70%);
+    animation:fadeIn .35s ease both;
+  }
+  .reveal-stage{
+    position:relative;
+    max-width:380px;
+    margin:0 auto;
+    padding:48px 16px 40px;
+    text-align:center;
+  }
+  .reveal-kicker{font-size:12px;font-weight:700;letter-spacing:0.28em;opacity:0.85;margin-bottom:18px;animation:fadeSlideUp .6s var(--ease-out) both;}
+  .boarding-pass{
+    position:relative;
+    text-align:left;
+    color:var(--ink);
+    background:var(--card);
+    border-radius:22px;
+    overflow:hidden;
+    box-shadow:0 30px 70px rgba(0,0,0,0.5);
+    animation:passIn .7s var(--ease-spring) both;
+  }
+  @keyframes passIn{ from{transform:translateY(60px) rotate(-4deg);opacity:0;} to{transform:none;opacity:1;} }
+  .bp-top{
+    display:flex;
+    justify-content:space-between;
+    padding:12px 18px;
+    background:var(--plan-color, var(--coral));
+    color:#fff;
+    font-size:10.5px;
+    font-weight:800;
+    letter-spacing:0.14em;
+  }
+  .bp-body{padding:16px 18px 18px;}
+  .bp-route{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-bottom:14px;}
+  .bp-plane{font-size:22px;color:var(--plan-color, var(--coral));padding-bottom:6px;}
+  .bp-to{text-align:right;}
+  .bp-label{font-size:9.5px;font-weight:700;letter-spacing:0.14em;color:var(--ink-soft);margin-bottom:4px;}
+  .bp-value{font-size:13px;font-weight:700;}
+  .bp-meta{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:16px;
+    padding-top:14px;
+    border-top:2px dashed rgba(43,27,51,0.18);
+  }
+  .bp-seat .bp-value{font-size:16px;}
+  .flap-text{display:flex;flex-wrap:wrap;gap:4px 10px;}
+  .flap-code{justify-content:flex-end;}
+  .flap-word{display:inline-flex;gap:3px;}
+  .flap-cell{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:0.78em;
+    height:1.32em;
+    padding:0 0.08em;
+    border-radius:5px;
+    background:linear-gradient(180deg, #2B1B33 50%, #22152a 50%);
+    color:#FFE18A;
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    box-shadow:inset 0 -1px 0 rgba(255,255,255,0.08), 0 2px 4px rgba(0,0,0,0.25);
+  }
+  .flap-cell.settled{color:#fff;}
+  .flap-code .flap-cell{font-size:24px;}
+  .flap-city .flap-cell{font-size:21px;}
+  .bp-stamp{
+    position:absolute;
+    right:22px;
+    bottom:58px;
+    padding:4px 10px;
+    border:3px solid #1f9d63;
+    border-radius:8px;
+    color:#1f9d63;
+    font-weight:800;
+    font-size:15px;
+    letter-spacing:0.12em;
+    opacity:0;
+    transform:rotate(-12deg) scale(1.8);
+    pointer-events:none;
+  }
+  .boarding-pass.confirmed .bp-stamp{animation:stampIn .45s var(--ease-spring) forwards;}
+  @keyframes stampIn{ to{opacity:0.9;transform:rotate(-12deg) scale(1);} }
+  .reveal-photo{
+    position:relative;
+    height:0;
+    opacity:0;
+    margin-top:18px;
+    border-radius:22px;
+    overflow:hidden;
+    border:3px solid #fff;
+    background:linear-gradient(160deg, var(--plan-color), var(--plan-dim));
+    background-size:cover;
+    background-position:center;
+    transition:height .6s var(--ease-out), opacity .6s ease;
+  }
+  .reveal-backdrop.revealed .reveal-photo{height:200px;opacity:1;}
+  .reveal-actions{opacity:0;transform:translateY(10px);transition:opacity .5s ease .3s, transform .5s var(--ease-out) .3s;margin-top:20px;}
+  .reveal-backdrop.revealed .reveal-actions{opacity:1;transform:none;}
+  .reveal-backdrop .confetti-bit{position:fixed;}
+
+  /* reactions */
+  .rx-hint{font-size:11px;color:var(--ink-soft);margin:-4px 0 10px;}
+  .rx{position:relative;display:flex;align-items:center;gap:4px;flex:0 0 auto;}
+  .rx-partner{
+    font-size:12px;
+    padding:3px 6px;
+    border-radius:999px;
+    background:rgba(43,27,51,0.06);
+    white-space:nowrap;
+  }
+  .rx-mine{
+    width:30px;height:30px;
+    border-radius:50%;
+    border:1.5px dashed rgba(43,27,51,0.25);
+    background:transparent;
+    color:rgba(43,27,51,0.45);
+    font-size:15px;
+    line-height:1;
+    cursor:pointer;
+    padding:0;
+  }
+  .rx-mine.has{border:1.5px solid transparent;background:rgba(255,111,145,0.12);color:inherit;animation:popIn .3s var(--ease-spring) both;}
+  .rx-picker{
+    position:absolute;
+    right:0;
+    bottom:calc(100% + 6px);
+    z-index:5;
+    display:flex;
+    gap:4px;
+    padding:6px;
+    border-radius:999px;
+    background:#fff;
+    box-shadow:0 10px 28px rgba(43,27,51,0.25);
+    animation:popIn .22s var(--ease-spring) both;
+  }
+  .rx-option{
+    width:38px;height:38px;
+    border:none;
+    border-radius:50%;
+    background:transparent;
+    font-size:22px;
+    cursor:pointer;
+    padding:0;
+    transition:transform .15s var(--ease-spring);
+  }
+  .rx-option:active{transform:scale(1.25);}
+  .rx-option.active{background:rgba(255,111,145,0.16);}
+  .highlight-row.both-love{
+    border-color:rgba(255,111,145,0.55);
+    background:linear-gradient(90deg, rgba(255,111,145,0.1), #fff 60%);
+  }
+
+  /* itinerary */
+  .itinerary{padding-bottom:10px;}
+  .itin-sub{font-size:12px;color:var(--ink-soft);margin:-4px 0 12px;}
+  .itin-auto{
+    display:block;
+    width:100%;
+    border:none;
+    border-radius:999px;
+    padding:11px;
+    margin-bottom:14px;
+    background:linear-gradient(90deg, var(--sky-pink), var(--sky-purple));
+    color:#fff;
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    font-size:12.5px;
+    cursor:pointer;
+  }
+  .itin-day{
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:16px;
+    padding:12px 14px 6px;
+    margin-bottom:10px;
+    animation:fadeSlideUp .35s var(--ease-out) both;
+  }
+  .itin-day-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;}
+  .itin-day-num{font-family:'Fraunces', serif;font-style:italic;font-weight:700;font-size:17px;}
+  .itin-day-date{font-size:11px;font-weight:600;color:var(--turquoise-dim);}
+  .itin-empty{font-size:12px;color:var(--ink-soft);padding:4px 0 6px;}
+  .itin-stop{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid rgba(43,27,51,0.06);}
+  .itin-stop:first-of-type{border-top:none;}
+  .itin-stop-num{
+    flex:0 0 auto;
+    width:22px;height:22px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--plan-color, var(--coral));
+    color:#fff;
+    font-size:11px;
+    font-weight:700;
+  }
+  .itin-stop-name{flex:1;min-width:0;font-size:12.5px;font-weight:500;}
+  .itin-stop-love{font-size:11px;}
+  .itin-suggest{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;}
+  .itin-chip{
+    border:1.5px solid var(--line);
+    border-radius:999px;
+    padding:6px 10px;
+    background:#fff;
+    font-family:'Poppins', sans-serif;
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .itin-day .add-row{margin:4px 0 6px;}
+  .itin-day .add-form{margin:6px 0 8px;}
+
+  /* view transitions */
+  html.vt-running .view, html.vt-running .view *{animation:none !important;}
+  ::view-transition-old(root){animation:vtFadeOut .2s ease both;}
+  ::view-transition-new(root){animation:vtFadeIn .32s var(--ease-out) both;}
+  @keyframes vtFadeOut{ to{opacity:0;} }
+  @keyframes vtFadeIn{ from{opacity:0;transform:translateY(10px);} }
+  ::view-transition-group(dest-morph){animation-duration:.45s;animation-timing-function:cubic-bezier(0.16, 1, 0.3, 1);}
+  ::view-transition-old(dest-morph), ::view-transition-new(dest-morph){height:100%;overflow:clip;object-fit:cover;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important;transition-duration:0.01ms !important;}
+  }
+
   /* it's a match */
   .match-backdrop{
     position:fixed;
@@ -1850,6 +2179,8 @@ let profileInfo = {};
 let adminRanking = [];
 let lastSubmitAt = null;
 let justEliminatedId = null;
+let tripStart = null; // 'YYYY-MM-DD'
+let tripEnd = null;
 
 function cooldownRemaining() {
   if (!lastSubmitAt) return 0;
@@ -1863,12 +2194,25 @@ function formatCountdown(ms) {
   return (h > 0 ? h + 'h ' : '') + m + 'm';
 }
 
-async function savePriorities() {
+// Sends only the named fields, so one phone never overwrites what the other changed.
+async function saveState(fields) {
+  const all = { priorityOrder, blockedIds, hiddenIds, elenyHiddenIds, adminRanking, lastSubmitAt, tripStart, tripEnd };
+  const body = {};
+  fields.forEach(f => { body[f] = all[f]; });
   try {
     await fetch('/api/state', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ priorityOrder, blockedIds, hiddenIds, elenyHiddenIds, profileInfo, adminRanking, lastSubmitAt }),
+      body: JSON.stringify(body),
+    });
+  } catch (e) { /* best-effort only */ }
+}
+async function saveProfileInfoNow() {
+  try {
+    await fetch('/api/state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profileInfoFor: { profile, info: profileInfo[profile] || {} } }),
     });
   } catch (e) { /* best-effort only */ }
 }
@@ -1885,6 +2229,8 @@ async function loadPriorities() {
         adminRanking = parsed.adminRanking || [];
         priorityOrder = (parsed.priorityOrder || defaultOrder()).filter(id => !blockedIds.includes(id) && !hiddenIds.includes(id));
         lastSubmitAt = parsed.lastSubmitAt || null;
+        tripStart = parsed.tripStart || null;
+        tripEnd = parsed.tripEnd || null;
       }
     }
   } catch (e) { /* keep defaults */ }
@@ -2055,7 +2401,7 @@ function addCustomDestination(city, plan) {
   addingCity = null;
   render();
   saveCustomDestinations(region);
-  savePriorities();
+  notifyPartner('city_added', d.city);
 }
 
 // ---- photos (uploaded from the device, persisted as compressed data URLs) ----
@@ -2210,20 +2556,35 @@ function showPhotoLightbox(src, alt, onReplace) {
 }
 
 function submitPriorities() {
-  if (cooldownRemaining() > 0 || priorityOrder.length <= 1) return;
-  const eliminatedId = priorityOrder[priorityOrder.length - 1];
+  const active = activePriorityOrder();
+  if (cooldownRemaining() > 0 || active.length <= 1) return;
+  const eliminatedId = active[active.length - 1];
   blockedIds.push(eliminatedId);
   priorityOrder = priorityOrder.filter(id => id !== eliminatedId);
   lastSubmitAt = Date.now();
   justEliminatedId = eliminatedId;
-  savePriorities();
+  saveState(['priorityOrder', 'blockedIds', 'lastSubmitAt']);
+  haptic(25);
+  const left = activePriorityOrder().length;
+  const cut = getDest(eliminatedId);
+  const w = winnerId();
+  if (w) {
+    notifyPartner('winner', getDest(w).city);
+    render();
+    setTimeout(() => showReveal(w), 350);
+    return;
+  }
+  notifyPartner('city_cut', cut ? cut.city : '', left);
   render();
 }
 
 function goPriorities() {
-  view = 'priorities';
-  justEliminatedId = null;
-  render();
+  navigate(() => {
+    view = 'priorities';
+    justEliminatedId = null;
+    window.scrollTo(0, 0);
+    render();
+  });
 }
 
 function changeTodaysPick() {
@@ -2232,7 +2593,7 @@ function changeTodaysPick() {
   priorityOrder.push(restoredId);
   lastSubmitAt = null;
   justEliminatedId = null;
-  savePriorities();
+  saveState(['priorityOrder', 'blockedIds', 'lastSubmitAt']);
   render();
 }
 
@@ -2331,34 +2692,48 @@ function goIntro() {
 
 let profileReturnView = 'map';
 function goProfile() {
-  profileReturnView = view;
-  view = 'profile';
-  render();
+  navigate(() => {
+    profileReturnView = view;
+    view = 'profile';
+    window.scrollTo(0, 0);
+    render();
+  });
 }
 function backFromProfile() {
-  view = profileReturnView;
-  render();
+  navigate(() => {
+    view = profileReturnView;
+    render();
+  });
 }
 let profileSaveTimer = null;
 function saveProfileInfo(field, value) {
   if (!profileInfo[profile]) profileInfo[profile] = {};
   profileInfo[profile][field] = value;
   clearTimeout(profileSaveTimer);
-  profileSaveTimer = setTimeout(() => savePriorities(), 400);
+  profileSaveTimer = setTimeout(saveProfileInfoNow, 400);
 }
 
 function goDetail(id) {
   const d = getDest(id);
-  detailReturnView = view === 'swipe' ? 'swipe' : 'map';
-  window.scrollTo(0, 0);
-  region = d.country === 'Mexico' ? 'mexico' : 'usa';
-  detailId = id;
-  view = 'detail';
-  openAddHighlight = false;
-  openAddLodging = false;
-  addingCity = null;
-  selectedHighlightCity = d.cities ? d.cities[0] : null;
-  render();
+  if (view === 'map') mapScrollY = window.scrollY;
+  navigate(() => {
+    detailReturnView = view === 'swipe' ? 'swipe' : 'map';
+    region = d.country === 'Mexico' ? 'mexico' : 'usa';
+    detailId = id;
+    view = 'detail';
+    openAddHighlight = false;
+    openAddLodging = false;
+    openItineraryDay = null;
+    addingCity = null;
+    selectedHighlightCity = d.cities ? d.cities[0] : null;
+    window.scrollTo(0, 0);
+    render();
+    if (pendingScrollTo) {
+      const target = document.getElementById(pendingScrollTo);
+      pendingScrollTo = null;
+      if (target) window.scrollTo(0, target.getBoundingClientRect().top + window.scrollY - 16);
+    }
+  }, id);
   loadPhotosFor(id).then(() => refreshDetailCard(id));
 }
 function refreshDetailCard(id) {
@@ -2371,16 +2746,20 @@ function refreshDetailCard(id) {
   oldCard.replaceWith(newCard);
 }
 function goMap() {
-  view = 'map';
-  detailId = null;
-  render();
+  const fromDetail = view === 'detail' ? detailId : null;
+  navigate(() => {
+    view = 'map';
+    detailId = null;
+    render();
+    window.scrollTo(0, fromDetail ? mapScrollY : 0);
+  }, fromDetail);
 }
 function deleteDestination(id) {
   const d = getDest(id);
   if (!window.confirm('Delete ' + d.city + '? This can\\'t be undone.')) return;
   hiddenIds.push(id);
   priorityOrder = priorityOrder.filter(pid => pid !== id);
-  savePriorities();
+  saveState(['hiddenIds', 'priorityOrder']);
   goMap();
 }
 function startMovingPin(id) {
@@ -2403,7 +2782,7 @@ function toggleElenyVisibility(id) {
     elenyHiddenIds.push(id);
   }
   render();
-  savePriorities();
+  saveState(['elenyHiddenIds']);
 }
 // ---- swipe to decide ----
 let swipes = { luis: {}, eleny: {} }; // profile -> { destId: 'like' | 'nope' }
@@ -2439,7 +2818,7 @@ async function saveSwipe(destId, choice) {
     const res = await fetch('/api/swipes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ profile, destId, choice }),
+      body: JSON.stringify({ profile, destId, choice, city: (getDest(destId) || {}).city }),
     });
     return res.ok;
   } catch (e) { return false; }
@@ -2468,15 +2847,18 @@ function unseenMatchIds() {
 }
 
 function goSwipe() {
-  view = 'swipe';
-  swipeRerender = false;
-  window.scrollTo(0, 0);
-  render();
+  const fromDetail = view === 'detail' ? detailId : null;
+  navigate(() => {
+    view = 'swipe';
+    swipeRerender = false;
+    window.scrollTo(0, 0);
+    render();
+  }, fromDetail);
+  // The view switch may still be mid-transition when this resolves, so don't gate the match on it.
   loadSwipes(true).then(() => {
-    if (view !== 'swipe') return;
     const unseen = unseenMatchIds();
-    if (!swipeDragging) render();
     if (unseen.length) { showMatch(unseen[0]); markMatchesSeen(); }
+    if (view === 'swipe' && !swipeDragging) { swipeRerender = true; render(); }
   });
 }
 
@@ -2586,6 +2968,501 @@ function showMatch(id) {
   document.body.appendChild(backdrop);
 }
 
+// ---- notifications ----
+function notifyPartner(type, city, count) {
+  if (!profile) return;
+  fetch('/api/notify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from: profile, type, city: city || '', count: count || 0 }),
+  }).catch(() => {});
+}
+function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent); }
+function isStandalone() {
+  return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+}
+function pushSupported() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+let pushSubscribed = false;
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.register('/sw.js').then(reg => {
+    if (!('PushManager' in window)) return;
+    return reg.pushManager.getSubscription().then(sub => { pushSubscribed = !!sub; });
+  }).catch(() => {});
+  try { if (navigator.clearAppBadge) navigator.clearAppBadge(); } catch (e) { /* unsupported */ }
+}
+function urlBase64ToUint8Array(base64) {
+  const padding = '='.repeat((4 - base64.length % 4) % 4);
+  const raw = atob((base64 + padding).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from(raw, c => c.charCodeAt(0));
+}
+async function enableNotifications() {
+  if (!pushSupported()) {
+    window.alert(isIOS() && !isStandalone()
+      ? 'Open Here & There from its Home Screen icon to turn on notifications.'
+      : 'This browser can\\'t show notifications.');
+    return;
+  }
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') { render(); return; }
+    const reg = await navigator.serviceWorker.ready;
+    const keyRes = await fetch('/api/push');
+    const key = await keyRes.json();
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(key.publicKey) });
+    const res = await fetch('/api/push', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile, subscription: sub.toJSON() }),
+    });
+    if (!res.ok) throw new Error('save failed');
+    pushSubscribed = true;
+    haptic(20);
+    render();
+  } catch (e) {
+    window.alert('Couldn\\'t turn on notifications — try again in a moment.');
+  }
+}
+function pushBannerDismissed() {
+  try { return localStorage.getItem('push-banner-dismissed') === '1'; } catch (e) { return false; }
+}
+function dismissPushBanner() {
+  try { localStorage.setItem('push-banner-dismissed', '1'); } catch (e) { /* private mode */ }
+  render();
+}
+function shouldShowPushBanner() {
+  return pushSupported() && Notification.permission === 'default' && !pushBannerDismissed();
+}
+
+// ---- trip dates & countdown ----
+function parseDay(str) {
+  const parts = str.split('-').map(Number);
+  return new Date(parts[0], parts[1] - 1, parts[2]);
+}
+function daysUntil(str) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.round((parseDay(str) - today) / 86400000);
+}
+function formatTripDate(str) {
+  return parseDay(str).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+function tripDayCount() {
+  if (!tripStart || !tripEnd) return 3;
+  const span = Math.round((parseDay(tripEnd) - parseDay(tripStart)) / 86400000) + 1;
+  return Math.max(1, Math.min(14, span));
+}
+function dayDate(idx) {
+  if (!tripStart) return null;
+  const date = parseDay(tripStart);
+  date.setDate(date.getDate() + idx);
+  return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+function setTripDate(field, value) {
+  if (field === 'start') tripStart = value || null;
+  else tripEnd = value || null;
+  if (tripStart && tripEnd && tripEnd < tripStart) tripEnd = tripStart;
+  saveState(['tripStart', 'tripEnd']);
+  if (tripStart) notifyPartner('trip_dates');
+  render();
+}
+function tripCountdown() {
+  if (!tripStart) return null;
+  const days = daysUntil(tripStart);
+  if (daysUntil(tripEnd || tripStart) < 0) return null;
+  const w = winnerId();
+  const place = w ? getDest(w).city : null;
+  if (days > 1) return { big: String(days), label: 'days until ' + (place || 'our trip'), sub: formatTripDate(tripStart) };
+  if (days === 1) return { big: '1', label: 'day until ' + (place || 'our trip') + '!', sub: 'Pack your bags 🧳' };
+  if (days === 0) return { big: '✈️', label: 'Today\\'s the day!', sub: place ? 'Next stop: ' + place : 'Have the best trip' };
+  return { big: '🌴', label: 'Enjoy ' + (place || 'the trip') + '!', sub: 'Day ' + (1 - days) + ' of ' + tripDayCount() };
+}
+
+// ---- the final destination ----
+// Cities hidden from Eleny aren't in play, so they never show in (or win) the ranking.
+function activePriorityOrder() {
+  return priorityOrder.filter(id => !elenyHiddenIds.includes(id) && getDest(id));
+}
+function winnerId() {
+  const active = activePriorityOrder();
+  return active.length === 1 ? active[0] : null;
+}
+function ensurePriorityOrderComplete() {
+  allDestinations().forEach(d => {
+    if (!priorityOrder.includes(d.id) && !blockedIds.includes(d.id) && !hiddenIds.includes(d.id)) priorityOrder.push(d.id);
+  });
+}
+function revealSeenKey() { return 'seen-winner-' + profile; }
+function revealSeen(id) {
+  try { return localStorage.getItem(revealSeenKey()) === id; } catch (e) { return true; }
+}
+function markRevealSeen(id) {
+  try { localStorage.setItem(revealSeenKey(), id); } catch (e) { /* private mode */ }
+}
+function splitFlap(text) {
+  const wrap = el('div', 'flap-text');
+  const cells = [];
+  text.toUpperCase().split(' ').forEach(word => {
+    if (!word) return;
+    const w = el('span', 'flap-word');
+    Array.from(word).forEach(ch => {
+      const cell = txt('span', 'flap-cell', ' ');
+      cell.dataset.final = ch;
+      w.appendChild(cell);
+      cells.push(cell);
+    });
+    wrap.appendChild(w);
+  });
+  return { wrap, cells };
+}
+function runFlaps(cells, instant) {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  return Promise.all(cells.map((cell, i) => new Promise(resolve => {
+    if (instant) { cell.textContent = cell.dataset.final; cell.classList.add('settled'); resolve(); return; }
+    let ticks = 0;
+    const total = Math.min(30, 7 + i * 2);
+    const timer = setInterval(() => {
+      ticks++;
+      if (ticks >= total) {
+        clearInterval(timer);
+        cell.textContent = cell.dataset.final;
+        cell.classList.add('settled');
+        resolve();
+        return;
+      }
+      cell.textContent = letters[Math.floor(Math.random() * letters.length)];
+    }, 55);
+  })));
+}
+function confettiInto(container, count) {
+  const bits = ['🎉', '✨', '💘', '🌴', '☀️', '✈️', '🥂'];
+  for (let i = 0; i < count; i++) {
+    const bit = txt('span', 'confetti-bit', bits[i % bits.length]);
+    bit.style.left = (Math.random() * 100) + '%';
+    bit.style.animationDelay = (Math.random() * 0.9) + 's';
+    bit.style.animationDuration = (2.4 + Math.random() * 2) + 's';
+    bit.style.fontSize = (14 + Math.random() * 16) + 'px';
+    container.appendChild(bit);
+  }
+}
+function bpField(label, value, extra) {
+  const f = el('div', 'bp-field' + (extra ? ' ' + extra : ''));
+  f.appendChild(txt('div', 'bp-label', label));
+  f.appendChild(txt('div', 'bp-value', value));
+  return f;
+}
+function showReveal(id) {
+  const d = getDest(id);
+  if (!d || document.querySelector('.reveal-backdrop')) return;
+  markRevealSeen(id);
+  const plan = planOf(d);
+  const instant = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const backdrop = el('div', 'reveal-backdrop');
+  const stage = el('div', 'reveal-stage');
+  stage.appendChild(txt('div', 'reveal-kicker', 'YOUR NEXT ADVENTURE IS…'));
+
+  const pass = el('div', 'boarding-pass');
+  pass.style.setProperty('--plan-color', plan.color);
+  const top = el('div', 'bp-top');
+  top.appendChild(txt('span', null, '✈️ BOARDING PASS'));
+  top.appendChild(txt('span', null, 'HERE & THERE'));
+  pass.appendChild(top);
+
+  const body = el('div', 'bp-body');
+  const route = el('div', 'bp-route');
+  route.appendChild(bpField('FROM', 'MX 🇲🇽 · US 🇺🇸'));
+  route.appendChild(txt('div', 'bp-plane', '✈'));
+  const toField = el('div', 'bp-field bp-to');
+  toField.appendChild(txt('div', 'bp-label', 'TO'));
+  const code = splitFlap(d.code || d.city.slice(0, 3));
+  code.wrap.classList.add('flap-code');
+  toField.appendChild(code.wrap);
+  route.appendChild(toField);
+  body.appendChild(route);
+
+  body.appendChild(txt('div', 'bp-label', 'DESTINATION'));
+  const city = splitFlap(d.city);
+  city.wrap.classList.add('flap-city');
+  body.appendChild(city.wrap);
+
+  const meta = el('div', 'bp-meta');
+  meta.appendChild(bpField('PASSENGERS', 'LUIS & ELENY'));
+  meta.appendChild(bpField('DEPARTS', tripStart ? formatTripDate(tripStart).toUpperCase() : 'TBD'));
+  meta.appendChild(bpField('SEAT', '💘', 'bp-seat'));
+  body.appendChild(meta);
+  pass.appendChild(body);
+  pass.appendChild(txt('div', 'bp-stamp', 'CONFIRMED'));
+  stage.appendChild(pass);
+
+  const photo = el('div', 'reveal-photo');
+  photo.style.setProperty('--plan-color', plan.color);
+  photo.style.setProperty('--plan-dim', plan.dim);
+  if (d.cover) photo.style.backgroundImage = 'url("' + d.cover + '")';
+  else photo.appendChild(txt('div', 'match-photo-emoji', plan.emoji));
+  stage.appendChild(photo);
+
+  const actions = el('div', 'reveal-actions');
+  const planBtn = el('button', 'confirm-btn', '🗓️ Plan the trip →');
+  planBtn.addEventListener('click', () => {
+    backdrop.remove();
+    pendingScrollTo = 'itinerary';
+    goDetail(id);
+  });
+  const closeBtn = el('button', 'match-keep', 'Close');
+  closeBtn.addEventListener('click', () => backdrop.remove());
+  actions.appendChild(planBtn);
+  actions.appendChild(closeBtn);
+  stage.appendChild(actions);
+
+  backdrop.appendChild(stage);
+  document.body.appendChild(backdrop);
+  haptic(15);
+
+  setTimeout(() => {
+    runFlaps(code.cells.concat(city.cells), instant).then(() => {
+      pass.classList.add('confirmed');
+      backdrop.classList.add('revealed');
+      confettiInto(backdrop, 44);
+      haptic([40, 60, 40, 60, 120]);
+    });
+  }, instant ? 0 : 700);
+}
+
+// ---- reactions on highlights ----
+const REACTION_META = { love: '😍', maybe: '🤔', nope: '❌' };
+let reactions = { luis: {}, eleny: {} };
+function reactionKey(destId, name) { return destId + '|' + name; }
+function reactionFor(who, destId, name) { return (reactions[who] || {})[reactionKey(destId, name)] || null; }
+async function loadReactions() {
+  try {
+    const res = await fetch('/api/reactions');
+    if (!res.ok) return;
+    const map = await res.json();
+    reactions = { luis: map.luis || {}, eleny: map.eleny || {} };
+  } catch (e) { /* keep what we have */ }
+}
+function setReaction(destId, name, reaction) {
+  const key = reactionKey(destId, name);
+  if (reaction) reactions[profile][key] = reaction;
+  else delete reactions[profile][key];
+  haptic(10);
+  closeReactionPicker();
+  refreshDetailCard(destId);
+  fetch('/api/reactions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ profile, destId, name, reaction }),
+  }).catch(() => {});
+}
+function closeReactionPicker() {
+  document.querySelectorAll('.rx-picker').forEach(p => p.remove());
+}
+function openReactionPicker(anchor, destId, name) {
+  const wasOpen = anchor.querySelector('.rx-picker');
+  closeReactionPicker();
+  if (wasOpen) return;
+  const current = reactionFor(profile, destId, name);
+  const picker = el('div', 'rx-picker');
+  Object.keys(REACTION_META).forEach(r => {
+    const b = txt('button', 'rx-option' + (current === r ? ' active' : ''), REACTION_META[r]);
+    b.addEventListener('click', (e) => { e.stopPropagation(); setReaction(destId, name, current === r ? null : r); });
+    picker.appendChild(b);
+  });
+  anchor.appendChild(picker);
+  setTimeout(() => document.addEventListener('click', closeReactionPicker, { once: true }), 0);
+}
+function buildReactions(d, h) {
+  const partner = profile === 'luis' ? 'eleny' : 'luis';
+  const mine = reactionFor(profile, d.id, h.name);
+  const theirs = reactionFor(partner, d.id, h.name);
+  const box = el('div', 'rx');
+  if (theirs) {
+    const badge = txt('span', 'rx-partner', (partner === 'luis' ? '🇲🇽' : '🇺🇸') + REACTION_META[theirs]);
+    badge.title = partnerName() + ' reacted';
+    box.appendChild(badge);
+  }
+  const btn = txt('button', 'rx-mine' + (mine ? ' has' : ''), mine ? REACTION_META[mine] : '☺︎');
+  btn.setAttribute('aria-label', 'React');
+  btn.addEventListener('click', (e) => { e.stopPropagation(); openReactionPicker(box, d.id, h.name); });
+  box.appendChild(btn);
+  return box;
+}
+
+// ---- itinerary ----
+let itineraries = {}; // destId -> [[{ name }], ...]
+let openItineraryDay = null;
+let pendingScrollTo = null;
+async function loadItineraries() {
+  try {
+    const res = await fetch('/api/itinerary');
+    if (!res.ok) return;
+    itineraries = (await res.json()) || {};
+  } catch (e) { /* keep what we have */ }
+}
+function saveItinerary(destId) {
+  fetch('/api/itinerary', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ destId, days: itineraries[destId] }),
+  }).catch(() => {});
+}
+function getItinerary(destId) {
+  const days = (itineraries[destId] || []).map(day => day.slice());
+  while (days.length < tripDayCount()) days.push([]);
+  return days;
+}
+function itineraryHasStops(destId) {
+  return (itineraries[destId] || []).some(day => day.length);
+}
+function highlightScore(destId, name) {
+  const a = reactionFor('luis', destId, name);
+  const b = reactionFor('eleny', destId, name);
+  if (a === 'nope' || b === 'nope') return -1;
+  return [a, b].reduce((sum, r) => sum + (r === 'love' ? 2 : r === 'maybe' ? 1 : 0), 0);
+}
+function updateItinerary(destId, days) {
+  itineraries[destId] = days;
+  saveItinerary(destId);
+  refreshDetailCard(destId);
+}
+function autoPlan(destId) {
+  const d = getDest(destId);
+  if (itineraryHasStops(destId) && !window.confirm('Replace the current plan with an auto-plan?')) return;
+  const ranked = d.highlights
+    .map((h, i) => ({ name: h.name, score: highlightScore(destId, h.name), i }))
+    .filter(x => x.score >= 0)
+    .sort((x, y) => y.score - x.score || x.i - y.i);
+  const days = Array.from({ length: tripDayCount() }, () => []);
+  ranked.forEach((x, i) => {
+    const day = days[i % days.length];
+    if (day.length < 4) day.push({ name: x.name });
+  });
+  haptic(20);
+  updateItinerary(destId, days);
+}
+function addStop(destId, dayIdx, name) {
+  if (!name || !name.trim()) return;
+  const days = getItinerary(destId);
+  days[dayIdx].push({ name: name.trim() });
+  openItineraryDay = null;
+  updateItinerary(destId, days);
+}
+function removeStop(destId, dayIdx, stopIdx) {
+  const days = getItinerary(destId);
+  days[dayIdx].splice(stopIdx, 1);
+  updateItinerary(destId, days);
+}
+function buildItinerary(d) {
+  const section = el('div', 'detail-section itinerary');
+  section.id = 'itinerary';
+  section.appendChild(el('div', 'detail-label', '🗓️ ITINERARY'));
+  section.appendChild(txt('div', 'itin-sub', tripStart
+    ? formatTripDate(tripStart) + (tripEnd && tripEnd !== tripStart ? ' → ' + formatTripDate(tripEnd) : '')
+    : 'Set your trip dates in your profile (tap your flag) to see real dates here.'));
+
+  const autoBtn = el('button', 'itin-auto', '✨ Auto-plan from your reactions');
+  autoBtn.addEventListener('click', () => autoPlan(d.id));
+  section.appendChild(autoBtn);
+
+  const days = getItinerary(d.id);
+  const planned = new Set();
+  days.forEach(day => day.forEach(stop => planned.add(stop.name)));
+
+  days.forEach((day, dayIdx) => {
+    const dayCard = el('div', 'itin-day');
+    const head = el('div', 'itin-day-head');
+    head.appendChild(txt('span', 'itin-day-num', 'Day ' + (dayIdx + 1)));
+    const date = dayDate(dayIdx);
+    if (date) head.appendChild(txt('span', 'itin-day-date', date));
+    dayCard.appendChild(head);
+
+    if (!day.length) dayCard.appendChild(txt('div', 'itin-empty', 'Nothing planned yet'));
+    day.forEach((stop, stopIdx) => {
+      const row = el('div', 'itin-stop');
+      row.appendChild(txt('span', 'itin-stop-num', String(stopIdx + 1)));
+      row.appendChild(txt('span', 'itin-stop-name', stop.name));
+      const both = reactionFor('luis', d.id, stop.name) === 'love' && reactionFor('eleny', d.id, stop.name) === 'love';
+      if (both) row.appendChild(txt('span', 'itin-stop-love', '😍😍'));
+      const del = el('button', 'highlight-del', '×');
+      del.addEventListener('click', () => removeStop(d.id, dayIdx, stopIdx));
+      row.appendChild(del);
+      dayCard.appendChild(row);
+    });
+
+    if (openItineraryDay === dayIdx) {
+      const suggestions = d.highlights
+        .map((h, i) => ({ name: h.name, score: highlightScore(d.id, h.name), i }))
+        .filter(x => x.score >= 0 && !planned.has(x.name))
+        .sort((x, y) => y.score - x.score || x.i - y.i)
+        .slice(0, 6);
+      if (suggestions.length) {
+        const chips = el('div', 'itin-suggest');
+        suggestions.forEach(x => {
+          const chip = txt('button', 'itin-chip', (x.score >= 3 ? '😍 ' : x.score >= 2 ? '💛 ' : '') + x.name);
+          chip.addEventListener('click', () => addStop(d.id, dayIdx, x.name));
+          chips.appendChild(chip);
+        });
+        dayCard.appendChild(chips);
+      }
+      const form = el('div', 'add-form');
+      const input = document.createElement('input');
+      input.placeholder = 'Or type anything (dinner, beach day…)';
+      const addBtn = el('button', null, 'Add');
+      addBtn.addEventListener('click', () => addStop(d.id, dayIdx, input.value));
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') addStop(d.id, dayIdx, input.value); });
+      form.appendChild(input);
+      form.appendChild(addBtn);
+      dayCard.appendChild(form);
+    } else {
+      const addRow = el('div', 'add-row', '+ add stop');
+      addRow.addEventListener('click', () => { openItineraryDay = dayIdx; refreshDetailCard(d.id); });
+      dayCard.appendChild(addRow);
+    }
+    section.appendChild(dayCard);
+  });
+  return section;
+}
+
+// ---- transitions & live sync ----
+let mapScrollY = 0;
+// Runs a screen change inside a View Transition when the browser supports it;
+// the element tagged data-morph="<id>" in the old and new screen morphs between them.
+function navigate(update, morphId) {
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!document.startViewTransition || reduced) { update(); return; }
+  const tag = (node) => { if (node) node.style.viewTransitionName = 'dest-morph'; };
+  if (morphId) tag(document.querySelector('[data-morph="' + morphId + '"]'));
+  document.documentElement.classList.add('vt-running');
+  const transition = document.startViewTransition(() => {
+    update();
+    if (morphId) tag(document.querySelector('[data-morph="' + morphId + '"]'));
+  });
+  transition.finished.finally(() => {
+    document.documentElement.classList.remove('vt-running');
+    document.querySelectorAll('[data-morph]').forEach(node => { node.style.viewTransitionName = ''; });
+  });
+}
+let lastSyncAt = Date.now();
+async function syncFromServer() {
+  const tasks = [loadSwipes(true), loadReactions(), loadItineraries()];
+  if (view !== 'priorities' && view !== 'adminRanking') tasks.push(loadPriorities());
+  await Promise.all(tasks);
+  await loadCustomDestinations();
+  ensurePriorityOrderComplete();
+  if (swipeDragging || document.querySelector('.reveal-backdrop, .match-backdrop, .rx-picker, .lightbox-backdrop')) return;
+  if (view === 'map' || view === 'swipe') { swipeRerender = true; render(); }
+  else if (view === 'detail' && detailId) refreshDetailCard(detailId);
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  try { if (navigator.clearAppBadge) navigator.clearAppBadge(); } catch (e) { /* unsupported */ }
+  if (!profile || Date.now() - lastSyncAt < 4000) return;
+  lastSyncAt = Date.now();
+  syncFromServer();
+});
+
 function adminRankedList() {
   const validIds = allDestinations().map(d => d.id).filter(id => !blockedIds.includes(id) && !hiddenIds.includes(id));
   const ranked = adminRanking.filter(id => validIds.includes(id));
@@ -2594,8 +3471,11 @@ function adminRankedList() {
 }
 function goAdminRanking() {
   if (adminRanking.length === 0) adminRanking = adminRankedList();
-  view = 'adminRanking';
-  render();
+  navigate(() => {
+    view = 'adminRanking';
+    window.scrollTo(0, 0);
+    render();
+  });
 }
 function addHighlight(id, text) {
   const d = getDest(id);
@@ -2713,6 +3593,32 @@ function renderMap() {
   const view_ = el('div', 'view');
   view_.appendChild(appTitle());
 
+  const countdown = tripCountdown();
+  const winner = winnerId() ? getDest(winnerId()) : null;
+  if (countdown) {
+    const cd = el('button', 'countdown-card');
+    cd.appendChild(txt('div', 'countdown-big', countdown.big));
+    const cdText = el('div', 'countdown-text');
+    cdText.appendChild(txt('div', 'countdown-label', countdown.label));
+    cdText.appendChild(txt('div', 'countdown-sub', countdown.sub));
+    cd.appendChild(cdText);
+    cd.addEventListener('click', () => { if (winner) goDetail(winner.id); else goProfile(); });
+    view_.appendChild(cd);
+  }
+
+  if (shouldShowPushBanner()) {
+    const banner = el('div', 'push-banner');
+    banner.appendChild(txt('div', 'push-banner-text', '🔔 Get a ping when ' + partnerName() + ' swipes, matches, or adds a city'));
+    const onBtn = el('button', 'push-banner-on', 'Turn on');
+    onBtn.addEventListener('click', enableNotifications);
+    const offBtn = el('button', 'push-banner-x', '×');
+    offBtn.setAttribute('aria-label', 'Dismiss');
+    offBtn.addEventListener('click', dismissPushBanner);
+    banner.appendChild(onBtn);
+    banner.appendChild(offBtn);
+    view_.appendChild(banner);
+  }
+
   const toSwipe = swipeableDestinations().filter(d => !swipes[profile][d.id]).length;
   const newMatches = unseenMatchIds().length;
   const swipeBtn = el('button', 'swipe-cta', '💘 Swipe destinations');
@@ -2721,15 +3627,24 @@ function renderMap() {
   swipeBtn.addEventListener('click', goSwipe);
   view_.appendChild(swipeBtn);
 
-  const priBtn = el('button', 'confirm-btn', '🗳️ Pick your destination ranking');
-  priBtn.style.marginBottom = '6px';
-  priBtn.addEventListener('click', goPriorities);
-  view_.appendChild(priBtn);
+  if (winner) {
+    const winBtn = el('button', 'winner-cta');
+    winBtn.appendChild(txt('span', null, '🏆 It\\'s decided: ' + winner.city));
+    winBtn.appendChild(txt('span', 'winner-cta-sub', 'Tap for the reveal'));
+    winBtn.addEventListener('click', () => showReveal(winner.id));
+    view_.appendChild(winBtn);
+    if (!revealSeen(winner.id)) setTimeout(() => { if (view === 'map' && !revealSeen(winner.id)) showReveal(winner.id); }, 600);
+  } else {
+    const priBtn = el('button', 'confirm-btn', '🗳️ Pick your destination ranking');
+    priBtn.style.marginBottom = '6px';
+    priBtn.addEventListener('click', goPriorities);
+    view_.appendChild(priBtn);
 
-  const priRemaining = cooldownRemaining();
-  view_.appendChild(el('div', 'priority-status', priRemaining > 0
-    ? '🔒 Next pick in ' + formatCountdown(priRemaining)
-    : 'Last daily pick will be erased.'));
+    const priRemaining = cooldownRemaining();
+    view_.appendChild(el('div', 'priority-status', priRemaining > 0
+      ? '🔒 Next pick in ' + formatCountdown(priRemaining)
+      : 'Last daily pick will be erased.'));
+  }
 
   const tabs = el('div', 'region-tabs');
   Object.keys(REGIONS).forEach(key => {
@@ -2846,6 +3761,7 @@ function renderMap() {
     row.style.setProperty('--plan-color', plan.color);
     row.dataset.coverFor = d.id;
     row.dataset.coverShade = '1';
+    row.dataset.morph = d.id;
     if (d.cover) row.style.backgroundImage = coverBackground(d, true);
     const left = el('div', 'dest-row-left');
     left.appendChild(el('div', 'dest-row-name', d.city));
@@ -2921,6 +3837,7 @@ function buildSwipeCard(d, isTop) {
   const plan = planOf(d);
   const card = el('div', 'swipe-card ' + (isTop ? 'is-top' : 'is-next'));
   card.dataset.coverFor = d.id;
+  if (isTop) card.dataset.morph = d.id;
   card.style.setProperty('--plan-color', plan.color);
   card.style.setProperty('--plan-dim', plan.dim);
   if (d.cover) card.style.backgroundImage = coverBackground(d, false);
@@ -3005,6 +3922,7 @@ function renderSwipe() {
       chip.style.setProperty('--plan-color', plan.color);
       chip.style.setProperty('--plan-dim', plan.dim);
       chip.dataset.coverFor = d.id;
+      chip.dataset.morph = d.id;
       if (d.cover) chip.style.backgroundImage = coverBackground(d, false);
       chip.appendChild(txt('span', 'match-chip-city', d.city));
       chip.addEventListener('click', () => goDetail(d.id));
@@ -3036,6 +3954,42 @@ function renderProfile() {
   const switchBtn = el('button', 'add-city-row', '↺ Switch to ' + (profile === 'luis' ? 'Eleny' : 'Luis'));
   switchBtn.addEventListener('click', goIntro);
   view_.appendChild(switchBtn);
+
+  const tripCard = el('div', 'add-city-form profile-info-card');
+  tripCard.appendChild(el('div', 'add-city-label', '✈️ TRIP DATES'));
+  const dateRow = el('div', 'trip-dates');
+  [['start', 'Leaving', tripStart], ['end', 'Coming back', tripEnd]].forEach(([field, label, value]) => {
+    const wrap = el('label', 'trip-date');
+    wrap.appendChild(txt('span', 'add-city-label', label));
+    const input = document.createElement('input');
+    input.type = 'date';
+    input.value = value || '';
+    if (field === 'end' && tripStart) input.min = tripStart;
+    input.addEventListener('change', () => setTripDate(field, input.value));
+    wrap.appendChild(input);
+    dateRow.appendChild(wrap);
+  });
+  tripCard.appendChild(dateRow);
+  tripCard.appendChild(txt('div', 'trip-dates-hint', 'Shared with ' + partnerName() + ' — starts the countdown on the map.'));
+  view_.appendChild(tripCard);
+
+  const notifCard = el('div', 'add-city-form profile-info-card');
+  notifCard.appendChild(el('div', 'add-city-label', '🔔 NOTIFICATIONS'));
+  const perm = pushSupported() ? Notification.permission : 'unsupported';
+  if (pushSubscribed && perm === 'granted') {
+    notifCard.appendChild(txt('div', 'notif-status is-on', '✓ On — you\\'ll get a ping when ' + partnerName() + ' swipes, matches, or adds a city.'));
+  } else if (perm === 'denied') {
+    notifCard.appendChild(txt('div', 'notif-status', 'Blocked. Turn them on in your phone\\'s Settings → Notifications → Here & There.'));
+  } else if (perm === 'unsupported') {
+    notifCard.appendChild(txt('div', 'notif-status', isIOS() && !isStandalone()
+      ? 'Add Here & There to your Home Screen, open it from there, then come back here.'
+      : 'This browser doesn\\'t support notifications.'));
+  } else {
+    const onBtn = el('button', 'confirm-btn', '🔔 Turn on notifications');
+    onBtn.addEventListener('click', enableNotifications);
+    notifCard.appendChild(onBtn);
+  }
+  view_.appendChild(notifCard);
 
   const info = profileInfo[profile] || {};
 
@@ -3105,8 +4059,10 @@ function buildDetailCard(d, plan) {
   card.style.setProperty('--plan-soft1', hexToRgba(plan.color, 0.32));
   card.style.setProperty('--plan-soft2', hexToRgba(plan.dim, 0.22));
 
+  if (!d.cover) card.dataset.morph = d.id;
   if (d.cover) {
     const hero = el('div', 'detail-cover');
+    hero.dataset.morph = d.id;
     hero.style.backgroundImage = 'url("' + d.cover + '")';
     hero.addEventListener('click', () => showPhotoLightbox(d.cover, d.city, () => setCoverPhoto(d.id)));
     const changeBtn = el('button', 'detail-cover-change', '📷 Change');
@@ -3148,6 +4104,7 @@ function buildDetailCard(d, plan) {
   const head = el('div', 'detail-head');
   const headLeft = el('div', 'detail-head-left');
   headLeft.appendChild(el('div', 'detail-city', d.city));
+  if (winnerId() === d.id) headLeft.appendChild(txt('div', 'admin-pick-banner is-top-pick', '🏆 Our destination'));
   const rankPos = adminRanking.indexOf(d.id);
   if (rankPos === 0) headLeft.appendChild(el('div', 'admin-pick-banner is-top-pick', 'Luis\\'s top pick'));
   else if (rankPos > 0) headLeft.appendChild(el('div', 'admin-pick-banner', '👑 #' + (rankPos + 1) + ' on Luis\\'s list'));
@@ -3195,8 +4152,11 @@ function buildDetailCard(d, plan) {
     card.appendChild(priceBlock);
   }
 
+  if (winnerId() === d.id || itineraryHasStops(d.id)) card.appendChild(buildItinerary(d));
+
   const section = el('div', 'detail-section');
   section.appendChild(el('div', 'detail-label', 'HIGHLIGHTS'));
+  section.appendChild(txt('div', 'rx-hint', 'Tap ☺︎ to react — ' + partnerName() + ' sees it too.'));
 
   if (d.cities) {
     const cityTabs = el('div', 'city-tabs');
@@ -3238,6 +4198,8 @@ function buildDetailCard(d, plan) {
       row.appendChild(thumbBtn);
     }
     row.appendChild(el('div', 'highlight-name', h.name));
+    row.appendChild(buildReactions(d, h));
+    if (reactionFor('luis', d.id, h.name) === 'love' && reactionFor('eleny', d.id, h.name) === 'love') row.classList.add('both-love');
     const del = el('button', 'highlight-del', '×');
     del.addEventListener('click', () => removeHighlight(d.id, idx));
     row.appendChild(del);
@@ -3399,17 +4361,25 @@ function renderPriorities() {
 
   if (justEliminatedId) {
     const gone = getDest(justEliminatedId);
-    if (gone) view_.appendChild(el('div', 'elim-banner', '💔 ' + gone.city + ' just got cut — ' + priorityOrder.length + ' left.'));
+    if (gone) view_.appendChild(el('div', 'elim-banner', '💔 ' + gone.city + ' just got cut — ' + activePriorityOrder().length + ' left.'));
   }
 
-  if (priorityOrder.length <= 1) {
-    const winnerId = priorityOrder[0];
-    const winner = winnerId ? getDest(winnerId) : null;
+  const active = activePriorityOrder();
+  if (active.length <= 1) {
+    const winner = active[0] ? getDest(active[0]) : null;
     const card = el('div', 'winner-card');
     card.appendChild(el('div', 'winner-trophy', '🏆'));
     card.appendChild(el('div', 'winner-city', winner ? winner.city : '—'));
     card.appendChild(el('div', 'winner-sub', 'That\\'s it — this is the one.'));
     view_.appendChild(card);
+    if (winner) {
+      const planBtn = el('button', 'confirm-btn winner-action', '🗓️ Plan the trip →');
+      planBtn.addEventListener('click', () => { pendingScrollTo = 'itinerary'; goDetail(winner.id); });
+      view_.appendChild(planBtn);
+      const replayBtn = el('button', 'match-keep winner-action', '🎉 Watch the reveal again');
+      replayBtn.addEventListener('click', () => showReveal(winner.id));
+      view_.appendChild(replayBtn);
+    }
     return view_;
   }
 
@@ -3425,7 +4395,7 @@ function renderPriorities() {
   }
 
   const list = el('div', 'priority-list');
-  priorityOrder.forEach((id, idx) => {
+  active.forEach((id, idx) => {
     const d = getDest(id);
     if (!d) return;
     const plan = planOf(d);
@@ -3440,7 +4410,9 @@ function renderPriorities() {
     list.appendChild(row);
   });
   view_.appendChild(list);
-  if (remaining === 0) initSortable(list, (newOrder) => { priorityOrder = newOrder; });
+  if (remaining === 0) initSortable(list, (newOrder) => {
+    priorityOrder = newOrder.concat(priorityOrder.filter(id => !newOrder.includes(id)));
+  });
 
   if (remaining === 0) {
     const confirmBtn = el('button', 'confirm-btn', 'Lock in today\\'s ranking →');
@@ -3487,7 +4459,7 @@ function renderAdminRanking() {
   if (isAdmin) {
     initSortable(list, (newOrder) => {
       adminRanking = newOrder;
-      savePriorities();
+      saveState(['adminRanking']);
     });
   }
 
@@ -3545,8 +4517,11 @@ Promise.all([
   loadLodgingData(),
   loadCostsData(),
   loadSwipes(false),
+  loadReactions(),
+  loadItineraries(),
 ])
-  .then(() => { backfillIconicHighlights(); render(); });
+  .then(() => { ensurePriorityOrderComplete(); backfillIconicHighlights(); render(); });
+registerServiceWorker();
 
 `;
 

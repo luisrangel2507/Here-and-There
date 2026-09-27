@@ -17,6 +17,8 @@ model AppState {
   profileInfo    Json     @default("{}") @map("profile_info")
   adminRanking   Json     @default("[]") @map("admin_ranking")
   elenyHiddenIds Json     @default("[]") @map("eleny_hidden_ids")
+  tripStart      String?  @map("trip_start")
+  tripEnd        String?  @map("trip_end")
   lastSubmitAt   DateTime? @map("last_submit_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
@@ -88,4 +90,45 @@ model Swipe {
 
   @@id([profile, destId])
   @@map("swipes")
+}
+
+// One row per (traveler, destination, highlight) reaction: "love" | "maybe" | "nope".
+model Reaction {
+  profile   String
+  destId    String   @map("dest_id")
+  name      String
+  reaction  String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@id([profile, destId, name])
+  @@map("reactions")
+}
+
+// Day-by-day plan for a destination: [[{ name }, ...], ...] (one inner list per day).
+model Itinerary {
+  destId    String   @id @map("dest_id")
+  days      Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("itineraries")
+}
+
+// Web Push subscriptions, one per device, tagged with the traveler using it.
+model PushSubscription {
+  endpoint  String   @id
+  profile   String
+  keys      Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("push_subscriptions")
+}
+
+// Single row holding the VAPID key pair, generated on first use so no env
+// setup is needed to turn notifications on.
+model PushConfig {
+  id         Int      @id @default(1)
+  publicKey  String   @map("public_key")
+  privateKey String   @map("private_key")
+
+  @@map("push_config")
 }
