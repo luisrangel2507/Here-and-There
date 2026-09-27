@@ -16,6 +16,8 @@ function compose(from: string, type: string, city: string, count: number): PushP
       };
     case 'winner':
       return { title: '✈️ It\'s decided!', body: 'You\'re going to ' + city + '. Open the app for the big reveal.', tag: 'winner' };
+    case 'availability':
+      return { title: '📅 Free days updated', body: who + ' marked the days they can travel — see where you overlap.', tag: 'availability' };
     case 'trip_dates':
       return { title: '🗓️ Trip dates set', body: who + ' set the dates — the countdown is on.', tag: 'dates' };
     default:

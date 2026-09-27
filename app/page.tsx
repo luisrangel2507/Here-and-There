@@ -1535,6 +1535,123 @@ const APP_STYLE = `
     line-height:1.1;
   }
 
+  /* availability calendar */
+  .avail-hint{font-size:12px;color:rgba(255,255,255,0.8);margin:-2px 0 12px;line-height:1.45;}
+  .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .cal-month{font-family:'Fraunces', serif;font-style:italic;font-weight:700;font-size:18px;}
+  .cal-arrow{
+    width:34px;height:34px;
+    border:none;
+    border-radius:50%;
+    background:rgba(255,255,255,0.18);
+    color:#fff;
+    font-size:20px;
+    line-height:1;
+    cursor:pointer;
+  }
+  .cal-arrow:disabled{opacity:0.3;cursor:default;}
+  .cal-grid{
+    display:grid;
+    grid-template-columns:repeat(7, 1fr);
+    gap:4px;
+    touch-action:none;
+    user-select:none;
+    -webkit-user-select:none;
+  }
+  .cal-dow{text-align:center;font-size:10.5px;font-weight:700;opacity:0.7;padding-bottom:2px;}
+  .cal-day{
+    position:relative;
+    aspect-ratio:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:12px;
+    font-size:13px;
+    font-weight:600;
+    background:rgba(255,255,255,0.1);
+    cursor:pointer;
+    transition:background .15s ease, transform .15s var(--ease-spring);
+  }
+  .cal-day.is-past{opacity:0.3;cursor:default;}
+  .cal-day.is-today{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,0.7);}
+  .cal-day.is-mine{background:var(--turquoise);color:#fff;transform:scale(0.94);}
+  .cal-day.is-theirs::after{
+    content:'';
+    position:absolute;
+    bottom:4px;
+    width:6px;height:6px;
+    border-radius:50%;
+    background:var(--sun);
+    box-shadow:0 0 0 1.5px rgba(20,10,30,0.25);
+  }
+  .cal-day.is-both{background:linear-gradient(135deg, var(--sky-pink), var(--coral));color:#fff;box-shadow:0 4px 12px rgba(255,111,145,0.5);}
+  .cal-day.is-both::after{background:#fff;}
+  .cal-day.is-trip{outline:2px solid #fff;outline-offset:-2px;}
+  .cal-legend{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 4px;font-size:11px;font-weight:600;}
+  .cal-key{display:inline-flex;align-items:center;gap:5px;}
+  .cal-key::before{content:'';width:12px;height:12px;border-radius:4px;}
+  .key-mine::before{background:var(--turquoise);}
+  .key-theirs::before{width:7px;height:7px;border-radius:50%;background:var(--sun);}
+  .key-both::before{background:linear-gradient(135deg, var(--sky-pink), var(--coral));}
+  .key-trip::before{border:2px solid #fff;box-sizing:border-box;}
+  .avail-windows{margin-top:12px;}
+  .avail-windows-title{font-size:11px;font-weight:700;letter-spacing:0.12em;margin-bottom:8px;}
+  .avail-window{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 12px;
+    margin-bottom:8px;
+    border-radius:14px;
+    background:rgba(255,255,255,0.14);
+    border:1px solid rgba(255,111,145,0.45);
+  }
+  .avail-window-dates{font-weight:700;font-size:14px;}
+  .avail-window-len{font-size:11px;opacity:0.8;}
+  .avail-use{
+    flex:0 0 auto;
+    border:none;
+    border-radius:999px;
+    padding:8px 14px;
+    background:#fff;
+    color:var(--ink);
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    font-size:12px;
+    cursor:pointer;
+  }
+  .avail-use.is-set{background:rgba(255,255,255,0.25);color:#fff;cursor:default;}
+  .avail-empty{font-size:12.5px;opacity:0.85;line-height:1.45;}
+  .avail-clear{
+    margin-top:10px;
+    border:none;
+    background:none;
+    color:rgba(255,255,255,0.7);
+    font-family:'Poppins', sans-serif;
+    font-size:12px;
+    text-decoration:underline;
+    cursor:pointer;
+    padding:0;
+  }
+  .avail-nudge{
+    display:block;
+    width:100%;
+    text-align:left;
+    border:1.5px solid rgba(255,255,255,0.35);
+    border-radius:18px;
+    padding:12px 16px;
+    margin-bottom:12px;
+    background:rgba(14,165,160,0.35);
+    backdrop-filter:blur(10px);
+    color:#fff;
+    font-family:'Poppins', sans-serif;
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+    animation:fadeSlideUp .5s var(--ease-out) both;
+  }
+
   /* countdown */
   .countdown-card{
     display:flex;
@@ -2697,6 +2814,7 @@ function goProfile() {
     view = 'profile';
     window.scrollTo(0, 0);
     render();
+    applyPendingScroll();
   });
 }
 function backFromProfile() {
@@ -2728,11 +2846,7 @@ function goDetail(id) {
     selectedHighlightCity = d.cities ? d.cities[0] : null;
     window.scrollTo(0, 0);
     render();
-    if (pendingScrollTo) {
-      const target = document.getElementById(pendingScrollTo);
-      pendingScrollTo = null;
-      if (target) window.scrollTo(0, target.getBoundingClientRect().top + window.scrollY - 16);
-    }
+    applyPendingScroll();
   }, id);
   loadPhotosFor(id).then(() => refreshDetailCard(id));
 }
@@ -3067,6 +3181,190 @@ function setTripDate(field, value) {
   if (tripStart) notifyPartner('trip_dates');
   render();
 }
+function setTripRange(start, end) {
+  tripStart = start;
+  tripEnd = end;
+  saveState(['tripStart', 'tripEnd']);
+  notifyPartner('trip_dates');
+  haptic([20, 40, 20]);
+  render();
+}
+
+// ---- availability ("when I'm free") ----
+// Stored per traveler in profileInfo[who].freeDays as 'YYYY-MM-DD' strings.
+let calendarMonth = null; // Date on the 1st of the month being shown
+let availabilityNotifyTimer = null;
+function ymd(date) {
+  return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+}
+function todayYmd() { return ymd(new Date()); }
+function freeDaysOf(who) {
+  const info = profileInfo[who] || {};
+  return Array.isArray(info.freeDays) ? info.freeDays : [];
+}
+function setMyFreeDays(days) {
+  const today = todayYmd();
+  saveProfileInfo('freeDays', Array.from(new Set(days)).filter(day => day >= today).sort());
+  clearTimeout(availabilityNotifyTimer);
+  availabilityNotifyTimer = setTimeout(() => notifyPartner('availability'), 15000);
+}
+function sharedWindows() {
+  const partner = profile === 'luis' ? 'eleny' : 'luis';
+  const theirs = new Set(freeDaysOf(partner));
+  const both = freeDaysOf(profile).filter(day => theirs.has(day) && day >= todayYmd()).sort();
+  const windows = [];
+  both.forEach(day => {
+    const last = windows[windows.length - 1];
+    if (last) {
+      const next = parseDay(last.end);
+      next.setDate(next.getDate() + 1);
+      if (ymd(next) === day) { last.end = day; last.length++; return; }
+    }
+    windows.push({ start: day, end: day, length: 1 });
+  });
+  return windows.sort((a, b) => b.length - a.length || (a.start < b.start ? -1 : 1));
+}
+function formatShort(str) {
+  return parseDay(str).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+function formatWindow(w) {
+  return w.start === w.end ? formatShort(w.start) : formatShort(w.start) + ' – ' + formatShort(w.end);
+}
+function refreshAvailabilityCard() {
+  const old = document.getElementById('availability');
+  if (old) old.replaceWith(buildAvailabilityCard());
+}
+function buildAvailabilityCard() {
+  const partner = profile === 'luis' ? 'eleny' : 'luis';
+  const mine = new Set(freeDaysOf(profile));
+  const theirs = new Set(freeDaysOf(partner));
+  const today = todayYmd();
+  if (!calendarMonth) {
+    const base = tripStart ? parseDay(tripStart) : new Date();
+    calendarMonth = new Date(base.getFullYear(), base.getMonth(), 1);
+  }
+
+  const card = el('div', 'add-city-form profile-info-card avail-card');
+  card.id = 'availability';
+  card.appendChild(el('div', 'add-city-label', '📅 WHEN I\\'M FREE'));
+  card.appendChild(txt('div', 'avail-hint', 'Tap or drag across the days you can travel. ' + partnerName() + ' sees them too.'));
+
+  const nav = el('div', 'cal-nav');
+  const prev = el('button', 'cal-arrow', '‹');
+  prev.setAttribute('aria-label', 'Previous month');
+  const thisMonth = new Date();
+  const atFirst = calendarMonth.getFullYear() === thisMonth.getFullYear() && calendarMonth.getMonth() === thisMonth.getMonth();
+  prev.disabled = atFirst;
+  prev.addEventListener('click', () => { calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1); refreshAvailabilityCard(); });
+  const next = el('button', 'cal-arrow', '›');
+  next.setAttribute('aria-label', 'Next month');
+  next.addEventListener('click', () => { calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1); refreshAvailabilityCard(); });
+  nav.appendChild(prev);
+  nav.appendChild(txt('div', 'cal-month', calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })));
+  nav.appendChild(next);
+  card.appendChild(nav);
+
+  const grid = el('div', 'cal-grid');
+  ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(d => grid.appendChild(txt('div', 'cal-dow', d)));
+  const first = calendarMonth.getDay();
+  for (let i = 0; i < first; i++) grid.appendChild(el('div', 'cal-pad'));
+  const daysInMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0).getDate();
+  for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
+    const key = ymd(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), dayNum));
+    const isMine = mine.has(key);
+    const isTheirs = theirs.has(key);
+    const inTrip = tripStart && key >= tripStart && key <= (tripEnd || tripStart);
+    const cls = 'cal-day' + (key < today ? ' is-past' : '') + (isMine ? ' is-mine' : '') + (isTheirs ? ' is-theirs' : '') + (isMine && isTheirs ? ' is-both' : '') + (inTrip ? ' is-trip' : '') + (key === today ? ' is-today' : '');
+    const cell = txt('div', cls, String(dayNum));
+    cell.dataset.day = key;
+    grid.appendChild(cell);
+  }
+  attachCalendarPaint(grid, mine);
+  card.appendChild(grid);
+
+  const legend = el('div', 'cal-legend');
+  legend.appendChild(txt('span', 'cal-key key-mine', 'You'));
+  legend.appendChild(txt('span', 'cal-key key-theirs', partnerName()));
+  legend.appendChild(txt('span', 'cal-key key-both', 'Both free'));
+  if (tripStart) legend.appendChild(txt('span', 'cal-key key-trip', 'Trip'));
+  card.appendChild(legend);
+
+  const windows = sharedWindows().slice(0, 3);
+  const box = el('div', 'avail-windows');
+  if (windows.length) {
+    box.appendChild(txt('div', 'avail-windows-title', '💘 You\\'re both free'));
+    windows.forEach(w => {
+      const row = el('div', 'avail-window');
+      const info = el('div', 'avail-window-info');
+      info.appendChild(txt('div', 'avail-window-dates', formatWindow(w)));
+      info.appendChild(txt('div', 'avail-window-len', w.length + (w.length === 1 ? ' day' : ' days')));
+      row.appendChild(info);
+      const isCurrent = tripStart === w.start && (tripEnd || tripStart) === w.end;
+      const use = el('button', 'avail-use' + (isCurrent ? ' is-set' : ''), isCurrent ? '✓ Trip dates' : 'Use these dates');
+      if (!isCurrent) use.addEventListener('click', () => setTripRange(w.start, w.end));
+      row.appendChild(use);
+      box.appendChild(row);
+    });
+  } else if (!mine.size) {
+    box.appendChild(txt('div', 'avail-empty', theirs.size
+      ? partnerName() + ' marked ' + theirs.size + ' free day' + (theirs.size === 1 ? '' : 's') + ' — add yours to find the overlap.'
+      : 'Mark your free days to get started.'));
+  } else if (!theirs.size) {
+    box.appendChild(txt('div', 'avail-empty', 'Waiting on ' + partnerName() + ' to mark some free days.'));
+  } else {
+    box.appendChild(txt('div', 'avail-empty', 'No overlap yet — try a few more days.'));
+  }
+  card.appendChild(box);
+
+  if (mine.size) {
+    const clear = el('button', 'avail-clear', 'Clear my days');
+    clear.addEventListener('click', () => {
+      if (!window.confirm('Clear all the days you marked as free?')) return;
+      setMyFreeDays([]);
+      refreshAvailabilityCard();
+    });
+    card.appendChild(clear);
+  }
+  return card;
+}
+// Tap toggles a day; dragging paints every day the finger crosses with the
+// same add/remove as the first day touched.
+function attachCalendarPaint(grid, mine) {
+  let painting = null; // { adding: bool, days: Set }
+  const dayAt = (x, y) => {
+    const node = document.elementFromPoint(x, y);
+    return node && node.classList && node.classList.contains('cal-day') && !node.classList.contains('is-past') ? node : null;
+  };
+  const paint = (cell) => {
+    if (!cell || painting.days.has(cell.dataset.day)) return;
+    painting.days.add(cell.dataset.day);
+    cell.classList.toggle('is-mine', painting.adding);
+    cell.classList.toggle('is-both', painting.adding && cell.classList.contains('is-theirs'));
+    haptic(5);
+  };
+  grid.addEventListener('pointerdown', (e) => {
+    const cell = dayAt(e.clientX, e.clientY);
+    if (!cell) return;
+    e.preventDefault();
+    painting = { adding: !mine.has(cell.dataset.day), days: new Set() };
+    try { grid.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    paint(cell);
+  });
+  grid.addEventListener('pointermove', (e) => {
+    if (painting) paint(dayAt(e.clientX, e.clientY));
+  });
+  const finish = () => {
+    if (!painting) return;
+    const next = new Set(mine);
+    painting.days.forEach(day => { if (painting.adding) next.add(day); else next.delete(day); });
+    painting = null;
+    setMyFreeDays(Array.from(next));
+    refreshAvailabilityCard();
+  };
+  grid.addEventListener('pointerup', finish);
+  grid.addEventListener('pointercancel', finish);
+}
+
 function tripCountdown() {
   if (!tripStart) return null;
   const days = daysUntil(tripStart);
@@ -3294,6 +3592,12 @@ function buildReactions(d, h) {
 let itineraries = {}; // destId -> [[{ name }], ...]
 let openItineraryDay = null;
 let pendingScrollTo = null;
+function applyPendingScroll() {
+  if (!pendingScrollTo) return;
+  const target = document.getElementById(pendingScrollTo);
+  pendingScrollTo = null;
+  if (target) window.scrollTo(0, target.getBoundingClientRect().top + window.scrollY - 16);
+}
 async function loadItineraries() {
   try {
     const res = await fetch('/api/itinerary');
@@ -3604,6 +3908,24 @@ function renderMap() {
     cd.appendChild(cdText);
     cd.addEventListener('click', () => { if (winner) goDetail(winner.id); else goProfile(); });
     view_.appendChild(cd);
+  }
+
+  if (!tripStart) {
+    const myDays = freeDaysOf(profile).length;
+    const theirDays = freeDaysOf(profile === 'luis' ? 'eleny' : 'luis').length;
+    const best = sharedWindows()[0];
+    const nudgeText = best
+      ? '📅 You\\'re both free ' + formatWindow(best) + ' — lock in the dates?'
+      : !myDays && theirDays
+      ? '📅 ' + partnerName() + ' marked some free days — add yours'
+      : !myDays
+      ? '📅 Mark the dates you\\'re free to travel'
+      : null;
+    if (nudgeText) {
+      const nudge = txt('button', 'avail-nudge', nudgeText);
+      nudge.addEventListener('click', () => { pendingScrollTo = 'availability'; goProfile(); });
+      view_.appendChild(nudge);
+    }
   }
 
   if (shouldShowPushBanner()) {
@@ -3954,6 +4276,8 @@ function renderProfile() {
   const switchBtn = el('button', 'add-city-row', '↺ Switch to ' + (profile === 'luis' ? 'Eleny' : 'Luis'));
   switchBtn.addEventListener('click', goIntro);
   view_.appendChild(switchBtn);
+
+  view_.appendChild(buildAvailabilityCard());
 
   const tripCard = el('div', 'add-city-form profile-info-card');
   tripCard.appendChild(el('div', 'add-city-label', '✈️ TRIP DATES'));
