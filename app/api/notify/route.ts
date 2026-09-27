@@ -1,5 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { NAMES, PROFILES, partnerOf, sendToProfile, PushPayload } from '@/lib/push';
+import { logActivity } from '@/lib/activity';
+
+// Feed entry for each event: [profile ('both' = shared moment), emoji, text without the subject].
+function feedEntry(from: string, type: string, city: string): [string, string, string] | null {
+  switch (type) {
+    case 'city_added': return [from, '📍', 'added ' + city];
+    case 'city_cut': return [from, '💔', 'cut ' + city + ' from the ranking'];
+    case 'winner': return ['both', '✈️', 'It\'s decided — you\'re going to ' + city + '!'];
+    case 'trip_dates': return [from, '🗓️', 'set the trip dates'];
+    case 'availability': return [from, '📅', 'marked new free days'];
+    default: return null;
+  }
+}
 
 // Messages are composed here from a fixed set of event types, so the client
 // only supplies who did it and which city.
@@ -36,6 +49,8 @@ export async function POST(req: NextRequest) {
   const payload = compose(from, type, city, count);
   if (!payload) return NextResponse.json({ error: 'invalid type' }, { status: 400 });
 
+  const entry = feedEntry(from, type, city);
+  if (entry) await logActivity(entry[0], entry[1], entry[2], typeof body.destId === 'string' ? body.destId : null);
   try {
     await sendToProfile(partnerOf(from), payload);
   } catch (e) { /* notifications are best-effort */ }

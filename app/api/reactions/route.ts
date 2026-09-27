@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { PROFILES } from '@/lib/push';
+import { logActivity } from '@/lib/activity';
 
 const REACTIONS = ['love', 'maybe', 'nope'];
 
@@ -15,7 +16,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const { profile, destId, name, reaction } = (await req.json()) ?? {};
+  const { profile, destId, name, reaction, city } = (await req.json()) ?? {};
   if (!PROFILES.includes(profile) || typeof destId !== 'string' || typeof name !== 'string' || !destId || !name) {
     return NextResponse.json({ error: 'invalid request' }, { status: 400 });
   }
@@ -31,5 +32,8 @@ export async function POST(req: NextRequest) {
     create: { profile, destId, name, reaction },
     update: { reaction },
   });
+  if (reaction === 'love') {
+    await logActivity(profile, '😍', 'loved ' + name + (typeof city === 'string' && city ? ' in ' + city : ''), destId);
+  }
   return NextResponse.json({ ok: true });
 }

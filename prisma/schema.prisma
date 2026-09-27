@@ -132,3 +132,17 @@ model PushConfig {
 
   @@map("push_config")
 }
+
+// Shared "what's new" feed. profile is "luis", "eleny", or "both" (e.g. a match);
+// text is written without the subject ("added Bacalar") so the UI can prefix it.
+model Activity {
+  id        Int      @id @default(autoincrement())
+  profile   String
+  emoji     String
+  text      String
+  destId    String?  @map("dest_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("activity")
+}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { PROFILES, NAMES, partnerOf, sendToProfile } from '@/lib/push';
+import { logActivity } from '@/lib/activity';
 const CHOICES = ['like', 'nope'];
 
 export async function GET() {
@@ -50,6 +51,7 @@ export async function POST(req: NextRequest) {
     const partnerSwipe = await prisma.swipe.findUnique({ where: { profile_destId: { profile: partner, destId } } });
     if (partnerSwipe && partnerSwipe.choice === 'like') {
       const city = typeof body.city === 'string' ? body.city.slice(0, 60) : 'a destination';
+      await logActivity('both', '💘', 'It\'s a match: ' + city, destId);
       sendToProfile(partner, {
         title: '💘 It\'s a match!',
         body: 'You and ' + NAMES[profile] + ' both want to go to ' + city + '.',

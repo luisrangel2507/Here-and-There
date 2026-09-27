@@ -1535,6 +1535,252 @@ const APP_STYLE = `
     line-height:1.1;
   }
 
+  /* flight routes & home bases */
+  .route-layer{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible;}
+  .route-glow{
+    fill:none;
+    stroke:var(--route-color);
+    stroke-linecap:round;
+    opacity:0.75;
+    filter:drop-shadow(0 0 4px var(--route-color));
+    stroke-dasharray:1;
+    stroke-dashoffset:1;
+    animation:routeDraw 1.1s var(--ease-out) forwards;
+  }
+  .route-dash{
+    fill:none;
+    stroke:#fff;
+    stroke-linecap:round;
+    opacity:0;
+    animation:routeFade .5s ease forwards, routeMarch 1.4s linear infinite;
+  }
+  .route-shade{fill:none;stroke:rgba(20,10,30,0.45);stroke-linecap:round;opacity:0;animation:routeFade .5s ease forwards;}
+  @keyframes routeDraw{ to{stroke-dashoffset:0;} }
+  @keyframes routeFade{ to{opacity:0.95;} }
+  @keyframes routeMarch{ to{stroke-dashoffset:calc(var(--dash-cycle, 17) * -1px);} }
+  .route-plane path{fill:#fff;stroke:var(--route-color);stroke-width:1.2;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.45));}
+  .home-pin{
+    position:absolute;
+    z-index:2;
+    width:30px;height:30px;
+    transform:translate(-50%,-50%);
+    pointer-events:none;
+    animation:popIn .5s var(--ease-spring) .2s both;
+  }
+  .home-pin-flag{
+    position:relative;
+    width:30px;height:30px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;
+    background:#fff;
+    border:2.5px solid var(--route-color);
+    box-shadow:0 4px 10px rgba(0,0,0,0.35);
+  }
+  .home-pin-pulse{
+    position:absolute;
+    inset:-6px;
+    border-radius:50%;
+    background:var(--route-color);
+    opacity:0.35;
+    animation:homePulse 2s ease-out infinite;
+  }
+  @keyframes homePulse{ 0%{transform:scale(0.6);opacity:0.5;} 100%{transform:scale(1.7);opacity:0;} }
+  .home-chip{
+    display:block;
+    margin:10px auto 0;
+    border:1px solid rgba(255,255,255,0.35);
+    border-radius:999px;
+    padding:6px 14px;
+    background:rgba(255,255,255,0.12);
+    color:#fff;
+    font-family:'Poppins', sans-serif;
+    font-size:11.5px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .home-chip.is-cancel{background:rgba(255,107,91,0.4);}
+  .pin, .pin-preview{z-index:3;}
+  .pin-dot-wrap{animation:pinDrop .65s var(--ease-spring) backwards;}
+  @keyframes pinDrop{
+    0%{transform:translateY(-34px) scale(0.5);opacity:0;}
+    60%{transform:translateY(3px) scale(1.08);opacity:1;}
+    80%{transform:translateY(-2px) scale(0.98);}
+    100%{transform:none;}
+  }
+
+  /* activity feed */
+  .activity-card{
+    margin-bottom:16px;
+    border-radius:20px;
+    background:rgba(20,10,30,0.32);
+    backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,0.22);
+    overflow:hidden;
+    animation:fadeSlideUp .5s var(--ease-out) both;
+  }
+  .activity-head{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    width:100%;
+    padding:12px 16px 4px;
+    border:none;
+    background:none;
+    color:#fff;
+    font-family:'Poppins', sans-serif;
+    cursor:pointer;
+  }
+  .activity-title{font-size:11px;font-weight:700;letter-spacing:0.14em;}
+  .activity-badge{
+    font-size:10.5px;
+    font-weight:700;
+    padding:2px 8px;
+    border-radius:999px;
+    background:var(--sky-pink);
+    animation:badgePulse 1.6s ease-in-out infinite;
+  }
+  .activity-chevron{margin-left:auto;font-size:16px;opacity:0.8;transition:transform .3s var(--ease-out);}
+  .activity-card.open .activity-chevron{transform:rotate(180deg);}
+  .activity-list{padding:4px 8px 8px;}
+  .activity-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px;
+    border-radius:14px;
+    animation:fadeSlideRight .35s var(--ease-out) both;
+  }
+  .activity-card.open .activity-item:nth-child(2){animation-delay:.04s;}
+  .activity-card.open .activity-item:nth-child(3){animation-delay:.08s;}
+  .activity-card.open .activity-item:nth-child(4){animation-delay:.12s;}
+  .activity-card.open .activity-item:nth-child(n+5){animation-delay:.16s;}
+  .activity-item.is-link{cursor:pointer;}
+  .activity-item.is-link:active{background:rgba(255,255,255,0.1);}
+  .activity-emoji{
+    flex:0 0 auto;
+    width:34px;height:34px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:17px;
+    background:rgba(255,255,255,0.14);
+  }
+  .activity-body{min-width:0;flex:1;}
+  .activity-text{font-size:12.5px;line-height:1.35;}
+  .activity-time{font-size:10.5px;opacity:0.65;margin-top:1px;}
+
+  /* weather */
+  .dest-row-weather{font-size:10.5px;color:rgba(255,255,255,0.85);margin-top:2px;min-height:14px;transition:opacity .4s ease;}
+  .dest-row-weather.is-empty{opacity:0;}
+  .dest-row.has-cover .dest-row-weather{text-shadow:0 1px 6px rgba(0,0,0,0.6);}
+  .detail-weather{font-size:12px;font-weight:600;color:var(--ink-soft);margin:4px 0 2px;min-height:16px;transition:opacity .4s ease;}
+  .detail-weather.is-empty{opacity:0;}
+  .swipe-weather{
+    position:absolute;
+    top:16px; right:16px;
+    z-index:2;
+    padding:6px 12px;
+    border-radius:999px;
+    background:rgba(20,10,30,0.4);
+    backdrop-filter:blur(8px);
+    color:#fff;
+    font-size:12.5px;
+    font-weight:700;
+    transition:opacity .4s ease;
+  }
+  .swipe-weather.is-empty{opacity:0;}
+
+  /* holographic shine on swipe cards */
+  .swipe-shine{
+    position:absolute;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+    opacity:var(--shine-o, 0);
+    background:linear-gradient(115deg, transparent 20%, rgba(255,255,255,0.55) calc(var(--shine-x, 50%) - 8%), rgba(255,190,240,0.35) var(--shine-x, 50%), rgba(150,235,255,0.35) calc(var(--shine-x, 50%) + 6%), transparent 80%);
+    mix-blend-mode:soft-light;
+    transition:opacity .3s ease;
+  }
+  .swipe-card.is-top::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+    background:linear-gradient(110deg, transparent 35%, rgba(255,255,255,0.28) 48%, rgba(255,220,250,0.18) 52%, transparent 65%);
+    background-size:250% 100%;
+    background-position:150% 0;
+    animation:sheen 5.5s ease-in-out 1.2s infinite;
+  }
+  @keyframes sheen{ 0%{background-position:150% 0;} 30%,100%{background-position:-60% 0;} }
+  .swipe-card-info, .swipe-stamp{z-index:2;}
+
+  /* sky */
+  .sky-dawn .bg-overlay{background:linear-gradient(180deg, rgba(255,140,120,0.32) 0%, rgba(90,40,90,0.62) 55%, rgba(30,20,40,0.85) 100%);}
+  .sky-day .bg-overlay{background:linear-gradient(180deg, rgba(60,110,170,0.28) 0%, rgba(40,35,70,0.62) 55%, rgba(30,20,40,0.85) 100%);}
+  .sky-night .bg-overlay{background:linear-gradient(180deg, rgba(10,12,40,0.78) 0%, rgba(12,8,30,0.85) 60%, rgba(8,5,20,0.93) 100%);}
+  .sky-fx{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+  .cloud{
+    position:absolute;
+    left:0;
+    width:280px;height:90px;
+    border-radius:50%;
+    background:radial-gradient(ellipse at 50% 60%, rgba(255,255,255,0.28), rgba(255,255,255,0.08) 55%, transparent 72%);
+    filter:blur(6px);
+    animation-name:cloudDrift;
+    animation-timing-function:linear;
+    animation-iteration-count:infinite;
+  }
+  .sky-night .cloud{opacity:0.35;}
+  @keyframes cloudDrift{ from{translate:-320px 0;} to{translate:calc(100vw + 60px) 0;} }
+  .stars{
+    position:absolute;
+    inset:0;
+    background-image:
+      radial-gradient(1.5px 1.5px at 12% 8%, #fff, transparent),
+      radial-gradient(1px 1px at 28% 22%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 47% 12%, #fff, transparent),
+      radial-gradient(1px 1px at 63% 30%, #fff, transparent),
+      radial-gradient(2px 2px at 81% 9%, #fff, transparent),
+      radial-gradient(1px 1px at 91% 38%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 7% 45%, #fff, transparent),
+      radial-gradient(1px 1px at 35% 52%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 72% 58%, #fff, transparent),
+      radial-gradient(1px 1px at 55% 70%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 18% 78%, #fff, transparent),
+      radial-gradient(1px 1px at 88% 82%, #fff, transparent);
+    animation:twinkle 3.5s ease-in-out infinite alternate;
+  }
+  .stars-b{transform:translate(4%, 6%) scale(1.1);animation-duration:5s;animation-delay:-2s;}
+  @keyframes twinkle{ from{opacity:0.25;} to{opacity:0.9;} }
+
+  /* skeleton hero while photos load */
+  .detail-cover.skeleton{
+    cursor:default;
+    background:linear-gradient(100deg, rgba(43,27,51,0.06) 30%, rgba(43,27,51,0.14) 50%, rgba(43,27,51,0.06) 70%);
+    background-size:220% 100%;
+    animation:thumbShimmer 1.2s ease-in-out infinite;
+  }
+
+  /* pull to refresh */
+  .ptr{
+    position:fixed;
+    top:0; left:50%;
+    z-index:400;
+    width:44px;height:44px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:#fff;
+    box-shadow:0 8px 22px rgba(20,10,30,0.35);
+    font-size:20px;
+    pointer-events:none;
+  }
+  .ptr.ready{box-shadow:0 8px 22px rgba(255,111,145,0.6);}
+  .ptr.spinning{transition:transform .3s var(--ease-out);transform:translate(-50%, 28px) !important;}
+  .ptr.spinning .ptr-plane{display:inline-block;animation:ptrSpin .8s linear infinite;}
+  .ptr.done{transition:transform .35s ease-in, opacity .35s ease;transform:translate(-50%, -60px) !important;opacity:0;}
+  @keyframes ptrSpin{ to{transform:rotate(360deg);} }
+
   /* availability calendar */
   .avail-hint{font-size:12px;color:rgba(255,255,255,0.8);margin:-2px 0 12px;line-height:1.45;}
   .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
@@ -2518,7 +2764,7 @@ function addCustomDestination(city, plan) {
   addingCity = null;
   render();
   saveCustomDestinations(region);
-  notifyPartner('city_added', d.city);
+  notifyPartner('city_added', d.city, 0, d.id);
 }
 
 // ---- photos (uploaded from the device, persisted as compressed data URLs) ----
@@ -2686,12 +2932,12 @@ function submitPriorities() {
   const cut = getDest(eliminatedId);
   const w = winnerId();
   if (w) {
-    notifyPartner('winner', getDest(w).city);
+    notifyPartner('winner', getDest(w).city, 0, w);
     render();
     setTimeout(() => showReveal(w), 350);
     return;
   }
-  notifyPartner('city_cut', cut ? cut.city : '', left);
+  notifyPartner('city_cut', cut ? cut.city : '', left, eliminatedId);
   render();
 }
 
@@ -3015,7 +3261,9 @@ function attachSwipeDrag(card, id) {
     if (!active || e.pointerId !== pointerId) return;
     dx = e.clientX - startX;
     dy = e.clientY - startY;
-    card.style.transform = 'translate(' + dx + 'px,' + (dy * 0.2) + 'px) rotate(' + (dx / 18) + 'deg)';
+    card.style.transform = 'perspective(900px) translate(' + dx + 'px,' + (dy * 0.2) + 'px) rotate(' + (dx / 18) + 'deg) rotateY(' + Math.max(-18, Math.min(18, dx / 12)) + 'deg) rotateX(' + Math.max(-10, Math.min(10, -dy / 25)) + 'deg)';
+    card.style.setProperty('--shine-x', (50 + dx / 3) + '%');
+    card.style.setProperty('--shine-o', Math.min(Math.abs(dx) / 160, 0.7));
     const p = Math.min(Math.abs(dx) / 100, 1);
     likeStamp.style.opacity = dx > 0 ? p : 0;
     nopeStamp.style.opacity = dx < 0 ? p : 0;
@@ -3028,6 +3276,7 @@ function attachSwipeDrag(card, id) {
     if (!cancelled && Math.abs(dx) > 100) { flyOut(card, dx > 0 ? 'like' : 'nope', id); return; }
     card.style.transition = 'transform .4s var(--ease-spring)';
     card.style.transform = '';
+    card.style.setProperty('--shine-o', 0);
     likeStamp.style.opacity = 0;
     nopeStamp.style.opacity = 0;
   }
@@ -3083,13 +3332,13 @@ function showMatch(id) {
 }
 
 // ---- notifications ----
-function notifyPartner(type, city, count) {
+function notifyPartner(type, city, count, destId) {
   if (!profile) return;
   fetch('/api/notify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: profile, type, city: city || '', count: count || 0 }),
-  }).catch(() => {});
+    body: JSON.stringify({ from: profile, type, city: city || '', count: count || 0, destId: destId || null }),
+  }).then(() => loadActivity()).catch(() => {});
 }
 function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent); }
 function isStandalone() {
@@ -3551,7 +3800,7 @@ function setReaction(destId, name, reaction) {
   fetch('/api/reactions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ profile, destId, name, reaction }),
+    body: JSON.stringify({ profile, destId, name, reaction, city: (getDest(destId) || {}).city }),
   }).catch(() => {});
 }
 function closeReactionPicker() {
@@ -3645,6 +3894,7 @@ function autoPlan(destId) {
   });
   haptic(20);
   updateItinerary(destId, days);
+  logActivity('🗓️', 'auto-planned the trip to ' + d.city, destId);
 }
 function addStop(destId, dayIdx, name) {
   if (!name || !name.trim()) return;
@@ -3750,7 +4000,7 @@ function navigate(update, morphId) {
 }
 let lastSyncAt = Date.now();
 async function syncFromServer() {
-  const tasks = [loadSwipes(true), loadReactions(), loadItineraries()];
+  const tasks = [loadSwipes(true), loadReactions(), loadItineraries(), loadActivity()];
   if (view !== 'priorities' && view !== 'adminRanking') tasks.push(loadPriorities());
   await Promise.all(tasks);
   await loadCustomDestinations();
@@ -3765,7 +4015,371 @@ document.addEventListener('visibilitychange', () => {
   if (!profile || Date.now() - lastSyncAt < 4000) return;
   lastSyncAt = Date.now();
   syncFromServer();
+  loadWeather();
 });
+
+// ---- home bases & flight routes ----
+let placingHome = false;
+function homeOf(who) {
+  const info = profileInfo[who] || {};
+  return info.home && info.home.region ? info.home : null;
+}
+function startPlacingHome() {
+  placingHome = true;
+  addingCity = null;
+  movingPinId = null;
+  render();
+}
+function setHome(x, y) {
+  placingHome = false;
+  saveProfileInfo('home', { region, x, y });
+  haptic([15, 30, 15]);
+  render();
+}
+function routeTargets() {
+  const w = winnerId();
+  if (w) return [w];
+  const matches = currentMatchIds();
+  if (matches.length) return matches.slice(0, 4);
+  return adminRanking.length ? [adminRanking[0]] : [];
+}
+const ROUTE_COLORS = { luis: '#FF6B5B', eleny: '#2EC4B6' };
+const PLANE_PATH = 'M-11,-1.6 L3,-1.6 L9,0 L3,1.6 L-11,1.6 Z M-3,-1.6 L-7,-10 L-3.5,-10 L3,-1.6 Z M-3,1.6 L-7,10 L-3.5,10 L3,1.6 Z M-11,-1.6 L-13,-5 L-10.5,-5 L-8,-1.6 Z M-11,1.6 L-13,5 L-10.5,5 L-8,1.6 Z';
+function svgEl(tag, attrs) {
+  const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  Object.keys(attrs).forEach(k => node.setAttribute(k, attrs[k]));
+  return node;
+}
+// Arcs from each traveler's home to the winner (or matches, or Luis's top pick).
+// A home on the other country's map enters from the edge facing that country.
+function buildRoutes(r, stageDests) {
+  const dims = r.aspect.split('/').map(v => parseFloat(v));
+  const w = dims[0], h = dims[1];
+  const scale = w / 900;
+  const svg = svgEl('svg', { class: 'route-layer', viewBox: '0 0 ' + w + ' ' + h, preserveAspectRatio: 'xMidYMid meet' });
+  const targets = routeTargets().map(getDest).filter(d => d && stageDests.includes(d));
+  let n = 0;
+  ['luis', 'eleny'].forEach(who => {
+    const home = homeOf(who);
+    if (!home) return;
+    targets.forEach(t => {
+      const bx = t.pin.x / 100 * w, by = t.pin.y / 100 * h;
+      let ax, ay;
+      if (home.region === region) { ax = home.x / 100 * w; ay = home.y / 100 * h; }
+      else if (region === 'mexico') { ax = bx * 0.7 + w * 0.15; ay = -40 * scale; }
+      else { ax = bx * 0.6 + w * 0.1; ay = h + 40 * scale; }
+      const dx = bx - ax, dy = by - ay;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 20 * scale) return;
+      let px = -dy / dist, py = dx / dist;
+      if (py > 0) { px = -px; py = -py; }
+      const bend = Math.min(dist * 0.28, 160 * scale);
+      const cx = (ax + bx) / 2 + px * bend, cy = (ay + by) / 2 + py * bend;
+      const d = 'M' + ax.toFixed(1) + ',' + ay.toFixed(1) + ' Q' + cx.toFixed(1) + ',' + cy.toFixed(1) + ' ' + bx.toFixed(1) + ',' + by.toFixed(1);
+      const delay = (n * 0.35).toFixed(2);
+      const g = svgEl('g', { class: 'route' });
+      g.style.setProperty('--route-color', ROUTE_COLORS[who]);
+      g.style.animationDelay = delay + 's';
+      const glow = svgEl('path', { d, class: 'route-glow', pathLength: '1', 'stroke-width': (7 * scale).toFixed(1) });
+      glow.style.animationDelay = delay + 's';
+      const dash = svgEl('path', { d, class: 'route-dash', 'stroke-width': (2.8 * scale).toFixed(1), 'stroke-dasharray': (9 * scale).toFixed(1) + ' ' + (8 * scale).toFixed(1) });
+      dash.style.animationDelay = (parseFloat(delay) + 0.7).toFixed(2) + 's, 0s';
+      dash.style.setProperty('--dash-cycle', (17 * scale).toFixed(1));
+      const shade = svgEl('path', { d, class: 'route-shade', 'stroke-width': (5 * scale).toFixed(1) });
+      shade.style.animationDelay = (parseFloat(delay) + 0.7).toFixed(2) + 's';
+      g.appendChild(glow);
+      g.appendChild(shade);
+      g.appendChild(dash);
+      const plane = svgEl('g', { class: 'route-plane', opacity: '0' });
+      plane.appendChild(svgEl('path', { d: PLANE_PATH, transform: 'scale(' + (1.35 * scale).toFixed(2) + ')' }));
+      const dur = (3.2 + dist / (600 * scale)).toFixed(2) + 's';
+      const begin = (parseFloat(delay) + 0.9).toFixed(2) + 's';
+      plane.appendChild(svgEl('animateMotion', { path: d, dur, begin, repeatCount: 'indefinite', rotate: 'auto', calcMode: 'spline', keyTimes: '0;1', keySplines: '0.45 0 0.25 1' }));
+      plane.appendChild(svgEl('animate', { attributeName: 'opacity', values: '0;1;1;0', keyTimes: '0;0.08;0.88;1', dur, begin, repeatCount: 'indefinite' }));
+      g.appendChild(plane);
+      svg.appendChild(g);
+      n++;
+    });
+  });
+  return svg;
+}
+function buildHomePins() {
+  const pins = [];
+  ['luis', 'eleny'].forEach(who => {
+    const home = homeOf(who);
+    if (!home || home.region !== region) return;
+    const pin = el('div', 'home-pin');
+    pin.style.left = home.x + '%';
+    pin.style.top = home.y + '%';
+    pin.style.setProperty('--route-color', ROUTE_COLORS[who]);
+    pin.appendChild(el('div', 'home-pin-pulse'));
+    pin.appendChild(txt('div', 'home-pin-flag', who === 'luis' ? '🇲🇽' : '🇺🇸'));
+    pin.title = (who === profile ? 'Your' : (who === 'luis' ? 'Luis' : 'Eleny') + '\\'s') + ' home base';
+    pins.push(pin);
+  });
+  return pins;
+}
+
+// ---- activity feed ----
+let activity = [];
+let activityOpen = false;
+async function loadActivity() {
+  try {
+    const res = await fetch('/api/activity');
+    if (!res.ok) return;
+    const list = await res.json();
+    if (Array.isArray(list)) activity = list;
+  } catch (e) { /* keep what we have */ }
+}
+function logActivity(emoji, text, destId) {
+  if (!profile) return;
+  activity.unshift({ id: 'local-' + Date.now(), profile, emoji, text, destId: destId || null, at: Date.now() });
+  fetch('/api/activity', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ profile, emoji, text, destId: destId || null }),
+  }).catch(() => {});
+}
+function activitySeenKey() { return 'activity-seen-' + profile; }
+function lastSeenActivity() {
+  try { return Number(localStorage.getItem(activitySeenKey())) || 0; } catch (e) { return Date.now(); }
+}
+function markActivitySeen() {
+  try { localStorage.setItem(activitySeenKey(), String(Date.now())); } catch (e) { /* private mode */ }
+}
+function timeAgo(ms) {
+  const sec = Math.max(0, (Date.now() - ms) / 1000);
+  if (sec < 60) return 'just now';
+  if (sec < 3600) return Math.floor(sec / 60) + 'm ago';
+  if (sec < 86400) return Math.floor(sec / 3600) + 'h ago';
+  if (sec < 7 * 86400) return Math.floor(sec / 86400) + 'd ago';
+  return new Date(ms).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+function buildActivityItem(item) {
+  const row = el('div', 'activity-item' + (item.destId && getDest(item.destId) ? ' is-link' : ''));
+  row.appendChild(txt('div', 'activity-emoji', item.emoji));
+  const body = el('div', 'activity-body');
+  const line = el('div', 'activity-text');
+  if (item.profile !== 'both') line.appendChild(txt('strong', null, (item.profile === profile ? 'You' : (item.profile === 'luis' ? 'Luis' : 'Eleny')) + ' '));
+  line.appendChild(document.createTextNode(item.text));
+  body.appendChild(line);
+  body.appendChild(txt('div', 'activity-time', timeAgo(item.at)));
+  row.appendChild(body);
+  if (item.destId && getDest(item.destId)) row.addEventListener('click', () => goDetail(item.destId));
+  return row;
+}
+function buildActivityCard() {
+  if (!activity.length) return null;
+  const seen = lastSeenActivity();
+  const unread = activity.filter(a => a.profile !== profile && a.at > seen).length;
+  const card = el('div', 'activity-card' + (activityOpen ? ' open' : ''));
+  card.id = 'activity';
+  const head = el('button', 'activity-head');
+  head.appendChild(txt('span', 'activity-title', '✨ What\\'s new'));
+  if (unread) head.appendChild(txt('span', 'activity-badge', unread + ' new'));
+  head.appendChild(txt('span', 'activity-chevron', '⌄'));
+  head.addEventListener('click', () => {
+    activityOpen = !activityOpen;
+    if (activityOpen) markActivitySeen();
+    haptic(8);
+    const old = document.getElementById('activity');
+    const fresh = buildActivityCard();
+    if (old && fresh) old.replaceWith(fresh);
+  });
+  card.appendChild(head);
+  const list = el('div', 'activity-list');
+  activity.slice(0, activityOpen ? 15 : 1).forEach(item => list.appendChild(buildActivityItem(item)));
+  card.appendChild(list);
+  return card;
+}
+
+// ---- live weather (Open-Meteo, no key needed) ----
+const DEST_COORDS = {
+  cdmx: [19.4326, -99.1332], cabo: [22.8905, -109.9167], gdl: [20.6597, -103.3496], pvr: [20.6534, -105.2253],
+  bajio: [20.9144, -100.7452], tahoe: [38.9399, -119.9772], vegas: [36.1699, -115.1398], austin: [30.2672, -97.7431],
+  miami: [25.7617, -80.1918], sandiego: [32.7157, -117.1611],
+};
+let weather = {}; // destId -> { temp (°C), code, isDay, tz }
+let weatherLoadedAt = 0;
+let geoCache = {};
+try { geoCache = JSON.parse(localStorage.getItem('geo-cache') || '{}'); } catch (e) { geoCache = {}; }
+async function coordsFor(d) {
+  if (DEST_COORDS[d.id]) return DEST_COORDS[d.id];
+  const key = d.city + '|' + d.country;
+  if (key in geoCache) return geoCache[key];
+  try {
+    const res = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&format=json&countryCode='
+      + (d.country === 'Mexico' ? 'MX' : 'US') + '&name=' + encodeURIComponent(d.city.split('/')[0].trim()));
+    if (!res.ok) return null;
+    const json = await res.json();
+    const hit = json.results && json.results[0];
+    geoCache[key] = hit ? [hit.latitude, hit.longitude] : null;
+    try { localStorage.setItem('geo-cache', JSON.stringify(geoCache)); } catch (e) { /* private mode */ }
+    return geoCache[key];
+  } catch (e) { return null; }
+}
+async function loadWeather(force) {
+  if (!force && Date.now() - weatherLoadedAt < 15 * 60 * 1000) return;
+  weatherLoadedAt = Date.now();
+  try {
+    const dests = allDestinations().filter(d => !hiddenIds.includes(d.id));
+    const coords = await Promise.all(dests.map(coordsFor));
+    const located = dests.map((d, i) => ({ d, c: coords[i] })).filter(x => x.c);
+    if (!located.length) return;
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?current=temperature_2m,weather_code,is_day&timezone=auto'
+      + '&latitude=' + located.map(x => x.c[0]).join(',') + '&longitude=' + located.map(x => x.c[1]).join(','));
+    if (!res.ok) { weatherLoadedAt = 0; return; }
+    let data = await res.json();
+    if (!Array.isArray(data)) data = [data];
+    data.forEach((row, i) => {
+      if (!row || !row.current || !located[i]) return;
+      weather[located[i].d.id] = { temp: row.current.temperature_2m, code: row.current.weather_code, isDay: row.current.is_day === 1, tz: row.timezone };
+    });
+    paintWeather();
+  } catch (e) { weatherLoadedAt = 0; }
+}
+function weatherIcon(code, isDay) {
+  if (code === 0) return isDay ? '☀️' : '🌙';
+  if (code <= 2) return isDay ? '🌤️' : '☁️';
+  if (code === 3) return '☁️';
+  if (code === 45 || code === 48) return '🌫️';
+  if (code >= 51 && code <= 57) return '🌦️';
+  if (code >= 61 && code <= 67) return '🌧️';
+  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return '❄️';
+  if (code >= 80 && code <= 82) return '🌦️';
+  if (code >= 95) return '⛈️';
+  return '🌡️';
+}
+function weatherLabel(code) {
+  if (code === 0) return 'Clear';
+  if (code <= 2) return 'Partly cloudy';
+  if (code === 3) return 'Cloudy';
+  if (code === 45 || code === 48) return 'Foggy';
+  if (code >= 51 && code <= 67) return 'Rainy';
+  if (code >= 71 && code <= 86 && !(code >= 80 && code <= 82)) return 'Snowy';
+  if (code >= 80 && code <= 82) return 'Showers';
+  if (code >= 95) return 'Stormy';
+  return '';
+}
+// °F for Eleny, °C for Luis.
+function formatTemp(c) {
+  return profile === 'eleny' ? Math.round(c * 9 / 5 + 32) + '°F' : Math.round(c) + '°C';
+}
+function localTimeIn(tz) {
+  try { return new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: tz }); } catch (e) { return ''; }
+}
+function weatherShort(id) {
+  const w = weather[id];
+  return w ? weatherIcon(w.code, w.isDay) + ' ' + formatTemp(w.temp) : '';
+}
+function weatherLong(id) {
+  const w = weather[id];
+  if (!w) return '';
+  const time = w.tz ? localTimeIn(w.tz) : '';
+  return weatherIcon(w.code, w.isDay) + ' ' + formatTemp(w.temp) + ' · ' + weatherLabel(w.code) + (time ? ' · ' + time + ' there' : '');
+}
+function weatherNode(tag, cls, id, long) {
+  const node = txt(tag, cls, long ? weatherLong(id) : weatherShort(id));
+  node.dataset.weatherFor = id;
+  node.dataset.weatherLong = long ? '1' : '';
+  if (!weather[id]) node.classList.add('is-empty');
+  return node;
+}
+function paintWeather() {
+  document.querySelectorAll('[data-weather-for]').forEach(node => {
+    const id = node.dataset.weatherFor;
+    if (!weather[id]) return;
+    node.textContent = node.dataset.weatherLong ? weatherLong(id) : weatherShort(id);
+    node.classList.remove('is-empty');
+  });
+}
+
+// ---- sky by time of day ----
+function skyPhase() {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 8) return 'dawn';
+  if (hour >= 8 && hour < 17) return 'day';
+  if (hour >= 17 && hour < 20) return 'dusk';
+  return 'night';
+}
+// Delays are derived from the clock so clouds keep drifting smoothly across re-renders.
+function buildSky(phase) {
+  const fx = el('div', 'sky-fx');
+  const now = Date.now() / 1000;
+  [{ top: 8, dur: 95, size: 1 }, { top: 26, dur: 130, size: 1.4 }, { top: 58, dur: 110, size: 0.9 }, { top: 78, dur: 150, size: 1.2 }].forEach((c, i) => {
+    const cloud = el('div', 'cloud');
+    cloud.style.top = c.top + '%';
+    cloud.style.transform = 'scale(' + c.size + ')';
+    cloud.style.animationDuration = c.dur + 's';
+    cloud.style.animationDelay = (-((now + i * 37) % c.dur)) + 's';
+    fx.appendChild(cloud);
+  });
+  if (phase === 'night') {
+    fx.appendChild(el('div', 'stars stars-a'));
+    fx.appendChild(el('div', 'stars stars-b'));
+  }
+  return fx;
+}
+
+// ---- count-up numbers ----
+function countUp(node, to, format, duration) {
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced || !(to > 0)) { node.textContent = format(to); return; }
+  const start = performance.now();
+  const dur = duration || 900;
+  node.textContent = format(0);
+  const step = (t) => {
+    const p = Math.min(1, (t - start) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);
+    node.textContent = format(Math.round(to * eased));
+    if (p < 1 && node.isConnected) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+let lastCountdownShown = null;
+let lastPriceAnimatedFor = null;
+
+// ---- pull to refresh (home-screen app only; Safari has its own) ----
+function setupPullToRefresh() {
+  let startY = null, pull = 0, indicator = null, refreshing = false;
+  const reset = () => { if (indicator) indicator.remove(); indicator = null; startY = null; pull = 0; };
+  document.addEventListener('touchstart', (e) => {
+    startY = null;
+    if (!isStandalone() || refreshing || window.scrollY > 0 || !profile || view === 'intro' || view === 'splash') return;
+    if (document.querySelector('.reveal-backdrop, .match-backdrop, .lightbox-backdrop')) return;
+    if (e.target.closest && e.target.closest('.swipe-card, .cal-grid, .priority-list, .map-stage')) return;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchmove', (e) => {
+    if (startY === null) return;
+    const dy = e.touches[0].clientY - startY;
+    if (dy <= 0 || window.scrollY > 0) { if (indicator) { indicator.remove(); indicator = null; } pull = 0; return; }
+    pull = Math.min(dy * 0.5, 120);
+    if (!indicator) {
+      indicator = el('div', 'ptr');
+      indicator.appendChild(txt('span', 'ptr-plane', '✈️'));
+      document.body.appendChild(indicator);
+    }
+    indicator.style.transform = 'translate(-50%, ' + (pull - 46) + 'px) rotate(' + (pull * 2.6) + 'deg)';
+    const ready = pull > 72;
+    if (ready && !indicator.classList.contains('ready')) haptic(10);
+    indicator.classList.toggle('ready', ready);
+  }, { passive: true });
+  document.addEventListener('touchend', () => {
+    if (startY === null || !indicator) { reset(); return; }
+    if (pull <= 72) { reset(); return; }
+    startY = null;
+    refreshing = true;
+    const node = indicator;
+    node.classList.add('spinning');
+    lastSyncAt = Date.now();
+    Promise.all([syncFromServer(), loadActivity(), loadWeather(true)]).finally(() => {
+      node.classList.add('done');
+      setTimeout(() => { node.remove(); if (indicator === node) indicator = null; refreshing = false; }, 450);
+      if (view === 'map') { swipeRerender = true; render(); }
+    });
+  });
+}
 
 function adminRankedList() {
   const validIds = allDestinations().map(d => d.id).filter(id => !blockedIds.includes(id) && !hiddenIds.includes(id));
@@ -3820,7 +4434,7 @@ function setCoverPhoto(id) {
     d.cover = dataUrl;
     render();
     savePhoto(photoKeyForCover(id), dataUrl).then(ok => {
-      if (ok) return;
+      if (ok) { logActivity('📸', 'added a cover photo of ' + d.city, id); return; }
       d.cover = previous;
       render();
       window.alert('That photo didn\\'t save — check your connection and try again.');
@@ -3901,7 +4515,11 @@ function renderMap() {
   const winner = winnerId() ? getDest(winnerId()) : null;
   if (countdown) {
     const cd = el('button', 'countdown-card');
-    cd.appendChild(txt('div', 'countdown-big', countdown.big));
+    const big = txt('div', 'countdown-big', countdown.big);
+    const bigNum = Number(countdown.big);
+    if (bigNum > 0 && lastCountdownShown !== countdown.big) countUp(big, bigNum, v => String(v), 1100);
+    lastCountdownShown = countdown.big;
+    cd.appendChild(big);
     const cdText = el('div', 'countdown-text');
     cdText.appendChild(txt('div', 'countdown-label', countdown.label));
     cdText.appendChild(txt('div', 'countdown-sub', countdown.sub));
@@ -3968,6 +4586,9 @@ function renderMap() {
       : 'Last daily pick will be erased.'));
   }
 
+  const activityCard = buildActivityCard();
+  if (activityCard) view_.appendChild(activityCard);
+
   const tabs = el('div', 'region-tabs');
   Object.keys(REGIONS).forEach(key => {
     const btn = el('button', 'region-tab' + (region === key ? ' active' : ''), REGIONS[key].label);
@@ -3979,7 +4600,7 @@ function renderMap() {
   const r = { ...REGIONS[region], destinations: REGIONS[region].destinations.filter(d => !blockedIds.includes(d.id) && !hiddenIds.includes(d.id) && (isAdmin || !elenyHiddenIds.includes(d.id))) };
 
   const mapCard = el('div', 'map-card');
-  const stage = el('div', 'map-stage' + ((addingCity && addingCity.step === 'pin') || movingPinId ? ' placing' : ''));
+  const stage = el('div', 'map-stage' + ((addingCity && addingCity.step === 'pin') || movingPinId || placingHome ? ' placing' : ''));
   stage.style.aspectRatio = r.aspect;
   if (addingCity && addingCity.step === 'pin') {
     stage.addEventListener('click', (e) => {
@@ -3999,6 +4620,11 @@ function renderMap() {
       movingPinId = null;
       render();
       saveCustomDestinations(region);
+    });
+  } else if (placingHome) {
+    stage.addEventListener('click', (e) => {
+      const rect = stage.getBoundingClientRect();
+      setHome(((e.clientX - rect.left) / rect.width) * 100, ((e.clientY - rect.top) / rect.height) * 100);
     });
   }
 
@@ -4020,7 +4646,10 @@ function renderMap() {
     stage.appendChild(svg);
   }
 
-  r.destinations.forEach(d => {
+  stage.appendChild(buildRoutes(r, r.destinations));
+  buildHomePins().forEach(pin => stage.appendChild(pin));
+
+  r.destinations.forEach((d, pinIdx) => {
     const plan = planOf(d);
     const hiddenFromEleny = isAdmin && elenyHiddenIds.includes(d.id);
     const pin = el('button', 'pin' + (hiddenFromEleny ? ' pin-eleny-hidden' : ''));
@@ -4032,6 +4661,7 @@ function renderMap() {
     dotWrap.appendChild(el('div', 'pin-dot'));
     if (d.favorite) dotWrap.appendChild(el('div', 'pin-star', '⭐'));
     if (adminRanking[0] === d.id) dotWrap.classList.add('pin-gold');
+    dotWrap.style.animationDelay = (0.25 + pinIdx * 0.07) + 's';
     pin.appendChild(dotWrap);
     pin.addEventListener('click', () => goDetail(d.id));
     stage.appendChild(pin);
@@ -4052,7 +4682,16 @@ function renderMap() {
     ? '📍 Tap the map where this city goes'
     : movingPinId
     ? '📍 Tap the map to move this pin'
+    : placingHome
+    ? '🏠 Tap where you\\'ll fly or drive from'
     : 'Tap any pin to open the full proposal'));
+  if (!addingCity && !movingPinId) {
+    const homeBtn = el('button', 'home-chip' + (placingHome ? ' is-cancel' : ''), placingHome
+      ? 'Cancel'
+      : homeOf(profile) ? '🏠 Move my home base' : '🏠 Set your home base to see flight routes');
+    homeBtn.addEventListener('click', () => { if (placingHome) { placingHome = false; render(); } else startPlacingHome(); });
+    mapCard.appendChild(homeBtn);
+  }
 
   if (movingPinId) {
     const cancelMoveRow = el('button', 'add-city-row', 'Cancel moving pin');
@@ -4088,6 +4727,7 @@ function renderMap() {
     const left = el('div', 'dest-row-left');
     left.appendChild(el('div', 'dest-row-name', d.city));
     if (d.note) left.appendChild(el('div', 'dest-row-note', d.note));
+    left.appendChild(weatherNode('div', 'dest-row-weather', d.id, false));
     if (hiddenFromEleny) left.appendChild(el('div', 'dest-row-note', '🙈 Hidden from Eleny'));
     row.appendChild(left);
     const right = el('div', 'dest-row-right');
@@ -4167,6 +4807,8 @@ function buildSwipeCard(d, isTop) {
     card.classList.add('no-cover');
     card.appendChild(txt('div', 'swipe-card-emoji', plan.emoji));
   }
+  card.appendChild(el('div', 'swipe-shine'));
+  card.appendChild(weatherNode('div', 'swipe-weather', d.id, false));
   card.appendChild(txt('div', 'swipe-stamp stamp-like', 'LET\\'S GO'));
   card.appendChild(txt('div', 'swipe-stamp stamp-nope', 'NAH'));
   const info = el('div', 'swipe-card-info');
@@ -4393,6 +5035,8 @@ function buildDetailCard(d, plan) {
     changeBtn.addEventListener('click', (e) => { e.stopPropagation(); setCoverPhoto(d.id); });
     hero.appendChild(changeBtn);
     card.appendChild(hero);
+  } else if (!photosReady) {
+    card.appendChild(el('div', 'detail-cover skeleton'));
   } else {
     const addCover = el('button', 'detail-cover-add', '📷 Add a cover photo');
     addCover.addEventListener('click', () => setCoverPhoto(d.id));
@@ -4433,6 +5077,7 @@ function buildDetailCard(d, plan) {
   if (rankPos === 0) headLeft.appendChild(el('div', 'admin-pick-banner is-top-pick', 'Luis\\'s top pick'));
   else if (rankPos > 0) headLeft.appendChild(el('div', 'admin-pick-banner', '👑 #' + (rankPos + 1) + ' on Luis\\'s list'));
   headLeft.appendChild(el('div', 'detail-country', d.country));
+  headLeft.appendChild(weatherNode('div', 'detail-weather', d.id, true));
   headLeft.appendChild(el('div', 'detail-plan-chip', plan.emoji + ' ' + plan.label));
   if (d.note) headLeft.appendChild(el('div', 'detail-note', d.note));
   head.appendChild(headLeft);
@@ -4445,6 +5090,7 @@ function buildDetailCard(d, plan) {
     const priceBlock = el('div', 'price-block');
     priceBlock.appendChild(el('div', 'price-total-label', 'ESTIMATED TOTAL (only you see this)'));
     const totalEl = el('div', 'price-total', money(destTotal(d)));
+    if (lastPriceAnimatedFor !== d.id) { lastPriceAnimatedFor = d.id; countUp(totalEl, destTotal(d), money, 900); }
     priceBlock.appendChild(totalEl);
 
     const currentCosts = (d.costs && d.costs.myTransport != null) ? d.costs : EMPTY_COSTS;
@@ -4806,9 +5452,11 @@ function render() {
   }
 
   const app = el('div', 'app');
-  app.classList.add('photo-bg');
+  const phase = skyPhase();
+  app.classList.add('photo-bg', 'sky-' + phase);
   app.style.backgroundImage = 'url(' + BG_PHOTO_IMG + ')';
   app.appendChild(el('div', 'bg-overlay'));
+  app.appendChild(buildSky(phase));
   const wrap = el('div', 'wrap');
   let content;
   if (view === 'intro') content = renderIntro();
@@ -4843,9 +5491,11 @@ Promise.all([
   loadSwipes(false),
   loadReactions(),
   loadItineraries(),
+  loadActivity(),
 ])
-  .then(() => { ensurePriorityOrderComplete(); backfillIconicHighlights(); render(); });
+  .then(() => { ensurePriorityOrderComplete(); backfillIconicHighlights(); render(); loadWeather(); });
 registerServiceWorker();
+setupPullToRefresh();
 
 `;
 
