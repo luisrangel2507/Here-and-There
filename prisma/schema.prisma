@@ -19,6 +19,7 @@ model AppState {
   elenyHiddenIds Json     @default("[]") @map("eleny_hidden_ids")
   tripStart      String?  @map("trip_start")
   tripEnd        String?  @map("trip_end")
+  swipeRound     Int      @default(1) @map("swipe_round")
   lastSubmitAt   DateTime? @map("last_submit_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 

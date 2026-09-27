@@ -2103,16 +2103,86 @@ const APP_STYLE = `
     *{animation-duration:0.01ms !important;transition-duration:0.01ms !important;}
   }
 
-  .round-banner{
-    padding:12px 16px;
-    margin-bottom:12px;
-    border-radius:16px;
-    background:linear-gradient(90deg, rgba(255,111,145,0.45), rgba(255,159,104,0.45));
-    border:1px solid rgba(255,255,255,0.35);
-    font-size:13px;
-    font-weight:600;
-    animation:popIn .45s var(--ease-spring) both;
+  .round-backdrop{
+    position:fixed;
+    inset:0;
+    z-index:310;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px 16px;
+    overflow:hidden;
+    font-family:'Poppins', sans-serif;
+    color:#fff;
+    background:radial-gradient(circle at 50% 38%, #FF6F91 0%, #8A5FBF 45%, #1f1238 100%);
+    animation:fadeIn .25s ease both;
   }
+  .round-backdrop.leaving{animation:roundLeave .28s ease-in forwards;}
+  @keyframes roundLeave{ to{opacity:0;transform:scale(1.06);} }
+  .round-rays{
+    position:absolute;
+    left:50%; top:38%;
+    width:180vmax;height:180vmax;
+    margin:-90vmax 0 0 -90vmax;
+    background:repeating-conic-gradient(rgba(255,255,255,0.09) 0deg 8deg, transparent 8deg 22deg);
+    animation:raysSpin 26s linear infinite;
+    pointer-events:none;
+  }
+  @keyframes raysSpin{ to{transform:rotate(360deg);} }
+  .round-box{position:relative;width:100%;max-width:360px;text-align:center;}
+  .round-kicker{font-size:12px;font-weight:700;letter-spacing:0.26em;opacity:0.9;animation:fadeSlideUp .5s var(--ease-out) .1s both;}
+  .round-word{
+    font-weight:800;
+    font-size:26px;
+    letter-spacing:0.42em;
+    margin:14px 0 -6px;
+    padding-left:0.42em;
+    animation:fadeSlideUp .5s var(--ease-out) .2s both;
+  }
+  .round-number{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:700;
+    font-size:128px;
+    line-height:1;
+    background:linear-gradient(180deg, #fff 20%, var(--sun));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 10px 30px rgba(255,201,60,0.55));
+    animation:roundSlam .7s cubic-bezier(0.2, 1.4, 0.4, 1) .35s both;
+  }
+  .round-number.is-text{font-size:68px;margin:6px 0;}
+  @keyframes roundSlam{
+    0%{transform:scale(3.2) rotate(-8deg);opacity:0;}
+    60%{transform:scale(0.92) rotate(2deg);opacity:1;}
+    80%{transform:scale(1.04) rotate(-1deg);}
+    100%{transform:none;opacity:1;}
+  }
+  .round-sub{font-size:15px;font-weight:600;margin:6px 0 18px;animation:fadeSlideUp .5s var(--ease-out) .75s both;}
+  .round-tiles{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:20px;}
+  .round-tile{
+    font-size:12px;
+    font-weight:600;
+    padding:6px 11px;
+    border-radius:999px;
+    background:rgba(255,255,255,0.18);
+    border:1px solid rgba(255,255,255,0.3);
+    backdrop-filter:blur(6px);
+    animation:popIn .4s var(--ease-spring) both;
+  }
+  .round-rules{display:flex;justify-content:center;gap:10px;margin-bottom:22px;}
+  .round-rule{
+    flex:1;
+    max-width:110px;
+    padding:10px 6px;
+    border-radius:16px;
+    background:rgba(20,10,30,0.3);
+    animation:fadeSlideUp .45s var(--ease-out) both;
+  }
+  .round-rule-icon{font-size:20px;font-weight:700;margin-bottom:2px;}
+  .round-rule-label{font-size:11px;font-weight:600;opacity:0.9;line-height:1.3;}
+  .round-go{animation:fadeSlideUp .5s var(--ease-out) 1.6s both;}
   .swipe-done.is-winner .confirm-btn{margin-top:4px;}
   .swipe-out{margin:-24px 0 40px;}
   .swipe-out-row{display:flex;flex-wrap:wrap;gap:6px;}
@@ -2987,6 +3057,7 @@ function toggleElenyVisibility(id) {
 // ---- swipe to decide ----
 let swipes = { luis: {}, eleny: {} }; // profile -> { destId: 'like' | 'nope' }
 let pendingSwipes = {}; // my swipes still being saved, re-applied over any refresh
+let swipeRound = 1; // shared round number, kept on the server
 let swipeDragging = false;
 let swipeRerender = false;
 let detailReturnView = 'map';
@@ -3007,6 +3078,7 @@ async function loadSwipes() {
     if (!res.ok) return;
     const map = await res.json();
     swipes = { luis: map.luis || {}, eleny: map.eleny || {} };
+    if (map.round) swipeRound = map.round;
     if (profile) Object.keys(pendingSwipes).forEach(id => { swipes[profile][id] = pendingSwipes[id]; });
   } catch (e) { /* keep what we have */ }
 }
@@ -3039,22 +3111,89 @@ function outDestinations() {
   return allDestinations().filter(d => inPlay(d) && isOut(d.id));
 }
 // Round done = more than one destination left and both said yes to all of them.
+// The next round starts right away here; the server makes sure it only advances once.
 function maybeAdvanceRound() {
   const alive = swipeableDestinations();
   if (alive.length < 2 || !alive.every(d => isMatch(d.id))) return false;
   const ids = alive.map(d => d.id);
+  const fromRound = swipeRound;
   ids.forEach(id => { delete swipes.luis[id]; delete swipes.eleny[id]; });
+  swipeRound = fromRound + 1;
+  markMatchesSeen();
   fetch('/api/swipes', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ profile, resetRound: ids }),
+    body: JSON.stringify({ profile, resetRound: ids, fromRound }),
+  }).then(res => res.json()).then(result => {
+    if (result.advanced) { notifyPartner('round', String(result.round), ids.length); return; }
+    // The other phone already started the next round.
+    swipeRound = result.round || swipeRound;
+    return loadSwipes().then(() => { if (view === 'swipe' && !swipeDragging) { swipeRerender = true; render(); } });
   }).catch(() => {});
-  notifyPartner('round', String(ids.length), ids.length);
-  roundNotice = ids.length;
-  haptic([20, 40, 20]);
   return true;
 }
-let roundNotice = null;
+
+// ---- round intro screen ----
+function roundSeenKey() { return 'seen-round-' + profile; }
+function lastRoundSeen() {
+  try { return Number(localStorage.getItem(roundSeenKey())) || 0; } catch (e) { return swipeRound; }
+}
+function markRoundSeen() {
+  try { localStorage.setItem(roundSeenKey(), String(swipeRound)); } catch (e) { /* private mode */ }
+}
+// Shows the intro for the current round once per traveler (round 1 doubles as the game intro).
+// entering: called while the swipe screen may still be mid-transition.
+function maybeShowRoundIntro(entering) {
+  if ((!entering && view !== 'swipe') || winnerId() || document.querySelector('.round-backdrop, .reveal-backdrop')) return false;
+  if (lastRoundSeen() >= swipeRound) return false;
+  showRoundIntro();
+  return true;
+}
+function showRoundIntro() {
+  markRoundSeen();
+  const alive = swipeableDestinations();
+  const isFinal = alive.length === 2;
+  const backdrop = el('div', 'round-backdrop');
+  backdrop.appendChild(el('div', 'round-rays'));
+  const box = el('div', 'round-box');
+  box.appendChild(txt('div', 'round-kicker', swipeRound === 1
+    ? 'LET THE GAMES BEGIN'
+    : 'YOU BOTH SAID YES TO ' + alive.length));
+  box.appendChild(txt('div', 'round-word', isFinal ? 'FINAL' : 'ROUND'));
+  box.appendChild(txt('div', 'round-number' + (isFinal ? ' is-text' : ''), isFinal ? 'ROUND' : String(swipeRound)));
+  box.appendChild(txt('div', 'round-sub', isFinal
+    ? 'Only 2 left — one of you has to swipe one out.'
+    : alive.length <= 3
+    ? '🔥 Final ' + alive.length + ' — it\\'s getting serious.'
+    : alive.length + ' destinations still in the running'));
+  const tiles = el('div', 'round-tiles');
+  alive.slice(0, 10).forEach((d, i) => {
+    const tile = txt('span', 'round-tile', planOf(d).emoji + ' ' + d.city);
+    tile.style.animationDelay = (0.9 + i * 0.07) + 's';
+    tiles.appendChild(tile);
+  });
+  if (alive.length > 10) tiles.appendChild(txt('span', 'round-tile', '+' + (alive.length - 10) + ' more'));
+  box.appendChild(tiles);
+  const rules = el('div', 'round-rules');
+  [['♥', 'Keeps it in'], ['✕', 'Out for both of you'], ['🏆', 'Last one standing wins']].forEach(([icon, label], i) => {
+    const rule = el('div', 'round-rule');
+    rule.style.animationDelay = (1.3 + i * 0.1) + 's';
+    rule.appendChild(txt('div', 'round-rule-icon', icon));
+    rule.appendChild(txt('div', 'round-rule-label', label));
+    rules.appendChild(rule);
+  });
+  box.appendChild(rules);
+  const go = el('button', 'confirm-btn round-go', 'Let\\'s go →');
+  go.addEventListener('click', () => {
+    haptic(15);
+    backdrop.classList.add('leaving');
+    setTimeout(() => backdrop.remove(), 280);
+  });
+  box.appendChild(go);
+  backdrop.appendChild(box);
+  document.body.appendChild(backdrop);
+  haptic([30, 50, 30]);
+}
 function restoreDestination(id) {
   const d = getDest(id);
   if (!d || !window.confirm('Bring ' + d.city + ' back into play?')) return;
@@ -3100,9 +3239,10 @@ function goSwipe() {
   // The view switch may still be mid-transition when this resolves, so don't gate the match on it.
   loadSwipes().then(() => {
     maybeAdvanceRound();
+    if (view === 'swipe' && !swipeDragging) { swipeRerender = true; render(); }
+    if (maybeShowRoundIntro(true)) { markMatchesSeen(); return; }
     const unseen = unseenMatchIds();
     if (unseen.length) { showMatch(unseen[0]); markMatchesSeen(); }
-    if (view === 'swipe' && !swipeDragging) { swipeRerender = true; render(); }
   });
 }
 
@@ -3127,8 +3267,12 @@ async function commitSwipe(id, choice) {
   }
 
   if (ok) await loadSwipes();
+  if (maybeAdvanceRound()) {
+    if (view === 'swipe' && !swipeDragging) render();
+    maybeShowRoundIntro();
+    return;
+  }
   if (isMatch(id)) { showMatch(id); markMatchesSeen(); }
-  if (maybeAdvanceRound() && view === 'swipe' && !swipeDragging) render();
 }
 
 function flyOut(card, choice, id) {
@@ -3884,6 +4028,7 @@ async function syncFromServer() {
   await Promise.all([loadSwipes(), loadReactions(), loadItineraries(), loadActivity(), loadPriorities()]);
   await loadCustomDestinations();
   maybeAdvanceRound();
+  if (view === 'swipe') setTimeout(maybeShowRoundIntro, 50);
   if (swipeDragging || document.querySelector('.reveal-backdrop, .match-backdrop, .rx-picker, .lightbox-backdrop')) return;
   if (view === 'map' || view === 'swipe') { swipeRerender = true; render(); }
   else if (view === 'detail' && detailId) refreshDetailCard(detailId);
@@ -4425,7 +4570,7 @@ function renderMap() {
 
   const toSwipe = swipeableDestinations().filter(d => !swipes[profile][d.id]).length;
   const newMatches = unseenMatchIds().length;
-  const swipeBtn = el('button', 'swipe-cta', '💘 Swipe destinations');
+  const swipeBtn = el('button', 'swipe-cta', '💘 Swipe · Round ' + swipeRound);
   if (newMatches) swipeBtn.appendChild(txt('span', 'swipe-cta-badge is-match', newMatches + ' new match' + (newMatches > 1 ? 'es' : '') + '!'));
   else if (toSwipe) swipeBtn.appendChild(txt('span', 'swipe-cta-badge', toSwipe + ' to swipe'));
   swipeBtn.addEventListener('click', goSwipe);
@@ -4697,11 +4842,6 @@ function renderSwipe() {
   const out = outDestinations();
   const winner = winnerId() ? getDest(winnerId()) : null;
 
-  if (roundNotice) {
-    view_.appendChild(txt('div', 'round-banner', '🔥 Round done! You both said yes to ' + roundNotice + ' — swipe again to narrow it down.'));
-    roundNotice = null;
-  }
-
   if (winner) {
     const done = el('div', 'swipe-done is-winner');
     done.appendChild(txt('div', 'swipe-done-emoji', '🏆'));
@@ -4715,9 +4855,8 @@ function renderSwipe() {
     done.appendChild(replay);
     view_.appendChild(done);
   } else if (deck.length) {
-    view_.appendChild(txt('div', 'swipe-progress', all.length <= 3
-      ? '🔥 FINAL ' + all.length + ' · card ' + (all.length - deck.length + 1) + ' of ' + all.length
-      : all.length + ' LEFT · card ' + (all.length - deck.length + 1) + ' of ' + all.length));
+    view_.appendChild(txt('div', 'swipe-progress', (all.length === 2 ? '🔥 FINAL ROUND' : 'ROUND ' + swipeRound)
+      + ' · ' + all.length + ' LEFT · CARD ' + (all.length - deck.length + 1) + ' OF ' + all.length));
     const deckWrap = el('div', 'swipe-deck');
     if (deck[1]) deckWrap.appendChild(buildSwipeCard(deck[1], false));
     const top = buildSwipeCard(deck[0], true);
@@ -4742,7 +4881,7 @@ function renderSwipe() {
   } else {
     const done = el('div', 'swipe-done');
     done.appendChild(txt('div', 'swipe-done-emoji', '⏳'));
-    done.appendChild(txt('div', 'swipe-done-title', 'Round done on your side!'));
+    done.appendChild(txt('div', 'swipe-done-title', 'Round ' + swipeRound + ' done on your side!'));
     done.appendChild(txt('div', 'swipe-done-sub', 'Waiting on ' + partnerName() + ' to finish — then the next round starts with whatever you both said yes to.'));
     view_.appendChild(done);
   }

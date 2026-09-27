@@ -5,12 +5,15 @@ import { logActivity } from '@/lib/activity';
 const CHOICES = ['like', 'nope'];
 
 export async function GET() {
-  const rows = await prisma.swipe.findMany();
+  const [rows, state] = await Promise.all([
+    prisma.swipe.findMany(),
+    prisma.appState.findUnique({ where: { id: 1 } }),
+  ]);
   const map: Record<string, Record<string, string>> = { luis: {}, eleny: {} };
   for (const row of rows) {
     if (map[row.profile]) map[row.profile][row.destId] = row.choice;
   }
-  return NextResponse.json(map);
+  return NextResponse.json({ ...map, round: state ? state.swipeRound : 1 });
 }
 
 export async function POST(req: NextRequest) {
@@ -22,10 +25,19 @@ export async function POST(req: NextRequest) {
   }
 
   // Next round: everyone left said yes, so clear those likes and swipe again.
+  // Only advances from the round the phone saw, so two phones finishing at
+  // once can't skip a round or wipe likes from the new one.
   if (Array.isArray(body.resetRound)) {
     const ids = body.resetRound.filter((id: unknown) => typeof id === 'string');
+    const fromRound = Number(body.fromRound) || 1;
+    const bumped = await prisma.appState.updateMany({ where: { id: 1, swipeRound: fromRound }, data: { swipeRound: fromRound + 1 } });
+    if (bumped.count === 0) {
+      const state = await prisma.appState.findUnique({ where: { id: 1 } });
+      if (state) return NextResponse.json({ ok: true, advanced: false, round: state.swipeRound });
+      await prisma.appState.create({ data: { id: 1, swipeRound: fromRound + 1 } });
+    }
     await prisma.swipe.deleteMany({ where: { destId: { in: ids }, choice: 'like' } });
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, advanced: true, round: fromRound + 1 });
   }
 
   // Bring a swiped-out destination back into play.
