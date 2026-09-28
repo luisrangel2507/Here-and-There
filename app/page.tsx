@@ -2698,6 +2698,14 @@ async function loadCustomDestinations() {
 
 function addCustomDestination(city, plan) {
   if (!city || !city.trim() || !addingCity || addingCity.step !== 'form') return;
+  const key = cityKey({ city: city.trim(), country: region === 'mexico' ? 'Mexico' : 'USA' });
+  const existing = allDestinations().find(x => !hiddenIds.includes(x.id) && cityKey(x) === key);
+  if (existing) {
+    addingCity = null;
+    window.alert(existing.city + ' is already on the map.');
+    goDetail(cityGroups().repOf[existing.id] || existing.id);
+    return;
+  }
   const r = REGIONS[region];
   const id = 'custom-' + Date.now();
   const d = {
@@ -3095,14 +3103,52 @@ async function saveSwipe(destId, choice) {
 
 // Elimination: a left swipe from either traveler takes a destination out for both.
 // Anything hidden from Eleny isn't in play at all.
+// The same city added twice (e.g. a built-in and a "+ add city" copy) plays as one:
+// the copy with the most info represents it, and a swipe on any copy counts for all.
+function cityKey(d) {
+  return (d.city || '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().replace(/\\s+/g, ' ').trim() + '|' + d.country;
+}
+function contentScore(d) {
+  return (d.lodging || []).length * 2 + (destTotal(d) > 0 ? 2 : 0) + (d.vibe ? 1 : 0) + (d.custom ? 0 : 1);
+}
+function cityGroups() {
+  const groups = new Map();
+  allDestinations().filter(d => !hiddenIds.includes(d.id)).forEach(d => {
+    const key = cityKey(d);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(d);
+  });
+  const repOf = {};
+  const membersOf = {};
+  groups.forEach(list => {
+    const best = list.reduce((a, b) => (contentScore(b) > contentScore(a) ? b : a), list[0]);
+    const ids = list.map(d => d.id);
+    ids.forEach(id => { repOf[id] = best.id; });
+    membersOf[best.id] = ids;
+  });
+  return { repOf, membersOf };
+}
+function groupIds(id) {
+  const g = cityGroups();
+  return g.membersOf[g.repOf[id]] || [id];
+}
+function isDuplicate(id) {
+  const rep = cityGroups().repOf[id];
+  return !!rep && rep !== id;
+}
+function swipeOf(who, id) {
+  const ids = groupIds(id);
+  if (ids.some(x => swipes[who][x] === 'nope')) return 'nope';
+  return ids.some(x => swipes[who][x] === 'like') ? 'like' : null;
+}
 function inPlay(d) {
-  return !hiddenIds.includes(d.id) && !elenyHiddenIds.includes(d.id);
+  return !hiddenIds.includes(d.id) && !elenyHiddenIds.includes(d.id) && !isDuplicate(d.id);
 }
 function isVetoed(id) {
-  return swipes.luis[id] === 'nope' || swipes.eleny[id] === 'nope';
+  return swipeOf('luis', id) === 'nope' || swipeOf('eleny', id) === 'nope';
 }
 function isOut(id) {
-  return blockedIds.includes(id) || isVetoed(id);
+  return groupIds(id).some(x => blockedIds.includes(x)) || isVetoed(id);
 }
 function swipeableDestinations() {
   return allDestinations().filter(d => inPlay(d) && !isOut(d.id));
@@ -3115,7 +3161,7 @@ function outDestinations() {
 function maybeAdvanceRound() {
   const alive = swipeableDestinations();
   if (alive.length < 2 || !alive.every(d => isMatch(d.id))) return false;
-  const ids = alive.map(d => d.id);
+  const ids = [].concat(...alive.map(d => groupIds(d.id)));
   const fromRound = swipeRound;
   ids.forEach(id => { delete swipes.luis[id]; delete swipes.eleny[id]; });
   swipeRound = fromRound + 1;
@@ -3125,7 +3171,7 @@ function maybeAdvanceRound() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ profile, resetRound: ids, fromRound }),
   }).then(res => res.json()).then(result => {
-    if (result.advanced) { notifyPartner('round', String(result.round), ids.length); return; }
+    if (result.advanced) { notifyPartner('round', String(result.round), alive.length); return; }
     // The other phone already started the next round.
     swipeRound = result.round || swipeRound;
     return loadSwipes().then(() => { if (view === 'swipe' && !swipeDragging) { swipeRerender = true; render(); } });
@@ -3197,21 +3243,22 @@ function showRoundIntro() {
 function restoreDestination(id) {
   const d = getDest(id);
   if (!d || !window.confirm('Bring ' + d.city + ' back into play?')) return;
-  ['luis', 'eleny'].forEach(who => { if (swipes[who][id] === 'nope') delete swipes[who][id]; });
-  if (blockedIds.includes(id)) {
-    blockedIds = blockedIds.filter(b => b !== id);
+  const ids = groupIds(id);
+  ids.forEach(x => ['luis', 'eleny'].forEach(who => { if (swipes[who][x] === 'nope') delete swipes[who][x]; }));
+  if (ids.some(x => blockedIds.includes(x))) {
+    blockedIds = blockedIds.filter(b => !ids.includes(b));
     saveState(['blockedIds']);
   }
-  fetch('/api/swipes', {
+  ids.forEach(x => fetch('/api/swipes', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ profile, restore: id }),
-  }).catch(() => {});
+    body: JSON.stringify({ profile, restore: x }),
+  }).catch(() => {}));
   haptic(15);
   render();
 }
 function isMatch(id) {
-  return swipes.luis[id] === 'like' && swipes.eleny[id] === 'like';
+  return swipeOf('luis', id) === 'like' && swipeOf('eleny', id) === 'like';
 }
 function currentMatchIds() {
   return swipeableDestinations().filter(d => isMatch(d.id)).map(d => d.id);
@@ -4568,7 +4615,7 @@ function renderMap() {
     view_.appendChild(banner);
   }
 
-  const toSwipe = swipeableDestinations().filter(d => !swipes[profile][d.id]).length;
+  const toSwipe = swipeableDestinations().filter(d => !swipeOf(profile, d.id)).length;
   const newMatches = unseenMatchIds().length;
   const swipeBtn = el('button', 'swipe-cta', '💘 Swipe · Round ' + swipeRound);
   if (newMatches) swipeBtn.appendChild(txt('span', 'swipe-cta-badge is-match', newMatches + ' new match' + (newMatches > 1 ? 'es' : '') + '!'));
@@ -4596,7 +4643,7 @@ function renderMap() {
   });
   view_.appendChild(tabs);
 
-  const r = { ...REGIONS[region], destinations: REGIONS[region].destinations.filter(d => !isOut(d.id) && !hiddenIds.includes(d.id) && (isAdmin || !elenyHiddenIds.includes(d.id))) };
+  const r = { ...REGIONS[region], destinations: REGIONS[region].destinations.filter(d => !isOut(d.id) && !hiddenIds.includes(d.id) && !isDuplicate(d.id) && (isAdmin || !elenyHiddenIds.includes(d.id))) };
 
   const mapCard = el('div', 'map-card');
   const stage = el('div', 'map-stage' + ((addingCity && addingCity.step === 'pin') || movingPinId || placingHome ? ' placing' : ''));
@@ -4837,7 +4884,7 @@ function renderSwipe() {
   view_.appendChild(txt('p', 'sub', 'Right if you\\'d go. Left and it\\'s out — for both of you. The last one standing is where you\\'re going ✈️'));
 
   const all = swipeableDestinations();
-  const deck = all.filter(d => !swipes[profile][d.id]);
+  const deck = all.filter(d => !swipeOf(profile, d.id));
   const matches = all.filter(d => isMatch(d.id));
   const out = outDestinations();
   const winner = winnerId() ? getDest(winnerId()) : null;
