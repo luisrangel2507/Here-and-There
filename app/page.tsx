@@ -1407,6 +1407,37 @@ const APP_STYLE = `
     line-height:1.1;
   }
 
+  /* same-screen redraws: no entrance animations (see render) */
+  .app.is-redraw .view,
+  .app.is-redraw .eyebrow,
+  .app.is-redraw h1,
+  .app.is-redraw .sub,
+  .app.is-redraw .region-tabs,
+  .app.is-redraw .map-card,
+  .app.is-redraw .pin-preview,
+  .app.is-redraw .profile-header,
+  .app.is-redraw .intro-hero,
+  .app.is-redraw .profile-select,
+  .app.is-redraw .intro-title,
+  .app.is-redraw .dest-row,
+  .app.is-redraw .back-btn,
+  .app.is-redraw .detail-card,
+  .app.is-redraw .highlight-row,
+  .app.is-redraw .fav-btn .heart,
+  .app.is-redraw .detail-cover,
+  .app.is-redraw .swipe-cta,
+  .app.is-redraw .swipe-card.is-top,
+  .app.is-redraw .swipe-done-emoji,
+  .app.is-redraw .avatar-canvas.is-live,
+  .app.is-redraw .home-pin,
+  .app.is-redraw .activity-card,
+  .app.is-redraw .activity-item,
+  .app.is-redraw .avail-nudge,
+  .app.is-redraw .countdown-card,
+  .app.is-redraw .push-banner,
+  .app.is-redraw .winner-cta,
+  .app.is-redraw .itin-day{animation:none !important;}
+
   /* 3D avatars */
   .avatar-thumb{background-size:cover;background-position:center 30%;display:flex;align-items:center;justify-content:center;}
   /* Some hosts (feed bubble, map pin) set a background shorthand that resets size/position. */
@@ -4230,6 +4261,23 @@ function refreshAvatars() {
   if (options) options.replaceWith(buildStudioOptions());
   mountAvatars();
 }
+// Put already-running avatars back in place of their fresh copies, in the same
+// task as the redraw, so they don't blink out and fade back in.
+function avatarKey(canvas) {
+  return canvas.dataset.avatarWho + '|' + JSON.stringify(canvas._avatarOpts || {});
+}
+function reuseAvatarCanvases(previous) {
+  if (!previous.length) return;
+  const pool = previous.slice();
+  document.querySelectorAll('#root canvas[data-avatar-who]').forEach(fresh => {
+    if (fresh._avatar) return;
+    const i = pool.findIndex(old => avatarKey(old) === avatarKey(fresh));
+    if (i < 0) return;
+    const old = pool.splice(i, 1)[0];
+    old.className = fresh.className + ' is-live';
+    fresh.replaceWith(old);
+  });
+}
 function avatarDuo(action) {
   const duo = el('div', 'avatar-duo');
   duo.appendChild(avatarCanvas('luis', { framing: 'full', baseYaw: 0.55, action, loop: true, interactive: false }));
@@ -5589,9 +5637,16 @@ function buildDetailCard(d, plan) {
 
 
 
+// Entrance animations only play when the screen changes; a redraw of the same
+// screen (after a tap, a sync, data arriving) swaps content in place.
+let lastScreenKey = null;
 function render() {
   const root = document.getElementById('root');
+  const liveAvatars = Array.from(root.querySelectorAll('canvas[data-avatar-who]')).filter(c => c._avatar);
   root.innerHTML = '';
+  const screenKey = view + '|' + (view === 'detail' ? detailId : '') + '|' + (profile || '');
+  const sameScreen = screenKey === lastScreenKey;
+  lastScreenKey = screenKey;
 
   if (view === 'splash') {
     const splash = el('div', 'splash-screen');
@@ -5604,7 +5659,7 @@ function render() {
     return;
   }
 
-  const app = el('div', 'app');
+  const app = el('div', 'app' + (sameScreen ? ' is-redraw' : ''));
   const phase = skyPhase();
   app.classList.add('photo-bg', 'sky-' + phase);
   app.style.backgroundImage = 'url(' + BG_PHOTO_IMG + ')';
@@ -5629,6 +5684,7 @@ function render() {
   }
 
   root.appendChild(app);
+  reuseAvatarCanvases(liveAvatars);
   requestAnimationFrame(mountAvatars);
 }
 
