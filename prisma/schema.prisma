@@ -7,180 +7,143 @@ datasource db {
   url       = env("DATABASE_URL")
 }
 
-// One row per trip a group is planning. `code` is the short, shareable
-// join code; `organizerPasscode` gates the one traveler with admin powers
-// (costs, hiding destinations, etc) — same lightweight, client-checked
-// trust model this app has always used for "Luis's" passcode, just now
-// scoped per trip instead of hardcoded.
-model Trip {
-  id                String   @id @default(cuid())
-  code              String   @unique
-  name              String
-  organizerPasscode String   @map("organizer_passcode")
-  createdAt         DateTime @default(now()) @map("created_at")
+// Single-row table holding Eleny's daily priority ranking state.
+// (One row is enough for this app; swap for a real per-user table later if needed.)
+model AppState {
+  id             Int      @id @default(1)
+  priorityOrder  Json     @default("[]") @map("priority_order")
+  blockedIds     Json     @default("[]") @map("blocked_ids")
+  hiddenIds      Json     @default("[]") @map("hidden_ids")
+  profileInfo    Json     @default("{}") @map("profile_info")
+  adminRanking   Json     @default("[]") @map("admin_ranking")
+  elenyHiddenIds Json     @default("[]") @map("eleny_hidden_ids")
+  tripStart      String?  @map("trip_start")
+  tripEnd        String?  @map("trip_end")
+  swipeRound     Int      @default(1) @map("swipe_round")
+  lastSubmitAt   DateTime? @map("last_submit_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
-  @@map("trips")
+  @@map("app_state")
 }
 
-// One row per person in a trip. `info` is a free-form bag (avatar config,
-// home base, free days, emergency-contact fields) — mirrors what used to
-// live in app_state.profile_info[who], just per traveler now.
-model Traveler {
-  id          String   @id @default(cuid())
-  tripId      String   @map("trip_id")
-  name        String
-  isOrganizer Boolean  @default(false) @map("is_organizer")
-  info        Json     @default("{}")
-  createdAt   DateTime @default(now()) @map("created_at")
-
-  @@index([tripId])
-  @@map("travelers")
-}
-
-// One row per trip holding shared, non-per-traveler state.
-model TripState {
-  tripId     String   @id @map("trip_id")
-  blockedIds Json     @default("[]") @map("blocked_ids")
-  hiddenIds  Json     @default("[]") @map("hidden_ids")
-  // travelerId -> destId[] the organizer has hidden from that traveler
-  // specifically (generalizes the old single "hidden from Eleny" list).
-  hiddenFrom Json     @default("{}") @map("hidden_from")
-  tripStart  String?  @map("trip_start")
-  tripEnd    String?  @map("trip_end")
-  swipeRound Int      @default(1) @map("swipe_round")
-  updatedAt  DateTime @updatedAt @map("updated_at")
-
-  @@map("trip_state")
-}
-
-// One row per uploaded photo, keyed "dest:<id>:highlight:<name>" (or
-// ":cover" / ":lodging:<name>"), scoped per trip.
+// One row per uploaded highlight photo, keyed "dest:<id>:highlight:<name>".
+// Storing the image itself (as a compressed data URL) instead of a
+// filename, since Railway's filesystem isn't persistent across deploys.
 model Photo {
-  tripId    String   @map("trip_id")
-  key       String
+  key       String   @id
   dataUrl   String   @map("data_url")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@id([tripId, key])
   @@map("photos")
 }
 
-// One row per destination that's had its highlights list customized.
+// One row per destination that has had its highlights list customized
+// (added/removed/re-tagged by city). `highlights` is the full replacement
+// list for that destination: [{ name, city }, ...]. Photos for each
+// highlight are still tracked separately in Photo, matched by name.
 model DestinationHighlights {
-  tripId     String   @map("trip_id")
-  destId     String   @map("dest_id")
+  destId     String   @id @map("dest_id")
   highlights Json
   updatedAt  DateTime @updatedAt @map("updated_at")
 
-  @@id([tripId, destId])
   @@map("destination_highlights")
 }
 
-// One row per region ("mexico" | "usa") per trip, holding the custom
-// destinations added from the map screen ("+ Add city").
+// One row per region ("mexico" | "usa") holding the custom destinations
+// added from the map screen ("+ Add city"). `destinations` is the full
+// replacement list of custom-added destination objects for that region.
 model CustomDestinations {
-  tripId       String   @map("trip_id")
-  region       String
+  region       String   @id
   destinations Json
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  @@id([tripId, region])
   @@map("custom_destinations")
 }
 
-// One row per destination that's had its lodging list customized.
+// One row per destination that has had its lodging list customized.
+// `lodging` is the full replacement list for that destination: [{ name }, ...].
 model DestinationLodging {
-  tripId    String   @map("trip_id")
-  destId    String   @map("dest_id")
+  destId    String   @id @map("dest_id")
   lodging   Json
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@id([tripId, destId])
   @@map("destination_lodging")
 }
 
-// One row per destination with the organizer-only cost breakdown.
+// One row per destination with Luis's admin-only cost breakdown.
+// `costs` is { myTransport, elenyTransport, gas, tolls, hotel } (numbers).
+// Never exposed to Eleny — admin-only input and display.
 model DestinationCosts {
-  tripId    String   @map("trip_id")
-  destId    String   @map("dest_id")
+  destId    String   @id @map("dest_id")
   costs     Json
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@id([tripId, destId])
   @@map("destination_costs")
 }
 
-// One row per (traveler, destination) swipe: "like" or "nope".
+// One row per (traveler, destination) swipe: "like" or "nope". Kept as
+// separate rows so each phone only ever writes its own traveler's swipes.
 model Swipe {
-  tripId     String   @map("trip_id")
-  travelerId String   @map("traveler_id")
-  destId     String   @map("dest_id")
-  choice     String
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  profile   String
+  destId    String   @map("dest_id")
+  choice    String
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@id([travelerId, destId])
-  @@index([tripId])
+  @@id([profile, destId])
   @@map("swipes")
 }
 
-// One row per (traveler, destination, highlight) reaction.
+// One row per (traveler, destination, highlight) reaction: "love" | "maybe" | "nope".
 model Reaction {
-  tripId     String   @map("trip_id")
-  travelerId String   @map("traveler_id")
-  destId     String   @map("dest_id")
-  name       String
-  reaction   String
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  profile   String
+  destId    String   @map("dest_id")
+  name      String
+  reaction  String
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@id([travelerId, destId, name])
-  @@index([tripId])
+  @@id([profile, destId, name])
   @@map("reactions")
 }
 
-// Day-by-day plan for a destination, scoped per trip.
+// Day-by-day plan for a destination: [[{ name }, ...], ...] (one inner list per day).
 model Itinerary {
-  tripId    String   @map("trip_id")
-  destId    String   @map("dest_id")
+  destId    String   @id @map("dest_id")
   days      Json
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@id([tripId, destId])
   @@map("itineraries")
 }
 
 // Web Push subscriptions, one per device, tagged with the traveler using it.
 model PushSubscription {
-  endpoint   String   @id
-  tripId     String   @map("trip_id")
-  travelerId String   @map("traveler_id")
-  keys       Json
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  endpoint  String   @id
+  profile   String
+  keys      Json
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@index([tripId])
   @@map("push_subscriptions")
 }
 
 // Single row holding the VAPID key pair, generated on first use so no env
-// setup is needed to turn notifications on. Shared across all trips.
+// setup is needed to turn notifications on.
 model PushConfig {
-  id         Int    @id @default(1)
-  publicKey  String @map("public_key")
-  privateKey String @map("private_key")
+  id         Int      @id @default(1)
+  publicKey  String   @map("public_key")
+  privateKey String   @map("private_key")
 
   @@map("push_config")
 }
 
-// Shared "what's new" feed, scoped per trip. travelerId is null for a
-// shared/system event (a match, the final winner) that isn't one person's.
+// Shared "what's new" feed. profile is "luis", "eleny", or "both" (e.g. a match);
+// text is written without the subject ("added Bacalar") so the UI can prefix it.
 model Activity {
-  tripId     String   @map("trip_id")
-  id         Int      @id @default(autoincrement())
-  travelerId String?  @map("traveler_id")
-  emoji      String
-  text       String
-  destId     String?  @map("dest_id")
-  createdAt  DateTime @default(now()) @map("created_at")
+  id        Int      @id @default(autoincrement())
+  profile   String
+  emoji     String
+  text      String
+  destId    String?  @map("dest_id")
+  createdAt DateTime @default(now()) @map("created_at")
 
-  @@index([tripId, createdAt])
+  @@index([createdAt])
   @@map("activity")
 }

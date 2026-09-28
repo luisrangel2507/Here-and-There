@@ -478,8 +478,6 @@ const APP_STYLE = `
     color:#fff;
   }
   .profile-info-card{ margin-top:18px; }
-  .invite-code-row{display:flex;align-items:center;gap:10px;margin-top:6px;}
-  .invite-code{font-family:monospace;font-size:22px;font-weight:800;letter-spacing:3px;background:rgba(255,255,255,0.12);border-radius:10px;padding:8px 14px;flex:1;text-align:center;}
   .profile-textarea{
     width:100%;
     min-height:80px;
@@ -1441,7 +1439,7 @@ const APP_STYLE = `
   .app.is-redraw .itin-day{animation:none !important;}
 
   /* 3D avatars */
-  .avatar-thumb{background:var(--traveler-color,#FF6B5B);color:#fff;font-weight:800;background-size:cover;background-position:center 30%;display:flex;align-items:center;justify-content:center;}
+  .avatar-thumb{background-size:cover;background-position:center 30%;display:flex;align-items:center;justify-content:center;}
   /* Some hosts (feed bubble, map pin) set a background shorthand that resets size/position. */
   .avatar-thumb.is-3d{background-color:rgba(255,255,255,0.9);background-size:cover !important;background-position:center 30% !important;}
   .avatar-canvas{display:block;width:100%;height:150px;}
@@ -2605,6 +2603,7 @@ function destTotal(d) {
   return 0;
 }
 
+const ADMIN_CODE = 'aguacate9';
 const STORAGE_KEY = 'priorities-state';
 
 function allDestinations() {
@@ -2613,45 +2612,46 @@ function allDestinations() {
 
 let blockedIds = [];
 let hiddenIds = [];
-let hiddenFrom = {}; // { '*': [destId,...] } — destinations the organizer hid from everyone but themself
-let profileInfo = {}; // travelerId -> per-traveler info (avatar, home base, free days, emergency contact...)
+let elenyHiddenIds = []; // destinations Luis has hidden from Eleny's map/list (still visible to Luis)
+let profileInfo = {};
 let tripStart = null; // 'YYYY-MM-DD'
 let tripEnd = null;
 
-function orgHiddenIds() { return hiddenFrom['*'] || []; }
 
-// Sends only the named fields, so one phone never overwrites what another changed.
+// Sends only the named fields, so one phone never overwrites what the other changed.
 async function saveState(fields) {
-  const all = { blockedIds, hiddenIds, hiddenFrom, tripStart, tripEnd };
+  const all = { blockedIds, hiddenIds, elenyHiddenIds, tripStart, tripEnd };
   const body = {};
   fields.forEach(f => { body[f] = all[f]; });
   try {
-    await api('/api/state', { method: 'POST', body: JSON.stringify(body) });
+    await fetch('/api/state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
   } catch (e) { /* best-effort only */ }
 }
 async function saveProfileInfoNow() {
   try {
-    await api('/api/state', { method: 'POST', body: JSON.stringify({ myInfo: profileInfo[travelerId] || {} }) });
+    await fetch('/api/state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profileInfoFor: { profile, info: profileInfo[profile] || {} } }),
+    });
   } catch (e) { /* best-effort only */ }
 }
 async function loadPriorities() {
   try {
-    const res = await api('/api/state');
+    const res = await fetch('/api/state');
     if (res.ok) {
       const parsed = await res.json();
       if (parsed) {
         blockedIds = parsed.blockedIds || [];
         hiddenIds = parsed.hiddenIds || [];
-        hiddenFrom = parsed.hiddenFrom || {};
+        elenyHiddenIds = parsed.elenyHiddenIds || [];
+        profileInfo = parsed.profileInfo || {};
         tripStart = parsed.tripStart || null;
         tripEnd = parsed.tripEnd || null;
-        if (parsed.swipeRound) swipeRound = parsed.swipeRound;
-        if (Array.isArray(parsed.travelers)) {
-          travelers = parsed.travelers.map(t => ({ id: t.id, name: t.name, isOrganizer: t.isOrganizer }));
-          parsed.travelers.forEach(t => {
-            profileInfo[t.id] = (t.info && typeof t.info === 'object') ? t.info : (profileInfo[t.id] || {});
-          });
-        }
       }
     }
   } catch (e) { /* keep defaults */ }
@@ -2661,8 +2661,9 @@ async function loadPriorities() {
 async function saveHighlights(destId) {
   const d = getDest(destId);
   try {
-    await api('/api/highlights', {
+    await fetch('/api/highlights', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         destId,
         highlights: d.highlights.map(h => ({ name: h.name, city: h.city || null })),
@@ -2673,7 +2674,7 @@ async function saveHighlights(destId) {
 
 async function loadHighlightsData() {
   try {
-    const res = await api('/api/highlights');
+    const res = await fetch('/api/highlights');
     if (!res.ok) return;
     const map = await res.json();
     Object.keys(map).forEach(destId => {
@@ -2688,8 +2689,9 @@ async function loadHighlightsData() {
 async function saveLodging(destId) {
   const d = getDest(destId);
   try {
-    await api('/api/lodging', {
+    await fetch('/api/lodging', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         destId,
         lodging: (d.lodging || []).map(l => ({ name: l.name, url: l.url || null })),
@@ -2700,7 +2702,7 @@ async function saveLodging(destId) {
 
 async function loadLodgingData() {
   try {
-    const res = await api('/api/lodging');
+    const res = await fetch('/api/lodging');
     if (!res.ok) return;
     const map = await res.json();
     Object.keys(map).forEach(destId => {
@@ -2711,7 +2713,7 @@ async function loadLodgingData() {
   } catch (e) { /* keep defaults */ }
 }
 
-// ---- organizer-only cost breakdown (never shown to the rest of the trip) ----
+// ---- admin-only cost breakdown (never shown to Eleny) ----
 const EMPTY_COSTS = { myTransport: 0, elenyTransport: 0, gas: 0, tolls: 0, hotel: 0 };
 
 let costsSaveTimer = null;
@@ -2719,8 +2721,9 @@ function saveCosts(destId) {
   const d = getDest(destId);
   clearTimeout(costsSaveTimer);
   costsSaveTimer = setTimeout(() => {
-    api('/api/costs', {
+    fetch('/api/costs', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ destId, costs: d.costs }),
     }).catch(() => {});
   }, 400);
@@ -2728,7 +2731,7 @@ function saveCosts(destId) {
 
 async function loadCostsData() {
   try {
-    const res = await api('/api/costs');
+    const res = await fetch('/api/costs');
     if (!res.ok) return;
     const map = await res.json();
     Object.keys(map).forEach(destId => {
@@ -2772,8 +2775,9 @@ function removeLodging(id, idx) {
 // ---- custom destinations (added from the map via "+ Add city") ----
 async function saveCustomDestinations(regionKey) {
   try {
-    await api('/api/destinations', {
+    await fetch('/api/destinations', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         region: regionKey,
         destinations: REGIONS[regionKey].destinations.filter(d => d.custom),
@@ -2784,7 +2788,7 @@ async function saveCustomDestinations(regionKey) {
 
 async function loadCustomDestinations() {
   try {
-    const res = await api('/api/destinations');
+    const res = await fetch('/api/destinations');
     if (!res.ok) return;
     const map = await res.json();
     Object.keys(map).forEach(regionKey => {
@@ -2840,8 +2844,9 @@ function photoKeyForCover(id) {
 
 async function savePhoto(key, dataUrl) {
   try {
-    const res = await api('/api/photos', {
+    const res = await fetch('/api/photos', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key, dataUrl }),
     });
     return res.ok;
@@ -2857,7 +2862,7 @@ function loadPhotosFor(destId) {
   if (!d) return Promise.resolve();
   const p = (async () => {
     try {
-      const res = await api('/api/photos?destId=' + encodeURIComponent(destId));
+      const res = await fetch('/api/photos?destId=' + encodeURIComponent(destId));
       if (!res.ok) return;
       const map = await res.json();
       loadedPhotoDestIds.add(destId);
@@ -2981,7 +2986,7 @@ function showPhotoLightbox(src, alt, onReplace) {
 
 
 // ---- state ----
-let view = 'splash'; // 'splash' | 'landing' | 'picker' | 'map' | 'detail' | 'swipe' | 'profile'
+let view = 'splash'; // 'splash' | 'intro' | 'map' | 'detail'
 let region = 'mexico'; // 'mexico' | 'usa'
 let detailId = null;
 let openAddHighlight = false;
@@ -2989,71 +2994,24 @@ let openAddLodging = false;
 let selectedHighlightCity = null;
 let addingCity = null; // null | { step: 'pin' } | { step: 'form', pin: {x,y} }
 let movingPinId = null; // id of a custom destination currently being repositioned, or null
+let profile = null; // 'eleny' | 'luis'
+let isAdmin = false;
 
-// ---- trip/traveler identity ----
-let tripId = null;
-let travelerId = null;
-let tripCode = null;
-let tripName = '';
-let travelers = []; // [{id, name, isOrganizer}]
-let isAdmin = false; // proven with the organizer passcode this session — never persisted
-
-function me() { return travelers.find(t => t.id === travelerId) || null; }
-function myName() { const m = me(); return m ? m.name : ''; }
-function others() { return travelers.filter(t => t.id !== travelerId); }
-function otherNames() { return others().map(t => t.name); }
-function joinNames(names) {
-  if (!names.length) return '';
-  if (names.length === 1) return names[0];
-  if (names.length === 2) return names[0] + ' and ' + names[1];
-  return names.slice(0, -1).join(', ') + ', and ' + names[names.length - 1];
-}
-function othersLabel() { return joinNames(otherNames()) || 'the group'; }
-
-// Every trip-scoped call carries the traveler's identity as headers — there's
-// no password/session beyond that, so these two values are effectively a
-// bearer credential and are only ever sent to this app's own API.
-function api(path, opts) {
-  opts = opts || {};
-  const headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
-  if (tripId) headers['X-Trip-Id'] = tripId;
-  if (travelerId) headers['X-Traveler-Id'] = travelerId;
-  return fetch(path, Object.assign({}, opts, { headers }));
-}
-
-const DEVICE_KEY = 'here-and-there-device';
-function saveDeviceIdentity() {
-  try { localStorage.setItem(DEVICE_KEY, JSON.stringify({ tripId, travelerId, tripCode })); } catch (e) { /* private mode */ }
-}
-function loadDeviceIdentity() {
-  try { return JSON.parse(localStorage.getItem(DEVICE_KEY) || 'null'); } catch (e) { return null; }
-}
-function clearDeviceIdentity() {
-  try { localStorage.removeItem(DEVICE_KEY); } catch (e) { /* private mode */ }
-}
-
-// Selecting the organizer's own name re-proves the passcode every session —
-// it's never restored from a saved device, mirroring the original app's
-// "tap Luis, then unlock" flow.
-function selectTraveler(t) {
-  if (t.isOrganizer) {
-    showPasscodeModal().then(unlocked => {
-      if (!unlocked) return;
-      travelerId = t.id;
-      isAdmin = true;
-      saveDeviceIdentity();
-      view = 'map';
-      loadTripData();
-      render();
-    });
+function selectProfile(p) {
+  if (p === 'eleny') {
+    profile = 'eleny';
+    isAdmin = false;
+    view = 'map';
+    render();
     return;
   }
-  travelerId = t.id;
-  isAdmin = false;
-  saveDeviceIdentity();
-  view = 'map';
-  loadTripData();
-  render();
+  showPasscodeModal().then(unlocked => {
+    if (!unlocked) return;
+    profile = 'luis';
+    isAdmin = true;
+    view = 'map';
+    render();
+  });
 }
 
 function showPasscodeModal() {
@@ -3062,7 +3020,7 @@ function showPasscodeModal() {
     const card = el('div', 'passcode-card');
     card.appendChild(el('div', 'passcode-icon', '🔒'));
     card.appendChild(el('div', 'passcode-title', 'Enter Passcode'));
-    card.appendChild(el('div', 'passcode-sub', 'This unlocks the organizer\\'s view.'));
+    card.appendChild(el('div', 'passcode-sub', 'This unlocks Luis\\'s view.'));
 
     const input = document.createElement('input');
     input.type = 'password';
@@ -3087,32 +3045,21 @@ function showPasscodeModal() {
     document.body.appendChild(backdrop);
     setTimeout(() => input.focus(), 50);
 
-    let checking = false;
     function close(unlocked) {
       backdrop.remove();
       resolve(unlocked);
     }
     function tryUnlock() {
-      if (checking || !tripCode) return;
-      checking = true;
-      const code = input.value.trim();
-      fetch('/api/trips/' + tripCode + '/organizer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ travelerId: pickerOrganizerId(), passcode: code }),
-      }).then(res => {
-        checking = false;
-        if (res.ok) { close(true); return; }
-        error.textContent = 'Incorrect passcode';
-        input.value = '';
-        input.focus();
-        card.classList.remove('shake');
-        void card.offsetWidth; // restart the animation
-        card.classList.add('shake');
-      }).catch(() => {
-        checking = false;
-        error.textContent = 'Couldn\\'t reach the server — try again';
-      });
+      if (input.value.trim().toLowerCase() === ADMIN_CODE) {
+        close(true);
+        return;
+      }
+      error.textContent = 'Incorrect passcode';
+      input.value = '';
+      input.focus();
+      card.classList.remove('shake');
+      void card.offsetWidth; // restart the animation
+      card.classList.add('shake');
     }
     cancelBtn.addEventListener('click', () => close(false));
     okBtn.addEventListener('click', tryUnlock);
@@ -3123,43 +3070,12 @@ function showPasscodeModal() {
     backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(false); });
   });
 }
-// showPasscodeModal is used both from the picker (no travelerId chosen yet)
-// and to re-elevate the traveler you're already signed in as.
-function pickerOrganizerId() {
-  if (pickerTrip && pickerTrip.travelers) {
-    const org = pickerTrip.travelers.find(t => t.isOrganizer);
-    if (org) return org.id;
-  }
-  const mine = me();
-  if (mine && mine.isOrganizer) return mine.id;
-  const org = travelers.find(t => t.isOrganizer);
-  return org ? org.id : travelerId;
-}
-
-// ---- landing (join/create a trip) & traveler picker ----
-let landingMode = 'join'; // 'join' | 'create'
-let landingBusy = false;
-let landingError = '';
-let pickerTrip = null; // { tripId, code, name, travelers }
-function goLanding() {
-  view = 'landing';
-  landingError = '';
+function goIntro() {
+  view = 'intro';
+  profile = null;
+  isAdmin = false;
   detailId = null;
   render();
-}
-function goPicker() {
-  if (tripCode) pickerTrip = { tripId, code: tripCode, name: tripName, travelers };
-  travelerId = null;
-  isAdmin = false;
-  view = 'picker';
-  landingError = '';
-  render();
-}
-function leaveTrip() {
-  if (!window.confirm('Leave this trip on this device? You can always rejoin with the trip code.')) return;
-  clearDeviceIdentity();
-  tripId = null; travelerId = null; tripCode = null; tripName = ''; travelers = []; isAdmin = false;
-  goLanding();
 }
 
 let profileReturnView = 'map';
@@ -3180,8 +3096,8 @@ function backFromProfile() {
 }
 let profileSaveTimer = null;
 function saveProfileInfo(field, value) {
-  if (!profileInfo[travelerId]) profileInfo[travelerId] = {};
-  profileInfo[travelerId][field] = value;
+  if (!profileInfo[profile]) profileInfo[profile] = {};
+  profileInfo[profile][field] = value;
   clearTimeout(profileSaveTimer);
   profileSaveTimer = setTimeout(saveProfileInfoNow, 400);
 }
@@ -3243,21 +3159,24 @@ function toggleFavorite(id) {
   d.favorite = !d.favorite;
   render();
 }
-function toggleOrgVisibility(id) {
-  const list = hiddenFrom['*'] || [];
-  hiddenFrom = { ...hiddenFrom, '*': list.includes(id) ? list.filter(hid => hid !== id) : [...list, id] };
+function toggleElenyVisibility(id) {
+  if (elenyHiddenIds.includes(id)) {
+    elenyHiddenIds = elenyHiddenIds.filter(hid => hid !== id);
+  } else {
+    elenyHiddenIds.push(id);
+  }
   render();
-  saveState(['hiddenFrom']);
+  saveState(['elenyHiddenIds']);
 }
 // ---- swipe to decide ----
-let swipes = {}; // travelerId -> { destId: 'like' | 'nope' }
+let swipes = { luis: {}, eleny: {} }; // profile -> { destId: 'like' | 'nope' }
 let pendingSwipes = {}; // my swipes still being saved, re-applied over any refresh
 let swipeRound = 1; // shared round number, kept on the server
 let swipeDragging = false;
 let swipeRerender = false;
 let detailReturnView = 'map';
 
-function partnerName() { return othersLabel(); }
+function partnerName() { return profile === 'luis' ? 'Eleny' : 'Luis'; }
 function haptic(pattern) {
   try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) { /* unsupported */ }
 }
@@ -3269,22 +3188,20 @@ function txt(tag, className, text) {
 
 async function loadSwipes() {
   try {
-    const res = await api('/api/swipes');
+    const res = await fetch('/api/swipes');
     if (!res.ok) return;
-    const data = await res.json();
-    swipes = data.swipes || {};
-    if (data.round) swipeRound = data.round;
-    if (travelerId) {
-      if (!swipes[travelerId]) swipes[travelerId] = {};
-      Object.keys(pendingSwipes).forEach(id => { swipes[travelerId][id] = pendingSwipes[id]; });
-    }
+    const map = await res.json();
+    swipes = { luis: map.luis || {}, eleny: map.eleny || {} };
+    if (map.round) swipeRound = map.round;
+    if (profile) Object.keys(pendingSwipes).forEach(id => { swipes[profile][id] = pendingSwipes[id]; });
   } catch (e) { /* keep what we have */ }
 }
 async function saveSwipe(destId, choice) {
   try {
-    const res = await api('/api/swipes', {
+    const res = await fetch('/api/swipes', {
       method: 'POST',
-      body: JSON.stringify({ destId, choice, city: (getDest(destId) || {}).city }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile, destId, choice, city: (getDest(destId) || {}).city }),
     });
     return res.ok;
   } catch (e) { return false; }
@@ -3327,15 +3244,14 @@ function isDuplicate(id) {
 }
 function swipeOf(who, id) {
   const ids = groupIds(id);
-  const mine = swipes[who] || {};
-  if (ids.some(x => mine[x] === 'nope')) return 'nope';
-  return ids.some(x => mine[x] === 'like') ? 'like' : null;
+  if (ids.some(x => swipes[who][x] === 'nope')) return 'nope';
+  return ids.some(x => swipes[who][x] === 'like') ? 'like' : null;
 }
 function inPlay(d) {
-  return !hiddenIds.includes(d.id) && !orgHiddenIds().includes(d.id) && !isDuplicate(d.id);
+  return !hiddenIds.includes(d.id) && !elenyHiddenIds.includes(d.id) && !isDuplicate(d.id);
 }
 function isVetoed(id) {
-  return travelers.some(t => swipeOf(t.id, id) === 'nope');
+  return swipeOf('luis', id) === 'nope' || swipeOf('eleny', id) === 'nope';
 }
 function isOut(id) {
   return groupIds(id).some(x => blockedIds.includes(x)) || isVetoed(id);
@@ -3353,12 +3269,13 @@ function maybeAdvanceRound() {
   if (alive.length < 2 || !alive.every(d => isMatch(d.id))) return false;
   const ids = [].concat(...alive.map(d => groupIds(d.id)));
   const fromRound = swipeRound;
-  travelers.forEach(t => { if (swipes[t.id]) ids.forEach(id => delete swipes[t.id][id]); });
+  ids.forEach(id => { delete swipes.luis[id]; delete swipes.eleny[id]; });
   swipeRound = fromRound + 1;
   markMatchesSeen();
-  api('/api/swipes', {
+  fetch('/api/swipes', {
     method: 'POST',
-    body: JSON.stringify({ resetRound: ids, fromRound }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ profile, resetRound: ids, fromRound }),
   }).then(res => res.json()).then(result => {
     if (result.advanced) { notifyPartner('round', String(result.round), alive.length); return; }
     // The other phone already started the next round.
@@ -3369,7 +3286,7 @@ function maybeAdvanceRound() {
 }
 
 // ---- round intro screen ----
-function roundSeenKey() { return 'seen-round-' + travelerId; }
+function roundSeenKey() { return 'seen-round-' + profile; }
 function lastRoundSeen() {
   try { return Number(localStorage.getItem(roundSeenKey())) || 0; } catch (e) { return swipeRound; }
 }
@@ -3393,11 +3310,11 @@ function showRoundIntro() {
   const box = el('div', 'round-box');
   box.appendChild(txt('div', 'round-kicker', swipeRound === 1
     ? 'LET THE GAMES BEGIN'
-    : 'EVERYONE SAID YES TO ' + alive.length));
+    : 'YOU BOTH SAID YES TO ' + alive.length));
   box.appendChild(txt('div', 'round-word', isFinal ? 'FINAL' : 'ROUND'));
   box.appendChild(txt('div', 'round-number' + (isFinal ? ' is-text' : ''), isFinal ? 'ROUND' : String(swipeRound)));
   box.appendChild(txt('div', 'round-sub', isFinal
-    ? 'Only 2 left — someone has to swipe one out.'
+    ? 'Only 2 left — one of you has to swipe one out.'
     : alive.length <= 3
     ? '🔥 Final ' + alive.length + ' — it\\'s getting serious.'
     : alive.length + ' destinations still in the running'));
@@ -3410,7 +3327,7 @@ function showRoundIntro() {
   if (alive.length > 10) tiles.appendChild(txt('span', 'round-tile', '+' + (alive.length - 10) + ' more'));
   box.appendChild(tiles);
   const rules = el('div', 'round-rules');
-  [['♥', 'Keeps it in'], ['✕', 'Out for everyone'], ['🏆', 'Last one standing wins']].forEach(([icon, label], i) => {
+  [['♥', 'Keeps it in'], ['✕', 'Out for both of you'], ['🏆', 'Last one standing wins']].forEach(([icon, label], i) => {
     const rule = el('div', 'round-rule');
     rule.style.animationDelay = (1.3 + i * 0.1) + 's';
     rule.appendChild(txt('div', 'round-rule-icon', icon));
@@ -3433,25 +3350,26 @@ function restoreDestination(id) {
   const d = getDest(id);
   if (!d || !window.confirm('Bring ' + d.city + ' back into play?')) return;
   const ids = groupIds(id);
-  ids.forEach(x => travelers.forEach(t => { if (swipes[t.id] && swipes[t.id][x] === 'nope') delete swipes[t.id][x]; }));
+  ids.forEach(x => ['luis', 'eleny'].forEach(who => { if (swipes[who][x] === 'nope') delete swipes[who][x]; }));
   if (ids.some(x => blockedIds.includes(x))) {
     blockedIds = blockedIds.filter(b => !ids.includes(b));
     saveState(['blockedIds']);
   }
-  ids.forEach(x => api('/api/swipes', {
+  ids.forEach(x => fetch('/api/swipes', {
     method: 'POST',
-    body: JSON.stringify({ restore: x }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ profile, restore: x }),
   }).catch(() => {}));
   haptic(15);
   render();
 }
 function isMatch(id) {
-  return travelers.length > 1 && travelers.every(t => swipeOf(t.id, id) === 'like');
+  return swipeOf('luis', id) === 'like' && swipeOf('eleny', id) === 'like';
 }
 function currentMatchIds() {
   return swipeableDestinations().filter(d => isMatch(d.id)).map(d => d.id);
 }
-function seenMatchKey() { return 'seen-matches-' + travelerId; }
+function seenMatchKey() { return 'seen-matches-' + profile; }
 function getSeenMatches() {
   try { return JSON.parse(localStorage.getItem(seenMatchKey()) || '[]'); } catch (e) { return []; }
 }
@@ -3482,8 +3400,7 @@ function goSwipe() {
 }
 
 async function commitSwipe(id, choice) {
-  if (!swipes[travelerId]) swipes[travelerId] = {};
-  swipes[travelerId][id] = choice;
+  swipes[profile][id] = choice;
   pendingSwipes[id] = choice;
   haptic(choice === 'like' ? 18 : 8);
   render();
@@ -3604,10 +3521,11 @@ function showMatch(id) {
 
 // ---- notifications ----
 function notifyPartner(type, city, count, destId) {
-  if (!travelerId) return;
-  api('/api/notify', {
+  if (!profile) return;
+  fetch('/api/notify', {
     method: 'POST',
-    body: JSON.stringify({ type, city: city || '', count: count || 0, destId: destId || null }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from: profile, type, city: city || '', count: count || 0, destId: destId || null }),
   }).then(() => loadActivity()).catch(() => {});
 }
 function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent); }
@@ -3644,9 +3562,10 @@ async function enableNotifications() {
     const key = await keyRes.json();
     let sub = await reg.pushManager.getSubscription();
     if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(key.publicKey) });
-    const res = await api('/api/push', {
+    const res = await fetch('/api/push', {
       method: 'POST',
-      body: JSON.stringify({ subscription: sub.toJSON() }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile, subscription: sub.toJSON() }),
     });
     if (!res.ok) throw new Error('save failed');
     pushSubscribed = true;
@@ -3726,16 +3645,10 @@ function setMyFreeDays(days) {
   clearTimeout(availabilityNotifyTimer);
   availabilityNotifyTimer = setTimeout(() => notifyPartner('availability'), 15000);
 }
-// A shared window needs every traveler in the trip free that day, not just one partner.
-function everyoneFreeDays() {
-  const everyone = travelers.length ? travelers.map(t => t.id) : [travelerId].filter(Boolean);
-  if (!everyone.length) return [];
-  const sets = everyone.map(id => new Set(freeDaysOf(id)));
-  const today = todayYmd();
-  return Array.from(sets[0] || []).filter(day => day >= today && sets.every(s => s.has(day))).sort();
-}
 function sharedWindows() {
-  const both = everyoneFreeDays();
+  const partner = profile === 'luis' ? 'eleny' : 'luis';
+  const theirs = new Set(freeDaysOf(partner));
+  const both = freeDaysOf(profile).filter(day => theirs.has(day) && day >= todayYmd()).sort();
   const windows = [];
   both.forEach(day => {
     const last = windows[windows.length - 1];
@@ -3759,9 +3672,9 @@ function refreshAvailabilityCard() {
   if (old) old.replaceWith(buildAvailabilityCard());
 }
 function buildAvailabilityCard() {
-  const mine = new Set(freeDaysOf(travelerId));
-  const otherSets = others().map(t => new Set(freeDaysOf(t.id)));
-  const theirs = new Set(); otherSets.forEach(s => s.forEach(d => theirs.add(d)));
+  const partner = profile === 'luis' ? 'eleny' : 'luis';
+  const mine = new Set(freeDaysOf(profile));
+  const theirs = new Set(freeDaysOf(partner));
   const today = todayYmd();
   if (!calendarMonth) {
     const base = tripStart ? parseDay(tripStart) : new Date();
@@ -3907,7 +3820,7 @@ function winnerId() {
   const alive = swipeableDestinations();
   return alive.length === 1 ? alive[0].id : null;
 }
-function revealSeenKey() { return 'seen-winner-' + travelerId; }
+function revealSeenKey() { return 'seen-winner-' + profile; }
 function revealSeen(id) {
   try { return localStorage.getItem(revealSeenKey()) === id; } catch (e) { return true; }
 }
@@ -3986,7 +3899,7 @@ function showReveal(id) {
 
   const body = el('div', 'bp-body');
   const route = el('div', 'bp-route');
-  route.appendChild(bpField('TRIP', (tripName || 'HERE & THERE').toUpperCase()));
+  route.appendChild(bpField('FROM', 'MX 🇲🇽 · US 🇺🇸'));
   route.appendChild(txt('div', 'bp-plane', '✈'));
   const toField = el('div', 'bp-field bp-to');
   toField.appendChild(txt('div', 'bp-label', 'TO'));
@@ -4002,7 +3915,7 @@ function showReveal(id) {
   body.appendChild(city.wrap);
 
   const meta = el('div', 'bp-meta');
-  meta.appendChild(bpField('PASSENGERS', travelers.map(t => t.name.toUpperCase()).join(' & ')));
+  meta.appendChild(bpField('PASSENGERS', 'LUIS & ELENY'));
   meta.appendChild(bpField('DEPARTS', tripStart ? formatTripDate(tripStart).toUpperCase() : 'TBD'));
   meta.appendChild(bpField('SEAT', '💘', 'bp-seat'));
   body.appendChild(meta);
@@ -4050,27 +3963,28 @@ function showReveal(id) {
 
 // ---- reactions on highlights ----
 const REACTION_META = { love: '😍', maybe: '🤔', nope: '❌' };
-let reactions = {}; // travelerId -> { 'destId|name': reaction }
+let reactions = { luis: {}, eleny: {} };
 function reactionKey(destId, name) { return destId + '|' + name; }
 function reactionFor(who, destId, name) { return (reactions[who] || {})[reactionKey(destId, name)] || null; }
 async function loadReactions() {
   try {
-    const res = await api('/api/reactions');
+    const res = await fetch('/api/reactions');
     if (!res.ok) return;
-    reactions = (await res.json()) || {};
+    const map = await res.json();
+    reactions = { luis: map.luis || {}, eleny: map.eleny || {} };
   } catch (e) { /* keep what we have */ }
 }
 function setReaction(destId, name, reaction) {
   const key = reactionKey(destId, name);
-  if (!reactions[travelerId]) reactions[travelerId] = {};
-  if (reaction) reactions[travelerId][key] = reaction;
-  else delete reactions[travelerId][key];
+  if (reaction) reactions[profile][key] = reaction;
+  else delete reactions[profile][key];
   haptic(10);
   closeReactionPicker();
   refreshDetailCard(destId);
-  api('/api/reactions', {
+  fetch('/api/reactions', {
     method: 'POST',
-    body: JSON.stringify({ destId, name, reaction, city: (getDest(destId) || {}).city }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ profile, destId, name, reaction, city: (getDest(destId) || {}).city }),
   }).catch(() => {});
 }
 function closeReactionPicker() {
@@ -4080,7 +3994,7 @@ function openReactionPicker(anchor, destId, name) {
   const wasOpen = anchor.querySelector('.rx-picker');
   closeReactionPicker();
   if (wasOpen) return;
-  const current = reactionFor(travelerId, destId, name);
+  const current = reactionFor(profile, destId, name);
   const picker = el('div', 'rx-picker');
   Object.keys(REACTION_META).forEach(r => {
     const b = txt('button', 'rx-option' + (current === r ? ' active' : ''), REACTION_META[r]);
@@ -4091,15 +4005,15 @@ function openReactionPicker(anchor, destId, name) {
   setTimeout(() => document.addEventListener('click', closeReactionPicker, { once: true }), 0);
 }
 function buildReactions(d, h) {
-  const mine = reactionFor(travelerId, d.id, h.name);
+  const partner = profile === 'luis' ? 'eleny' : 'luis';
+  const mine = reactionFor(profile, d.id, h.name);
+  const theirs = reactionFor(partner, d.id, h.name);
   const box = el('div', 'rx');
-  others().forEach(t => {
-    const theirs = reactionFor(t.id, d.id, h.name);
-    if (!theirs) return;
-    const badge = txt('span', 'rx-partner', initialOf(t.id) + REACTION_META[theirs]);
-    badge.title = t.name + ' reacted';
+  if (theirs) {
+    const badge = txt('span', 'rx-partner', (partner === 'luis' ? '🇲🇽' : '🇺🇸') + REACTION_META[theirs]);
+    badge.title = partnerName() + ' reacted';
     box.appendChild(badge);
-  });
+  }
   const btn = txt('button', 'rx-mine' + (mine ? ' has' : ''), mine ? REACTION_META[mine] : '☺︎');
   btn.setAttribute('aria-label', 'React');
   btn.addEventListener('click', (e) => { e.stopPropagation(); openReactionPicker(box, d.id, h.name); });
@@ -4119,14 +4033,15 @@ function applyPendingScroll() {
 }
 async function loadItineraries() {
   try {
-    const res = await api('/api/itinerary');
+    const res = await fetch('/api/itinerary');
     if (!res.ok) return;
     itineraries = (await res.json()) || {};
   } catch (e) { /* keep what we have */ }
 }
 function saveItinerary(destId) {
-  api('/api/itinerary', {
+  fetch('/api/itinerary', {
     method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ destId, days: itineraries[destId] }),
   }).catch(() => {});
 }
@@ -4139,12 +4054,10 @@ function itineraryHasStops(destId) {
   return (itineraries[destId] || []).some(day => day.length);
 }
 function highlightScore(destId, name) {
-  const rx = travelers.map(t => reactionFor(t.id, destId, name));
-  if (rx.some(r => r === 'nope')) return -1;
-  return rx.reduce((sum, r) => sum + (r === 'love' ? 2 : r === 'maybe' ? 1 : 0), 0);
-}
-function allLove(destId, name) {
-  return travelers.length > 1 && travelers.every(t => reactionFor(t.id, destId, name) === 'love');
+  const a = reactionFor('luis', destId, name);
+  const b = reactionFor('eleny', destId, name);
+  if (a === 'nope' || b === 'nope') return -1;
+  return [a, b].reduce((sum, r) => sum + (r === 'love' ? 2 : r === 'maybe' ? 1 : 0), 0);
 }
 function updateItinerary(destId, days) {
   itineraries[destId] = days;
@@ -4185,7 +4098,7 @@ function buildItinerary(d) {
   section.appendChild(el('div', 'detail-label', '🗓️ ITINERARY'));
   section.appendChild(txt('div', 'itin-sub', tripStart
     ? formatTripDate(tripStart) + (tripEnd && tripEnd !== tripStart ? ' → ' + formatTripDate(tripEnd) : '')
-    : 'Set your trip dates in your profile to see real dates here.'));
+    : 'Set your trip dates in your profile (tap your flag) to see real dates here.'));
 
   const autoBtn = el('button', 'itin-auto', '✨ Auto-plan from your reactions');
   autoBtn.addEventListener('click', () => autoPlan(d.id));
@@ -4208,7 +4121,8 @@ function buildItinerary(d) {
       const row = el('div', 'itin-stop');
       row.appendChild(txt('span', 'itin-stop-num', String(stopIdx + 1)));
       row.appendChild(txt('span', 'itin-stop-name', stop.name));
-      if (allLove(d.id, stop.name)) row.appendChild(txt('span', 'itin-stop-love', '😍😍'));
+      const both = reactionFor('luis', d.id, stop.name) === 'love' && reactionFor('eleny', d.id, stop.name) === 'love';
+      if (both) row.appendChild(txt('span', 'itin-stop-love', '😍😍'));
       const del = el('button', 'highlight-del', '×');
       del.addEventListener('click', () => removeStop(d.id, dayIdx, stopIdx));
       row.appendChild(del);
@@ -4281,7 +4195,7 @@ async function syncFromServer() {
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible') return;
   try { if (navigator.clearAppBadge) navigator.clearAppBadge(); } catch (e) { /* unsupported */ }
-  if (!travelerId || Date.now() - lastSyncAt < 4000) return;
+  if (!profile || Date.now() - lastSyncAt < 4000) return;
   lastSyncAt = Date.now();
   syncFromServer();
   loadWeather();
@@ -4303,21 +4217,11 @@ function avatarOf(who) {
   if (info.avatar) return info.avatar;
   return avatarEngine ? avatarEngine.defaultAvatar(who) : null;
 }
-const TRAVELER_COLORS = ['#FF6B5B', '#2EC4B6', '#8A5FBF', '#FFC93C', '#2B6CB0', '#FF6F91', '#3F8F5C', '#F4A261'];
-function travelerIndex(who) {
-  const i = travelers.findIndex(t => t.id === who);
-  return i < 0 ? 0 : i;
-}
-function colorOf(who) { return TRAVELER_COLORS[travelerIndex(who) % TRAVELER_COLORS.length]; }
-function initialOf(who) {
-  const t = travelers.find(x => x.id === who);
-  return t && t.name ? t.name.trim().charAt(0).toUpperCase() : '?';
-}
-// Still headshot for small spots; shows a colored initial until the 3D engine has loaded.
+function flagOf(who) { return who === 'luis' ? '🇲🇽' : '🇺🇸'; }
+// Still headshot for small spots; shows the flag until the 3D engine has loaded.
 function avatarThumbNode(who, cls) {
-  const node = txt('div', 'avatar-thumb' + (cls ? ' ' + cls : ''), initialOf(who));
+  const node = txt('div', 'avatar-thumb' + (cls ? ' ' + cls : ''), flagOf(who));
   node.dataset.avatarThumb = who;
-  node.style.setProperty('--traveler-color', colorOf(who));
   paintThumb(node);
   return node;
 }
@@ -4376,22 +4280,19 @@ function reuseAvatarCanvases(previous) {
 }
 function avatarDuo(action) {
   const duo = el('div', 'avatar-duo');
-  const list = (travelers.length ? travelers : (travelerId ? [{ id: travelerId }] : [])).slice(0, 4);
-  list.forEach((t, i) => {
-    const sign = i % 2 === 0 ? 1 : -1;
-    duo.appendChild(avatarCanvas(t.id, { framing: 'full', baseYaw: sign * (0.55 - i * 0.05), action, loop: true, interactive: false }));
-  });
+  duo.appendChild(avatarCanvas('luis', { framing: 'full', baseYaw: 0.55, action, loop: true, interactive: false }));
+  duo.appendChild(avatarCanvas('eleny', { framing: 'full', baseYaw: -0.55, action, loop: true, interactive: false }));
   return duo;
 }
 
 // ---- avatar studio (profile) ----
 function setMyAvatar(patch) {
   if (!avatarEngine) return;
-  const cfg = Object.assign({}, avatarOf(travelerId), patch);
+  const cfg = Object.assign({}, avatarOf(profile), patch);
   saveProfileInfo('avatar', cfg);
   const canvas = document.querySelector('.studio canvas[data-avatar-who]');
   if (canvas && canvas._avatar) { canvas._avatar.setConfig(cfg); canvas._avatar.play('wave'); }
-  document.querySelectorAll('[data-avatar-thumb="' + travelerId + '"]').forEach(paintThumb);
+  document.querySelectorAll('[data-avatar-thumb="' + profile + '"]').forEach(paintThumb);
   const old = document.getElementById('studio-options');
   if (old) old.replaceWith(buildStudioOptions());
   haptic(8);
@@ -4400,7 +4301,7 @@ function buildAvatarStudio() {
   const card = el('div', 'add-city-form profile-info-card studio');
   card.appendChild(el('div', 'add-city-label', '🎮 MY AVATAR'));
   const stage = el('div', 'studio-stage');
-  stage.appendChild(avatarCanvas(travelerId, { framing: 'full', action: 'wave' }));
+  stage.appendChild(avatarCanvas(profile, { framing: 'full', action: 'wave' }));
   stage.appendChild(txt('div', 'studio-hint', 'Drag to spin · tap to wave'));
   card.appendChild(stage);
   card.appendChild(buildStudioOptions());
@@ -4414,7 +4315,7 @@ function buildStudioOptions() {
     return wrap;
   }
   const E = avatarEngine;
-  const cfg = avatarOf(travelerId);
+  const cfg = avatarOf(profile);
   const row = (label) => {
     const r = el('div', 'studio-row');
     r.appendChild(txt('div', 'studio-label', label));
@@ -4479,6 +4380,7 @@ function routeTargets() {
   if (w) return [w];
   return currentMatchIds().slice(0, 4);
 }
+const ROUTE_COLORS = { luis: '#FF6B5B', eleny: '#2EC4B6' };
 const PLANE_PATH = 'M-11,-1.6 L3,-1.6 L9,0 L3,1.6 L-11,1.6 Z M-3,-1.6 L-7,-10 L-3.5,-10 L3,-1.6 Z M-3,1.6 L-7,10 L-3.5,10 L3,1.6 Z M-11,-1.6 L-13,-5 L-10.5,-5 L-8,-1.6 Z M-11,1.6 L-13,5 L-10.5,5 L-8,1.6 Z';
 function svgEl(tag, attrs) {
   const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
@@ -4494,8 +4396,7 @@ function buildRoutes(r, stageDests, intro) {
   const svg = svgEl('svg', { class: 'route-layer', viewBox: '0 0 ' + w + ' ' + h, preserveAspectRatio: 'xMidYMid meet' });
   const targets = routeTargets().map(getDest).filter(d => d && stageDests.includes(d));
   let n = 0;
-  travelers.forEach(t => {
-    const who = t.id;
+  ['luis', 'eleny'].forEach(who => {
     const home = homeOf(who);
     if (!home) return;
     targets.forEach(t => {
@@ -4514,7 +4415,7 @@ function buildRoutes(r, stageDests, intro) {
       const d = 'M' + ax.toFixed(1) + ',' + ay.toFixed(1) + ' Q' + cx.toFixed(1) + ',' + cy.toFixed(1) + ' ' + bx.toFixed(1) + ',' + by.toFixed(1);
       const delay = (n * 0.35).toFixed(2);
       const g = svgEl('g', { class: 'route' });
-      g.style.setProperty('--route-color', colorOf(who));
+      g.style.setProperty('--route-color', ROUTE_COLORS[who]);
       const glow = svgEl('path', { d, class: 'route-glow', pathLength: '1', 'stroke-width': (7 * scale).toFixed(1) });
       if (intro) glow.style.animationDelay = delay + 's';
       const dash = svgEl('path', { d, class: 'route-dash', 'stroke-width': (2.8 * scale).toFixed(1), 'stroke-dasharray': (9 * scale).toFixed(1) + ' ' + (8 * scale).toFixed(1) });
@@ -4540,17 +4441,16 @@ function buildRoutes(r, stageDests, intro) {
 }
 function buildHomePins() {
   const pins = [];
-  travelers.forEach(t => {
-    const who = t.id;
+  ['luis', 'eleny'].forEach(who => {
     const home = homeOf(who);
     if (!home || home.region !== region) return;
     const pin = el('div', 'home-pin');
     pin.style.left = home.x + '%';
     pin.style.top = home.y + '%';
-    pin.style.setProperty('--route-color', colorOf(who));
+    pin.style.setProperty('--route-color', ROUTE_COLORS[who]);
     pin.appendChild(el('div', 'home-pin-pulse'));
     pin.appendChild(avatarThumbNode(who, 'home-pin-flag'));
-    pin.title = (who === travelerId ? 'Your' : t.name + '\\'s') + ' home base';
+    pin.title = (who === profile ? 'Your' : (who === 'luis' ? 'Luis' : 'Eleny') + '\\'s') + ' home base';
     pins.push(pin);
   });
   return pins;
@@ -4561,21 +4461,22 @@ let activity = [];
 let activityOpen = false;
 async function loadActivity() {
   try {
-    const res = await api('/api/activity');
+    const res = await fetch('/api/activity');
     if (!res.ok) return;
     const list = await res.json();
     if (Array.isArray(list)) activity = list;
   } catch (e) { /* keep what we have */ }
 }
 function logActivity(emoji, text, destId) {
-  if (!travelerId) return;
-  activity.unshift({ id: 'local-' + Date.now(), travelerId, emoji, text, destId: destId || null, at: Date.now() });
-  api('/api/activity', {
+  if (!profile) return;
+  activity.unshift({ id: 'local-' + Date.now(), profile, emoji, text, destId: destId || null, at: Date.now() });
+  fetch('/api/activity', {
     method: 'POST',
-    body: JSON.stringify({ emoji, text, destId: destId || null }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ profile, emoji, text, destId: destId || null }),
   }).catch(() => {});
 }
-function activitySeenKey() { return 'activity-seen-' + travelerId; }
+function activitySeenKey() { return 'activity-seen-' + profile; }
 function lastSeenActivity() {
   try { return Number(localStorage.getItem(activitySeenKey())) || 0; } catch (e) { return Date.now(); }
 }
@@ -4590,14 +4491,10 @@ function timeAgo(ms) {
   if (sec < 7 * 86400) return Math.floor(sec / 86400) + 'd ago';
   return new Date(ms).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
-function activityAuthorName(travId) {
-  const t = travelers.find(x => x.id === travId);
-  return t ? t.name : 'Someone';
-}
 function buildActivityItem(item) {
   const row = el('div', 'activity-item' + (item.destId && getDest(item.destId) ? ' is-link' : ''));
-  if (item.travelerId && travelers.some(t => t.id === item.travelerId)) {
-    const face = avatarThumbNode(item.travelerId, 'activity-emoji has-avatar');
+  if (item.profile === 'luis' || item.profile === 'eleny') {
+    const face = avatarThumbNode(item.profile, 'activity-emoji has-avatar');
     face.appendChild(txt('span', 'activity-emoji-badge', item.emoji));
     row.appendChild(face);
   } else {
@@ -4605,7 +4502,7 @@ function buildActivityItem(item) {
   }
   const body = el('div', 'activity-body');
   const line = el('div', 'activity-text');
-  if (item.travelerId) line.appendChild(txt('strong', null, (item.travelerId === travelerId ? 'You' : activityAuthorName(item.travelerId)) + ' '));
+  if (item.profile !== 'both') line.appendChild(txt('strong', null, (item.profile === profile ? 'You' : (item.profile === 'luis' ? 'Luis' : 'Eleny')) + ' '));
   line.appendChild(document.createTextNode(item.text));
   body.appendChild(line);
   body.appendChild(txt('div', 'activity-time', timeAgo(item.at)));
@@ -4616,7 +4513,7 @@ function buildActivityItem(item) {
 function buildActivityCard() {
   if (!activity.length) return null;
   const seen = lastSeenActivity();
-  const unread = activity.filter(a => a.travelerId !== travelerId && a.at > seen).length;
+  const unread = activity.filter(a => a.profile !== profile && a.at > seen).length;
   const card = el('div', 'activity-card' + (activityOpen ? ' open' : ''));
   card.id = 'activity';
   const head = el('button', 'activity-head');
@@ -4706,9 +4603,9 @@ function weatherLabel(code) {
   if (code >= 95) return 'Stormy';
   return '';
 }
-function myTempUnit() { return (profileInfo[travelerId] || {}).tempUnit || 'C'; }
+// °F for Eleny, °C for Luis.
 function formatTemp(c) {
-  return myTempUnit() === 'F' ? Math.round(c * 9 / 5 + 32) + '°F' : Math.round(c) + '°C';
+  return profile === 'eleny' ? Math.round(c * 9 / 5 + 32) + '°F' : Math.round(c) + '°C';
 }
 function localTimeIn(tz) {
   try { return new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: tz }); } catch (e) { return ''; }
@@ -4790,7 +4687,7 @@ function setupPullToRefresh() {
   const reset = () => { if (indicator) indicator.remove(); indicator = null; startY = null; pull = 0; };
   document.addEventListener('touchstart', (e) => {
     startY = null;
-    if (!isStandalone() || refreshing || window.scrollY > 0 || !travelerId || view === 'landing' || view === 'picker' || view === 'splash') return;
+    if (!isStandalone() || refreshing || window.scrollY > 0 || !profile || view === 'intro' || view === 'splash') return;
     if (document.querySelector('.reveal-backdrop, .match-backdrop, .lightbox-backdrop')) return;
     if (e.target.closest && e.target.closest('.swipe-card, .cal-grid, .map-stage')) return;
     startY = e.touches[0].clientY;
@@ -4898,16 +4795,7 @@ function appTitle() {
   return el('div', 'app-title', '🌵 Here <span class="app-title-amp">&</span> There <span class="app-title-icon">🌁</span>');
 }
 
-function landingField(label, placeholder, type) {
-  const wrap = el('div');
-  wrap.appendChild(txt('div', 'add-city-label', label));
-  const input = document.createElement('input');
-  input.type = type || 'text';
-  input.placeholder = placeholder || '';
-  wrap.appendChild(input);
-  return { wrap, input };
-}
-function renderLanding() {
+function renderIntro() {
   const view_ = el('div', 'view');
 
   const introTitle = appTitle();
@@ -4917,117 +4805,12 @@ function renderLanding() {
   const hero = document.createElement('img');
   hero.className = 'intro-hero';
   hero.src = INTRO_HERO_IMG;
-  hero.alt = 'Here & There';
+  hero.alt = 'Eleny and Luis';
   view_.appendChild(hero);
 
   const header = el('div');
   header.style.textAlign = 'center';
   header.appendChild(el('h1', null, 'Where should we <em>run away</em> to?'));
-  view_.appendChild(header);
-
-  const tabs = el('div', 'region-tabs');
-  const joinTab = el('button', 'region-tab' + (landingMode === 'join' ? ' active' : ''), 'Join a trip');
-  joinTab.addEventListener('click', () => { landingMode = 'join'; landingError = ''; render(); });
-  const createTab = el('button', 'region-tab' + (landingMode === 'create' ? ' active' : ''), 'Start a trip');
-  createTab.addEventListener('click', () => { landingMode = 'create'; landingError = ''; render(); });
-  tabs.appendChild(joinTab);
-  tabs.appendChild(createTab);
-  view_.appendChild(tabs);
-
-  const card = el('div', 'add-city-form profile-info-card');
-
-  if (landingMode === 'join') {
-    const codeField = landingField('Trip code', 'e.g. PVRBAC');
-    codeField.input.style.textTransform = 'uppercase';
-    codeField.input.maxLength = 8;
-    card.appendChild(codeField.wrap);
-    const goBtn = el('button', 'confirm-btn', landingBusy ? 'Looking…' : 'Find trip →');
-    goBtn.disabled = landingBusy;
-    const submit = () => {
-      const code = codeField.input.value.trim().toUpperCase();
-      if (!code) return;
-      landingBusy = true; landingError = ''; render();
-      fetch('/api/trips/' + encodeURIComponent(code))
-        .then(res => res.ok ? res.json() : Promise.reject(new Error('not found')))
-        .then(data => {
-          landingBusy = false;
-          pickerTrip = data;
-          data.travelers.forEach(t => { if (t.avatar) profileInfo[t.id] = Object.assign({}, profileInfo[t.id], { avatar: t.avatar }); });
-          view = 'picker';
-          render();
-        })
-        .catch(() => {
-          landingBusy = false;
-          landingError = 'No trip with that code.';
-          render();
-        });
-    };
-    goBtn.addEventListener('click', submit);
-    codeField.input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
-    card.appendChild(goBtn);
-  } else {
-    const nameField = landingField('Trip name', 'e.g. Fall Getaway');
-    const orgField = landingField('Your name', 'e.g. Luis');
-    const passField = landingField('Set an organizer passcode', 'At least 4 characters', 'password');
-    card.appendChild(nameField.wrap);
-    card.appendChild(orgField.wrap);
-    card.appendChild(passField.wrap);
-    const createBtn = el('button', 'confirm-btn', landingBusy ? 'Creating…' : 'Create trip →');
-    createBtn.disabled = landingBusy;
-    createBtn.addEventListener('click', () => {
-      const name = nameField.input.value.trim();
-      const organizerName = orgField.input.value.trim();
-      const passcode = passField.input.value.trim();
-      if (!name || !organizerName || passcode.length < 4) {
-        landingError = 'Fill in a trip name, your name, and a 4+ character passcode.';
-        render();
-        return;
-      }
-      landingBusy = true; landingError = ''; render();
-      fetch('/api/trips', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, organizerName, passcode }),
-      })
-        .then(res => res.ok ? res.json() : res.json().then(e => Promise.reject(new Error(e.error || 'failed'))))
-        .then(data => {
-          landingBusy = false;
-          tripId = data.tripId;
-          travelerId = data.travelerId;
-          tripCode = data.code;
-          tripName = data.name;
-          travelers = [{ id: data.travelerId, name: organizerName, isOrganizer: true }];
-          isAdmin = true;
-          saveDeviceIdentity();
-          view = 'map';
-          loadTripData();
-          render();
-        })
-        .catch((e) => {
-          landingBusy = false;
-          landingError = e.message || 'Couldn\\'t create the trip — try again.';
-          render();
-        });
-    });
-    card.appendChild(createBtn);
-  }
-
-  if (landingError) card.appendChild(txt('div', 'passcode-error', landingError));
-  view_.appendChild(card);
-
-  return view_;
-}
-function renderPicker() {
-  const view_ = el('div', 'view');
-  const trip = pickerTrip || { name: tripName, code: tripCode, travelers };
-
-  const introTitle = appTitle();
-  introTitle.classList.add('intro-title');
-  view_.appendChild(introTitle);
-
-  const header = el('div');
-  header.style.textAlign = 'center';
-  header.appendChild(el('h1', null, trip.name || 'Your trip'));
   view_.appendChild(header);
 
   const chooseLabel = el('div', 'sub', 'Choose the traveler');
@@ -5036,53 +4819,22 @@ function renderPicker() {
   view_.appendChild(chooseLabel);
 
   const select = el('div', 'profile-select');
-  (trip.travelers || []).forEach(t => {
-    const card = el('div', 'profile-card');
-    card.appendChild(avatarCanvas(t.id, { framing: 'full', baseYaw: 0.35, action: 'wave', interactive: false }));
-    card.appendChild(el('div', 'profile-name', t.name));
-    card.appendChild(el('div', 'profile-hint', t.isOrganizer ? 'passcode required' : 'tap to enter'));
-    card.addEventListener('click', () => {
-      tripId = trip.tripId; tripCode = trip.code; tripName = trip.name; travelers = trip.travelers;
-      selectTraveler(t);
-    });
-    select.appendChild(card);
-  });
+
+  const luisCard = el('div', 'profile-card');
+  luisCard.appendChild(avatarCanvas('luis', { framing: 'full', baseYaw: 0.35, action: 'wave', interactive: false }));
+  luisCard.appendChild(el('div', 'profile-name', 'Luis'));
+  luisCard.appendChild(el('div', 'profile-hint', 'passcode required'));
+  luisCard.addEventListener('click', () => selectProfile('luis'));
+  select.appendChild(luisCard);
+
+  const elenyCard = el('div', 'profile-card');
+  elenyCard.appendChild(avatarCanvas('eleny', { framing: 'full', baseYaw: -0.35, action: 'wave', interactive: false }));
+  elenyCard.appendChild(el('div', 'profile-name', 'Eleny'));
+  elenyCard.appendChild(el('div', 'profile-hint', 'tap to enter'));
+  elenyCard.addEventListener('click', () => selectProfile('eleny'));
+  select.appendChild(elenyCard);
+
   view_.appendChild(select);
-
-  const newField = landingField('New here? Add your name', 'Your name');
-  const joinCard = el('div', 'add-city-form profile-info-card');
-  joinCard.appendChild(newField.wrap);
-  const joinBtn = el('button', 'confirm-btn', landingBusy ? 'Joining…' : '+ I\\'m new here');
-  joinBtn.disabled = landingBusy;
-  joinBtn.addEventListener('click', () => {
-    const name = newField.input.value.trim();
-    if (!name) return;
-    landingBusy = true; render();
-    fetch('/api/trips/' + trip.code + '/travelers', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name }),
-    })
-      .then(res => res.ok ? res.json() : Promise.reject(new Error('failed')))
-      .then(data => {
-        landingBusy = false;
-        tripId = data.tripId; travelerId = data.travelerId; tripCode = trip.code; tripName = trip.name;
-        travelers = (trip.travelers || []).concat([{ id: data.travelerId, name: data.name, isOrganizer: false }]);
-        isAdmin = false;
-        saveDeviceIdentity();
-        view = 'map';
-        loadTripData();
-        render();
-      })
-      .catch(() => { landingBusy = false; landingError = 'Couldn\\'t join — try again.'; render(); });
-  });
-  joinCard.appendChild(joinBtn);
-  if (landingError) joinCard.appendChild(txt('div', 'passcode-error', landingError));
-  view_.appendChild(joinCard);
-
-  const backBtn = el('button', 'add-city-row', '← Different trip code');
-  backBtn.addEventListener('click', goLanding);
-  view_.appendChild(backBtn);
 
   return view_;
 }
@@ -5109,11 +4861,11 @@ function renderMap() {
   }
 
   if (!tripStart) {
-    const myDays = freeDaysOf(travelerId).length;
-    const theirDays = others().some(t => freeDaysOf(t.id).length);
+    const myDays = freeDaysOf(profile).length;
+    const theirDays = freeDaysOf(profile === 'luis' ? 'eleny' : 'luis').length;
     const best = sharedWindows()[0];
     const nudgeText = best
-      ? '📅 You\\'re all free ' + formatWindow(best) + ' — lock in the dates?'
+      ? '📅 You\\'re both free ' + formatWindow(best) + ' — lock in the dates?'
       : !myDays && theirDays
       ? '📅 ' + partnerName() + ' marked some free days — add yours'
       : !myDays
@@ -5139,7 +4891,7 @@ function renderMap() {
     view_.appendChild(banner);
   }
 
-  const toSwipe = swipeableDestinations().filter(d => !swipeOf(travelerId, d.id)).length;
+  const toSwipe = swipeableDestinations().filter(d => !swipeOf(profile, d.id)).length;
   const newMatches = unseenMatchIds().length;
   const swipeBtn = el('button', 'swipe-cta', '💘 Swipe · Round ' + swipeRound);
   if (newMatches) swipeBtn.appendChild(txt('span', 'swipe-cta-badge is-match', newMatches + ' new match' + (newMatches > 1 ? 'es' : '') + '!'));
@@ -5167,7 +4919,7 @@ function renderMap() {
   });
   view_.appendChild(tabs);
 
-  const r = { ...REGIONS[region], destinations: REGIONS[region].destinations.filter(d => !isOut(d.id) && !hiddenIds.includes(d.id) && !isDuplicate(d.id) && (isAdmin || !orgHiddenIds().includes(d.id))) };
+  const r = { ...REGIONS[region], destinations: REGIONS[region].destinations.filter(d => !isOut(d.id) && !hiddenIds.includes(d.id) && !isDuplicate(d.id) && (isAdmin || !elenyHiddenIds.includes(d.id))) };
 
   const mapCard = el('div', 'map-card');
   const stage = el('div', 'map-stage' + ((addingCity && addingCity.step === 'pin') || movingPinId || placingHome ? ' placing' : ''));
@@ -5224,8 +4976,8 @@ function renderMap() {
 
   r.destinations.forEach((d, pinIdx) => {
     const plan = planOf(d);
-    const hiddenFromOthers = isAdmin && orgHiddenIds().includes(d.id);
-    const pin = el('button', 'pin' + (hiddenFromOthers ? ' pin-eleny-hidden' : ''));
+    const hiddenFromEleny = isAdmin && elenyHiddenIds.includes(d.id);
+    const pin = el('button', 'pin' + (hiddenFromEleny ? ' pin-eleny-hidden' : ''));
     pin.style.left = d.pin.x + '%';
     pin.style.top = d.pin.y + '%';
     pin.style.setProperty('--plan-color', plan.color);
@@ -5260,7 +5012,7 @@ function renderMap() {
   if (!addingCity && !movingPinId) {
     const homeBtn = el('button', 'home-chip' + (placingHome ? ' is-cancel' : ''), placingHome
       ? 'Cancel'
-      : homeOf(travelerId) ? '🏠 Move my home base' : '🏠 Set your home base to see flight routes');
+      : homeOf(profile) ? '🏠 Move my home base' : '🏠 Set your home base to see flight routes');
     homeBtn.addEventListener('click', () => { if (placingHome) { placingHome = false; render(); } else startPlacingHome(); });
     mapCard.appendChild(homeBtn);
   }
@@ -5287,8 +5039,8 @@ function renderMap() {
   const list = el('div', 'dest-list');
   r.destinations.forEach((d, idx) => {
     const plan = planOf(d);
-    const hiddenFromOthers = isAdmin && orgHiddenIds().includes(d.id);
-    const row = el('div', 'dest-row' + (winnerId() === d.id ? ' is-top-pick' : '') + (hiddenFromOthers ? ' is-eleny-hidden' : '') + (isAdmin ? ' has-vis-toggle' : '') + (d.cover ? ' has-cover' : ''));
+    const hiddenFromEleny = isAdmin && elenyHiddenIds.includes(d.id);
+    const row = el('div', 'dest-row' + (winnerId() === d.id ? ' is-top-pick' : '') + (hiddenFromEleny ? ' is-eleny-hidden' : '') + (isAdmin ? ' has-vis-toggle' : '') + (d.cover ? ' has-cover' : ''));
     row.style.animationDelay = (idx * 0.04) + 's';
     row.style.setProperty('--plan-color', plan.color);
     row.dataset.coverFor = d.id;
@@ -5299,7 +5051,7 @@ function renderMap() {
     left.appendChild(el('div', 'dest-row-name', d.city));
     if (d.note) left.appendChild(el('div', 'dest-row-note', d.note));
     left.appendChild(weatherNode('div', 'dest-row-weather', d.id, false));
-    if (hiddenFromOthers) left.appendChild(el('div', 'dest-row-note', '🙈 Hidden from the group'));
+    if (hiddenFromEleny) left.appendChild(el('div', 'dest-row-note', '🙈 Hidden from Eleny'));
     row.appendChild(left);
     const right = el('div', 'dest-row-right');
     right.appendChild(el('span', 'dest-row-plan-emoji', plan.emoji));
@@ -5308,9 +5060,9 @@ function renderMap() {
     if (isAdmin) right.appendChild(el('div', 'dest-row-price', money(destTotal(d))));
     row.appendChild(right);
     if (isAdmin) {
-      const visBtn = el('button', 'dest-row-visibility', hiddenFromOthers ? '🙈' : '👁️');
-      visBtn.setAttribute('aria-label', hiddenFromOthers ? 'Show to the group' : 'Hide from the group');
-      visBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleOrgVisibility(d.id); });
+      const visBtn = el('button', 'dest-row-visibility', hiddenFromEleny ? '🙈' : '👁️');
+      visBtn.setAttribute('aria-label', hiddenFromEleny ? 'Show to Eleny' : 'Hide from Eleny');
+      visBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleElenyVisibility(d.id); });
       row.appendChild(visBtn);
     }
     row.addEventListener('click', () => goDetail(d.id));
@@ -5408,7 +5160,7 @@ function renderSwipe() {
   view_.appendChild(txt('p', 'sub', 'Right if you\\'d go. Left and it\\'s out — for both of you. The last one standing is where you\\'re going ✈️'));
 
   const all = swipeableDestinations();
-  const deck = all.filter(d => !swipeOf(travelerId, d.id));
+  const deck = all.filter(d => !swipeOf(profile, d.id));
   const matches = all.filter(d => isMatch(d.id));
   const out = outDestinations();
   const winner = winnerId() ? getDest(winnerId()) : null;
@@ -5507,40 +5259,13 @@ function renderProfile() {
   view_.appendChild(backBtn);
 
   const header = el('div', 'profile-header');
-  header.appendChild(avatarThumbNode(travelerId, 'profile-header-flag'));
-  header.appendChild(el('div', 'profile-header-name', myName() + (isAdmin ? ' 🔑' : '')));
+  header.appendChild(avatarThumbNode(profile, 'profile-header-flag'));
+  header.appendChild(el('div', 'profile-header-name', profile === 'luis' ? 'Luis' : 'Eleny'));
   view_.appendChild(header);
 
-  const switchBtn = el('button', 'add-city-row', '↺ Switch traveler');
-  switchBtn.addEventListener('click', goPicker);
+  const switchBtn = el('button', 'add-city-row', '↺ Switch to ' + (profile === 'luis' ? 'Eleny' : 'Luis'));
+  switchBtn.addEventListener('click', goIntro);
   view_.appendChild(switchBtn);
-
-  const inviteCard = el('div', 'add-city-form profile-info-card');
-  inviteCard.appendChild(el('div', 'add-city-label', '🔗 INVITE THE GROUP'));
-  inviteCard.appendChild(txt('div', 'avail-hint', 'Share this trip code — anyone can join with it.'));
-  const codeRow = el('div', 'invite-code-row');
-  codeRow.appendChild(txt('div', 'invite-code', tripCode || ''));
-  const copyBtn = el('button', 'confirm-btn', 'Copy code');
-  copyBtn.addEventListener('click', () => {
-    try { navigator.clipboard.writeText(tripCode || ''); } catch (e) { /* unsupported */ }
-    copyBtn.textContent = 'Copied!';
-    setTimeout(() => { copyBtn.textContent = 'Copy code'; }, 1500);
-    haptic(8);
-  });
-  codeRow.appendChild(copyBtn);
-  inviteCard.appendChild(codeRow);
-  view_.appendChild(inviteCard);
-
-  const unitsCard = el('div', 'add-city-form profile-info-card');
-  unitsCard.appendChild(el('div', 'add-city-label', '🌡️ TEMPERATURE'));
-  const unitsRow = el('div', 'studio-chips');
-  [['C', '°C'], ['F', '°F']].forEach(([value, name]) => {
-    const b = txt('button', 'studio-chip' + (myTempUnit() === value ? ' active' : ''), name);
-    b.addEventListener('click', () => { saveProfileInfo('tempUnit', value); paintWeather(); render(); });
-    unitsRow.appendChild(b);
-  });
-  unitsCard.appendChild(unitsRow);
-  view_.appendChild(unitsCard);
 
   view_.appendChild(buildAvatarStudio());
   view_.appendChild(buildAvailabilityCard());
@@ -5581,7 +5306,7 @@ function renderProfile() {
   }
   view_.appendChild(notifCard);
 
-  const info = profileInfo[travelerId] || {};
+  const info = profileInfo[profile] || {};
 
   const card = el('div', 'add-city-form profile-info-card');
   card.appendChild(el('div', 'add-city-label', '🚨 IN CASE OF EMERGENCY'));
@@ -5622,10 +5347,6 @@ function renderProfile() {
   card.appendChild(textarea);
 
   view_.appendChild(card);
-
-  const leaveBtn = el('button', 'delete-city-btn', '🚪 Leave this trip');
-  leaveBtn.addEventListener('click', leaveTrip);
-  view_.appendChild(leaveBtn);
 
   return view_;
 }
@@ -5794,7 +5515,7 @@ function buildDetailCard(d, plan) {
     }
     row.appendChild(el('div', 'highlight-name', h.name));
     row.appendChild(buildReactions(d, h));
-    if (allLove(d.id, h.name)) row.classList.add('both-love');
+    if (reactionFor('luis', d.id, h.name) === 'love' && reactionFor('eleny', d.id, h.name) === 'love') row.classList.add('both-love');
     const del = el('button', 'highlight-del', '×');
     del.addEventListener('click', () => removeHighlight(d.id, idx));
     row.appendChild(del);
@@ -5923,7 +5644,7 @@ function render() {
   const root = document.getElementById('root');
   const liveAvatars = Array.from(root.querySelectorAll('canvas[data-avatar-who]')).filter(c => c._avatar);
   root.innerHTML = '';
-  const screenKey = view + '|' + (view === 'detail' ? detailId : '') + '|' + (travelerId || '');
+  const screenKey = view + '|' + (view === 'detail' ? detailId : '') + '|' + (profile || '');
   const sameScreen = screenKey === lastScreenKey;
   lastScreenKey = screenKey;
 
@@ -5946,8 +5667,7 @@ function render() {
   app.appendChild(buildSky(phase));
   const wrap = el('div', 'wrap');
   let content;
-  if (view === 'landing') content = renderLanding();
-  else if (view === 'picker') content = renderPicker();
+  if (view === 'intro') content = renderIntro();
   else if (view === 'detail') content = renderDetail();
   else if (view === 'profile') content = renderProfile();
   else if (view === 'swipe') content = renderSwipe();
@@ -5955,9 +5675,9 @@ function render() {
   wrap.appendChild(content);
   app.appendChild(wrap);
 
-  if (view !== 'landing' && view !== 'picker' && view !== 'profile' && travelerId) {
+  if (view !== 'intro' && view !== 'profile') {
     const profileFab = el('button', 'profile-fab');
-    profileFab.appendChild(avatarThumbNode(travelerId, 'fab-thumb'));
+    profileFab.appendChild(avatarThumbNode(profile, 'fab-thumb'));
     profileFab.setAttribute('aria-label', 'Profile');
     profileFab.addEventListener('click', goProfile);
     app.appendChild(profileFab);
@@ -5968,47 +5688,21 @@ function render() {
   requestAnimationFrame(mountAvatars);
 }
 
-function loadTripData() {
-  return Promise.all([
-    loadPriorities().then(loadCustomDestinations),
-    loadHighlightsData(),
-    loadLodgingData(),
-    loadCostsData(),
-    loadSwipes(),
-    loadReactions(),
-    loadItineraries(),
-    loadActivity(),
-  ]).then(() => { backfillIconicHighlights(); render(); loadWeather(); });
-}
-// The organizer's identity is never auto-restored (the passcode must be
-// re-proven each session) — a saved device that was the organizer lands on
-// the picker instead, with the roster already loaded.
-let resolvedView = 'landing';
-function resolveIdentity() {
-  const device = loadDeviceIdentity();
-  if (!device || !device.tripCode) { resolvedView = 'landing'; return Promise.resolve(); }
-  return fetch('/api/trips/' + device.tripCode).then(res => res.ok ? res.json() : null).then(data => {
-    if (!data) { clearDeviceIdentity(); resolvedView = 'landing'; return; }
-    tripId = data.tripId; tripCode = data.code; tripName = data.name; travelers = data.travelers;
-    data.travelers.forEach(t => { if (t.avatar) profileInfo[t.id] = Object.assign({}, profileInfo[t.id], { avatar: t.avatar }); });
-    const found = device.travelerId && data.travelers.find(t => t.id === device.travelerId);
-    if (!found || found.isOrganizer) {
-      pickerTrip = data;
-      resolvedView = 'picker';
-      return;
-    }
-    travelerId = found.id;
-    isAdmin = false;
-    resolvedView = 'map';
-    return loadTripData();
-  }).catch(() => { resolvedView = 'landing'; });
-}
 render();
-const splashDone = new Promise(resolve => setTimeout(resolve, 5000));
-Promise.all([splashDone, resolveIdentity()]).then(() => {
-  view = resolvedView;
-  render();
-});
+setTimeout(() => {
+  if (view === 'splash') { view = 'intro'; render(); }
+}, 5000);
+Promise.all([
+  loadPriorities().then(loadCustomDestinations),
+  loadHighlightsData(),
+  loadLodgingData(),
+  loadCostsData(),
+  loadSwipes(),
+  loadReactions(),
+  loadItineraries(),
+  loadActivity(),
+])
+  .then(() => { backfillIconicHighlights(); render(); loadWeather(); });
 registerServiceWorker();
 setTimeout(loadAvatars, 400);
 setupPullToRefresh();

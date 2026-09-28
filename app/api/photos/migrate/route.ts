@@ -27,12 +27,12 @@ async function runMigration() {
   for (const row of rows) {
     try {
       const uploaded = await cloudinary.uploader.upload(row.dataUrl, {
-        public_id: publicIdForKey(row.tripId, row.key),
+        public_id: publicIdForKey(row.key),
         overwrite: true,
         invalidate: true,
       });
       await prisma.photo.update({
-        where: { tripId_key: { tripId: row.tripId, key: row.key } },
+        where: { key: row.key },
         data: { dataUrl: uploaded.secure_url },
       });
       progress.migrated++;
