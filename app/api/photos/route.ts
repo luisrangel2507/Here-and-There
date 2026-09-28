@@ -1,20 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { cloudinary, publicIdForKey } from '@/lib/cloudinary';
+import { requireTraveler, isCtx } from '@/lib/trip';
 
 const MAX_DATA_URL_LENGTH = 8_000_000; // ~6MB image, generous over the client-side compressed size
 
 export async function GET(req: NextRequest) {
+  const ctx = await requireTraveler(req);
+  if (!isCtx(ctx)) return ctx;
+
   const destId = req.nextUrl.searchParams.get('destId');
   const rows = destId
-    ? await prisma.photo.findMany({ where: { key: { startsWith: 'dest:' + destId + ':' } } })
-    : await prisma.photo.findMany();
+    ? await prisma.photo.findMany({ where: { tripId: ctx.tripId, key: { startsWith: 'dest:' + destId + ':' } } })
+    : await prisma.photo.findMany({ where: { tripId: ctx.tripId } });
   const map: Record<string, string> = {};
   for (const row of rows) map[row.key] = row.dataUrl;
   return NextResponse.json(map);
 }
 
 export async function POST(req: NextRequest) {
+  const ctx = await requireTraveler(req);
+  if (!isCtx(ctx)) return ctx;
+
   const body = await req.json();
   const { key, dataUrl } = body ?? {};
 
@@ -23,9 +30,9 @@ export async function POST(req: NextRequest) {
   }
 
   if (!dataUrl) {
-    await prisma.photo.deleteMany({ where: { key } });
+    await prisma.photo.deleteMany({ where: { tripId: ctx.tripId, key } });
     try {
-      await cloudinary.uploader.destroy(publicIdForKey(key));
+      await cloudinary.uploader.destroy(publicIdForKey(ctx.tripId, key));
     } catch (e) { /* best-effort cleanup */ }
     return NextResponse.json({ ok: true });
   }
@@ -45,7 +52,7 @@ export async function POST(req: NextRequest) {
   if (process.env.CLOUDINARY_CLOUD_NAME) {
     try {
       const uploaded = await cloudinary.uploader.upload(dataUrl, {
-        public_id: publicIdForKey(key),
+        public_id: publicIdForKey(ctx.tripId, key),
         overwrite: true,
         invalidate: true,
       });
@@ -54,8 +61,8 @@ export async function POST(req: NextRequest) {
   }
 
   await prisma.photo.upsert({
-    where: { key },
-    create: { key, dataUrl: storedUrl },
+    where: { tripId_key: { tripId: ctx.tripId, key } },
+    create: { tripId: ctx.tripId, key, dataUrl: storedUrl },
     update: { dataUrl: storedUrl },
   });
 

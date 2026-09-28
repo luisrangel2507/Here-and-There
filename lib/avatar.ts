@@ -27,10 +27,24 @@ export const ACCESSORIES: [string, string][] = [
 ];
 export const FACES: [string, string][] = [['none', 'None'], ['mustache', 'Mustache'], ['beard', 'Beard'], ['stubble', 'Stubble']];
 
-export function defaultAvatar(who: string): AvatarConfig {
-  return who === 'luis'
-    ? { skin: '#DDA078', hair: 'short', hairColor: '#1f1a17', top: '#FF6B5B', bottom: '#2B3A55', acc: 'none', face: 'none' }
-    : { skin: '#F1C09A', hair: 'long', hairColor: '#3b2518', top: '#0EA5A0', bottom: '#2B3A55', acc: 'sunglasses', face: 'none' };
+// Deterministic pick from a string seed (a travelerId), so each traveler gets
+// a stable, distinctive default look before ever opening the avatar studio.
+function hashSeed(seed: string): number {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+export function defaultAvatar(seed?: string): AvatarConfig {
+  const h = hashSeed(seed || 'traveler');
+  return {
+    skin: SKINS[h % SKINS.length],
+    hair: HAIR_STYLES[(h >> 3) % HAIR_STYLES.length][0],
+    hairColor: HAIR_COLORS[(h >> 6) % HAIR_COLORS.length],
+    top: TOP_COLORS[(h >> 9) % TOP_COLORS.length],
+    bottom: BOTTOM_COLORS[(h >> 12) % BOTTOM_COLORS.length],
+    acc: 'none',
+    face: 'none',
+  };
 }
 
 const pick = <T,>(list: T[]) => list[Math.floor(Math.random() * list.length)];

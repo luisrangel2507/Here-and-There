@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { getVapidPublicKey, PROFILES } from '@/lib/push';
+import { getVapidPublicKey } from '@/lib/push';
+import { requireTraveler, isCtx } from '@/lib/trip';
 
 export async function GET() {
   return NextResponse.json({ publicKey: await getVapidPublicKey() });
 }
 
-// Body: { profile, subscription } to subscribe, or { endpoint, unsubscribe: true }.
+// Body: { subscription } to subscribe (trip/traveler come from headers), or
+// { endpoint, unsubscribe: true }.
 export async function POST(req: NextRequest) {
   const body = (await req.json()) ?? {};
 
@@ -17,10 +19,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
-  const { profile, subscription } = body;
-  if (!PROFILES.includes(profile)) {
-    return NextResponse.json({ error: 'invalid profile' }, { status: 400 });
-  }
+  const ctx = await requireTraveler(req);
+  if (!isCtx(ctx)) return ctx;
+
+  const { subscription } = body;
   const endpoint = subscription && subscription.endpoint;
   const keys = subscription && subscription.keys;
   if (typeof endpoint !== 'string' || !endpoint.startsWith('https://') || !keys || !keys.p256dh || !keys.auth) {
@@ -29,8 +31,8 @@ export async function POST(req: NextRequest) {
 
   await prisma.pushSubscription.upsert({
     where: { endpoint },
-    create: { endpoint, profile, keys: { p256dh: keys.p256dh, auth: keys.auth } },
-    update: { profile, keys: { p256dh: keys.p256dh, auth: keys.auth } },
+    create: { endpoint, tripId: ctx.tripId, travelerId: ctx.travelerId, keys: { p256dh: keys.p256dh, auth: keys.auth } },
+    update: { tripId: ctx.tripId, travelerId: ctx.travelerId, keys: { p256dh: keys.p256dh, auth: keys.auth } },
   });
   return NextResponse.json({ ok: true });
 }

@@ -1,14 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { requireTraveler, isCtx } from '@/lib/trip';
 
-export async function GET() {
-  const rows = await prisma.destinationLodging.findMany();
+export async function GET(req: NextRequest) {
+  const ctx = await requireTraveler(req);
+  if (!isCtx(ctx)) return ctx;
+
+  const rows = await prisma.destinationLodging.findMany({ where: { tripId: ctx.tripId } });
   const map: Record<string, unknown> = {};
   for (const row of rows) map[row.destId] = row.lodging;
   return NextResponse.json(map);
 }
 
 export async function POST(req: NextRequest) {
+  const ctx = await requireTraveler(req);
+  if (!isCtx(ctx)) return ctx;
+
   const body = await req.json();
   const { destId, lodging } = body ?? {};
 
@@ -17,8 +24,8 @@ export async function POST(req: NextRequest) {
   }
 
   await prisma.destinationLodging.upsert({
-    where: { destId },
-    create: { destId, lodging },
+    where: { tripId_destId: { tripId: ctx.tripId, destId } },
+    create: { tripId: ctx.tripId, destId, lodging },
     update: { lodging },
   });
 

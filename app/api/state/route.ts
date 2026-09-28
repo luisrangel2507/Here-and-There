@@ -1,34 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { requireTraveler, isCtx } from '@/lib/trip';
 
-const JSON_FIELDS = ['priorityOrder', 'blockedIds', 'hiddenIds', 'profileInfo', 'adminRanking', 'elenyHiddenIds'] as const;
+const JSON_FIELDS = ['blockedIds', 'hiddenIds', 'hiddenFrom'] as const;
 const DATE_FIELDS = ['tripStart', 'tripEnd'] as const;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-export async function GET() {
-  const row = await prisma.appState.findUnique({ where: { id: 1 } });
-  if (!row) return NextResponse.json(null);
+export async function GET(req: NextRequest) {
+  const ctx = await requireTraveler(req);
+  if (!isCtx(ctx)) return ctx;
+
+  const [row, travelers] = await Promise.all([
+    prisma.tripState.findUnique({ where: { tripId: ctx.tripId } }),
+    prisma.traveler.findMany({
+      where: { tripId: ctx.tripId },
+      orderBy: { createdAt: 'asc' },
+      select: { id: true, name: true, isOrganizer: true, info: true },
+    }),
+  ]);
+
   return NextResponse.json({
-    priorityOrder: row.priorityOrder,
-    blockedIds: row.blockedIds,
-    hiddenIds: row.hiddenIds,
-    profileInfo: row.profileInfo,
-    adminRanking: row.adminRanking,
-    elenyHiddenIds: row.elenyHiddenIds,
-    tripStart: row.tripStart,
-    tripEnd: row.tripEnd,
-    lastSubmitAt: row.lastSubmitAt ? row.lastSubmitAt.getTime() : null,
+    blockedIds: row?.blockedIds ?? [],
+    hiddenIds: row?.hiddenIds ?? [],
+    hiddenFrom: row?.hiddenFrom ?? {},
+    tripStart: row?.tripStart ?? null,
+    tripEnd: row?.tripEnd ?? null,
+    swipeRound: row?.swipeRound ?? 1,
+    travelers: travelers.map(t => ({ id: t.id, name: t.name, isOrganizer: t.isOrganizer, info: t.info })),
+    me: { id: ctx.travelerId, isOrganizer: ctx.isOrganizer },
   });
 }
 
-// Only the fields present in the body are written, so each phone can save
-// what it changed without overwriting what the other phone changed meanwhile.
+// Only the fields present in the body are written, so multiple phones can
+// each save what they changed without overwriting each other.
 export async function POST(req: NextRequest) {
+  const ctx = await requireTraveler(req);
+  if (!isCtx(ctx)) return ctx;
+
   const body = (await req.json()) ?? {};
   const data: Record<string, unknown> = {};
 
   for (const field of JSON_FIELDS) {
-    if (body[field] !== undefined) data[field] = body[field] ?? (field === 'profileInfo' ? {} : []);
+    if (body[field] !== undefined) data[field] = body[field] ?? (field === 'hiddenFrom' ? {} : []);
   }
   for (const field of DATE_FIELDS) {
     if (body[field] === undefined) continue;
@@ -37,21 +50,24 @@ export async function POST(req: NextRequest) {
     }
     data[field] = body[field];
   }
-  // Per-traveler profile info is merged in, so each phone only touches its own entry.
-  if (body.profileInfoFor && ['luis', 'eleny'].includes(body.profileInfoFor.profile)) {
-    const current = await prisma.appState.findUnique({ where: { id: 1 } });
-    const existing = (current && current.profileInfo && typeof current.profileInfo === 'object') ? current.profileInfo as Record<string, unknown> : {};
-    data.profileInfo = { ...existing, [body.profileInfoFor.profile]: body.profileInfoFor.info || {} };
-  }
-  if (body.lastSubmitAt !== undefined) {
-    data.lastSubmitAt = body.lastSubmitAt ? new Date(body.lastSubmitAt) : null;
+  // Per-traveler info (avatar, home base, free days, emergency contact) is
+  // merged in, so each phone only touches its own traveler's row.
+  if (body.myInfo !== undefined) {
+    const current = await prisma.traveler.findUnique({ where: { id: ctx.travelerId } });
+    const existing = (current && current.info && typeof current.info === 'object') ? current.info as Record<string, unknown> : {};
+    await prisma.traveler.update({
+      where: { id: ctx.travelerId },
+      data: { info: { ...existing, ...(body.myInfo || {}) } },
+    });
   }
 
-  const row = await prisma.appState.upsert({
-    where: { id: 1 },
-    create: { id: 1, ...data },
-    update: data,
-  });
+  if (Object.keys(data).length) {
+    await prisma.tripState.upsert({
+      where: { tripId: ctx.tripId },
+      create: { tripId: ctx.tripId, ...data },
+      update: data,
+    });
+  }
 
-  return NextResponse.json({ ok: true, updatedAt: row.updatedAt });
+  return NextResponse.json({ ok: true });
 }

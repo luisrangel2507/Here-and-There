@@ -11,6 +11,8 @@ export { cloudinary };
 
 // Photo keys look like "dest:<id>:highlight:<name>" — turn the colons into
 // slashes so Cloudinary groups them into folders in its media library.
-export function publicIdForKey(key: string) {
-  return 'here-and-there/' + key.replace(/:/g, '/');
+// Prefixed with the trip id so two trips with the same destination/highlight
+// names never collide on the same Cloudinary asset.
+export function publicIdForKey(tripId: string, key: string) {
+  return 'here-and-there/' + tripId + '/' + key.replace(/:/g, '/');
 }
