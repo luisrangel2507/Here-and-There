@@ -551,7 +551,6 @@ const APP_STYLE = `
     transition:transform .15s ease, background .15s ease;
   }
   .profile-card:hover{transform:translateY(-2px);background:rgba(255,255,255,0.24);}
-  .profile-emoji{font-size:30px;margin-bottom:8px;}
   .profile-name{font-family:'Fraunces', serif;font-style:italic;font-weight:700;font-size:18px;}
   .profile-hint{font-size:10.5px;color:rgba(255,255,255,0.7);margin-top:4px;}
 
@@ -1407,6 +1406,82 @@ const APP_STYLE = `
     text-align:left;
     line-height:1.1;
   }
+
+  /* 3D avatars */
+  .avatar-thumb{background-size:cover;background-position:center 30%;display:flex;align-items:center;justify-content:center;}
+  /* Some hosts (feed bubble, map pin) set a background shorthand that resets size/position. */
+  .avatar-thumb.is-3d{background-color:rgba(255,255,255,0.9);background-size:cover !important;background-position:center 30% !important;}
+  .avatar-canvas{display:block;width:100%;height:150px;}
+  .avatar-canvas:not(.is-live){opacity:0;}
+  .avatar-canvas.is-live{animation:fadeIn .4s ease both;}
+  .profile-card .avatar-canvas{height:150px;margin:-12px 0 2px;}
+  .profile-fab{padding:0;overflow:hidden;}
+  .fab-thumb{width:100%;height:100%;border-radius:50%;font-size:18px;}
+  .profile-header-flag.is-3d{background-size:cover;}
+  .studio-stage{
+    position:relative;
+    height:270px;
+    margin-bottom:14px;
+    border-radius:20px;
+    background:radial-gradient(circle at 50% 42%, rgba(255,255,255,0.3), rgba(255,255,255,0.05) 68%);
+  }
+  .studio-stage .avatar-canvas{height:100%;}
+  .studio-hint{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:11px;opacity:0.7;pointer-events:none;}
+  .studio-row{margin-bottom:14px;}
+  .studio-label{font-size:10.5px;font-weight:700;letter-spacing:0.12em;opacity:0.8;margin-bottom:7px;}
+  .studio-swatches{display:flex;flex-wrap:wrap;gap:9px;}
+  .studio-swatch{
+    width:30px;height:30px;
+    padding:0;
+    border-radius:50%;
+    border:2px solid rgba(255,255,255,0.45);
+    cursor:pointer;
+    transition:transform .15s var(--ease-spring), box-shadow .15s ease;
+  }
+  .studio-swatch.active{border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,0.35);transform:scale(1.12);}
+  .studio-chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .studio-chip{
+    border:1px solid rgba(255,255,255,0.35);
+    border-radius:999px;
+    padding:6px 12px;
+    background:rgba(255,255,255,0.1);
+    color:#fff;
+    font-family:'Poppins', sans-serif;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .studio-chip.active{background:#fff;color:var(--ink);}
+  .studio-random{
+    display:block;
+    width:100%;
+    margin-top:4px;
+    border:none;
+    border-radius:999px;
+    padding:11px;
+    background:linear-gradient(90deg, var(--sky-pink), var(--sky-purple));
+    color:#fff;
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .avatar-duo{display:flex;justify-content:center;height:150px;margin:0 0 -8px;}
+  .avatar-duo .avatar-canvas{width:130px;height:150px;flex:0 0 auto;}
+  .match-box .match-photo{height:170px;}
+  .reveal-duo{height:0;opacity:0;overflow:hidden;transition:height .6s var(--ease-out), opacity .6s ease;}
+  .reveal-backdrop.revealed .reveal-duo{height:150px;opacity:1;}
+  .activity-emoji.has-avatar{position:relative;overflow:visible;font-size:15px;}
+  .activity-emoji-badge{
+    position:absolute;
+    right:-5px; bottom:-5px;
+    width:19px;height:19px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;
+    background:rgba(20,10,30,0.75);
+  }
+  .home-pin-flag.is-3d{background-size:cover;}
 
   /* flight routes & home bases */
   .route-layer{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible;}
@@ -3391,6 +3466,7 @@ function showMatch(id) {
     backdrop.appendChild(bit);
   }
   const box = el('div', 'match-box');
+  box.appendChild(avatarDuo('celebrate'));
   box.appendChild(txt('div', 'match-kicker', 'IT\\'S A'));
   box.appendChild(txt('div', 'match-title', 'Match 💘'));
   const photo = el('div', 'match-photo');
@@ -3409,6 +3485,7 @@ function showMatch(id) {
   box.appendChild(keepBtn);
   backdrop.appendChild(box);
   document.body.appendChild(backdrop);
+  mountAvatars();
 }
 
 // ---- notifications ----
@@ -3821,6 +3898,9 @@ function showReveal(id) {
   if (d.cover) photo.style.backgroundImage = 'url("' + d.cover + '")';
   else photo.appendChild(txt('div', 'match-photo-emoji', plan.emoji));
   stage.appendChild(photo);
+  const revealDuo = avatarDuo('celebrate');
+  revealDuo.classList.add('reveal-duo');
+  stage.appendChild(revealDuo);
 
   const actions = el('div', 'reveal-actions');
   const planBtn = el('button', 'confirm-btn', '🗓️ Plan the trip →');
@@ -3837,6 +3917,7 @@ function showReveal(id) {
 
   backdrop.appendChild(stage);
   document.body.appendChild(backdrop);
+  mountAvatars();
   haptic(15);
 
   setTimeout(() => {
@@ -4089,6 +4170,143 @@ document.addEventListener('visibilitychange', () => {
   loadWeather();
 });
 
+// ---- 3D avatars ----
+let avatarEngine = null;
+let avatarEnginePromise = null;
+function loadAvatars() {
+  if (!avatarEnginePromise && window.loadAvatarEngine) {
+    avatarEnginePromise = window.loadAvatarEngine()
+      .then(m => { avatarEngine = m; refreshAvatars(); return m; })
+      .catch(() => null);
+  }
+  return avatarEnginePromise;
+}
+function avatarOf(who) {
+  const info = profileInfo[who] || {};
+  if (info.avatar) return info.avatar;
+  return avatarEngine ? avatarEngine.defaultAvatar(who) : null;
+}
+function flagOf(who) { return who === 'luis' ? '🇲🇽' : '🇺🇸'; }
+// Still headshot for small spots; shows the flag until the 3D engine has loaded.
+function avatarThumbNode(who, cls) {
+  const node = txt('div', 'avatar-thumb' + (cls ? ' ' + cls : ''), flagOf(who));
+  node.dataset.avatarThumb = who;
+  paintThumb(node);
+  return node;
+}
+function paintThumb(node) {
+  if (!avatarEngine) return;
+  const cfg = avatarOf(node.dataset.avatarThumb);
+  if (!cfg) return;
+  try {
+    node.style.backgroundImage = 'url("' + avatarEngine.avatarThumb(cfg) + '")';
+    node.textContent = '';
+    node.classList.add('is-3d');
+  } catch (e) { /* no WebGL: keep the flag */ }
+}
+// Live 3D avatar; mounted once it's in the page, since it needs its on-screen size.
+function avatarCanvas(who, opts) {
+  const canvas = el('canvas', 'avatar-canvas');
+  canvas.dataset.avatarWho = who;
+  canvas._avatarOpts = opts || {};
+  return canvas;
+}
+function mountAvatars() {
+  if (!avatarEngine) { loadAvatars(); return; }
+  document.querySelectorAll('canvas[data-avatar-who]').forEach(canvas => {
+    if (canvas._avatar || canvas.classList.contains('is-failed')) return;
+    try {
+      canvas._avatar = avatarEngine.mountAvatar(canvas, avatarOf(canvas.dataset.avatarWho), canvas._avatarOpts);
+      canvas.classList.add('is-live');
+    } catch (e) { canvas.classList.add('is-failed'); }
+  });
+}
+function refreshAvatars() {
+  document.querySelectorAll('[data-avatar-thumb]').forEach(paintThumb);
+  document.querySelectorAll('canvas[data-avatar-who]').forEach(canvas => {
+    if (canvas._avatar) canvas._avatar.setConfig(avatarOf(canvas.dataset.avatarWho));
+  });
+  const options = document.getElementById('studio-options');
+  if (options) options.replaceWith(buildStudioOptions());
+  mountAvatars();
+}
+function avatarDuo(action) {
+  const duo = el('div', 'avatar-duo');
+  duo.appendChild(avatarCanvas('luis', { framing: 'full', baseYaw: 0.55, action, loop: true, interactive: false }));
+  duo.appendChild(avatarCanvas('eleny', { framing: 'full', baseYaw: -0.55, action, loop: true, interactive: false }));
+  return duo;
+}
+
+// ---- avatar studio (profile) ----
+function setMyAvatar(patch) {
+  if (!avatarEngine) return;
+  const cfg = Object.assign({}, avatarOf(profile), patch);
+  saveProfileInfo('avatar', cfg);
+  const canvas = document.querySelector('.studio canvas[data-avatar-who]');
+  if (canvas && canvas._avatar) { canvas._avatar.setConfig(cfg); canvas._avatar.play('wave'); }
+  document.querySelectorAll('[data-avatar-thumb="' + profile + '"]').forEach(paintThumb);
+  const old = document.getElementById('studio-options');
+  if (old) old.replaceWith(buildStudioOptions());
+  haptic(8);
+}
+function buildAvatarStudio() {
+  const card = el('div', 'add-city-form profile-info-card studio');
+  card.appendChild(el('div', 'add-city-label', '🎮 MY AVATAR'));
+  const stage = el('div', 'studio-stage');
+  stage.appendChild(avatarCanvas(profile, { framing: 'full', action: 'wave' }));
+  stage.appendChild(txt('div', 'studio-hint', 'Drag to spin · tap to wave'));
+  card.appendChild(stage);
+  card.appendChild(buildStudioOptions());
+  return card;
+}
+function buildStudioOptions() {
+  const wrap = el('div', 'studio-options');
+  wrap.id = 'studio-options';
+  if (!avatarEngine) {
+    wrap.appendChild(txt('div', 'avail-empty', 'Loading your avatar…'));
+    return wrap;
+  }
+  const E = avatarEngine;
+  const cfg = avatarOf(profile);
+  const row = (label) => {
+    const r = el('div', 'studio-row');
+    r.appendChild(txt('div', 'studio-label', label));
+    wrap.appendChild(r);
+    return r;
+  };
+  const swatches = (label, key, colors) => {
+    const box = el('div', 'studio-swatches');
+    colors.forEach(color => {
+      const b = el('button', 'studio-swatch' + (cfg[key] === color ? ' active' : ''));
+      b.style.background = color;
+      b.setAttribute('aria-label', label + ' ' + color);
+      b.addEventListener('click', () => setMyAvatar({ [key]: color }));
+      box.appendChild(b);
+    });
+    row(label).appendChild(box);
+  };
+  const chips = (label, key, options) => {
+    const box = el('div', 'studio-chips');
+    options.forEach(([value, name]) => {
+      const b = txt('button', 'studio-chip' + (cfg[key] === value ? ' active' : ''), name);
+      b.addEventListener('click', () => setMyAvatar({ [key]: value }));
+      box.appendChild(b);
+    });
+    row(label).appendChild(box);
+  };
+  swatches('SKIN', 'skin', E.SKINS);
+  chips('HAIR', 'hair', E.HAIR_STYLES);
+  swatches('HAIR COLOR', 'hairColor', E.HAIR_COLORS);
+  swatches('TOP', 'top', E.TOP_COLORS);
+  swatches('BOTTOMS', 'bottom', E.BOTTOM_COLORS);
+  chips('EXTRAS', 'acc', E.ACCESSORIES);
+  chips('FACE', 'face', E.FACES);
+  const random = el('button', 'studio-random', '🎲 Surprise me');
+  random.addEventListener('click', () => setMyAvatar(E.randomAvatar()));
+  wrap.appendChild(random);
+  return wrap;
+}
+
 // ---- home bases & flight routes ----
 let placingHome = false;
 let mapIntroPlayed = false; // pin drop / route draw-in play only the first time the map shows
@@ -4183,7 +4401,7 @@ function buildHomePins() {
     pin.style.top = home.y + '%';
     pin.style.setProperty('--route-color', ROUTE_COLORS[who]);
     pin.appendChild(el('div', 'home-pin-pulse'));
-    pin.appendChild(txt('div', 'home-pin-flag', who === 'luis' ? '🇲🇽' : '🇺🇸'));
+    pin.appendChild(avatarThumbNode(who, 'home-pin-flag'));
     pin.title = (who === profile ? 'Your' : (who === 'luis' ? 'Luis' : 'Eleny') + '\\'s') + ' home base';
     pins.push(pin);
   });
@@ -4227,7 +4445,13 @@ function timeAgo(ms) {
 }
 function buildActivityItem(item) {
   const row = el('div', 'activity-item' + (item.destId && getDest(item.destId) ? ' is-link' : ''));
-  row.appendChild(txt('div', 'activity-emoji', item.emoji));
+  if (item.profile === 'luis' || item.profile === 'eleny') {
+    const face = avatarThumbNode(item.profile, 'activity-emoji has-avatar');
+    face.appendChild(txt('span', 'activity-emoji-badge', item.emoji));
+    row.appendChild(face);
+  } else {
+    row.appendChild(txt('div', 'activity-emoji', item.emoji));
+  }
   const body = el('div', 'activity-body');
   const line = el('div', 'activity-text');
   if (item.profile !== 'both') line.appendChild(txt('strong', null, (item.profile === profile ? 'You' : (item.profile === 'luis' ? 'Luis' : 'Eleny')) + ' '));
@@ -4549,12 +4773,16 @@ function renderIntro() {
   const select = el('div', 'profile-select');
 
   const luisCard = el('div', 'profile-card');
-  luisCard.innerHTML = '<div class="profile-emoji">🇲🇽</div><div class="profile-name">Luis</div><div class="profile-hint">passcode required</div>';
+  luisCard.appendChild(avatarCanvas('luis', { framing: 'full', baseYaw: 0.35, action: 'wave', interactive: false }));
+  luisCard.appendChild(el('div', 'profile-name', 'Luis'));
+  luisCard.appendChild(el('div', 'profile-hint', 'passcode required'));
   luisCard.addEventListener('click', () => selectProfile('luis'));
   select.appendChild(luisCard);
 
   const elenyCard = el('div', 'profile-card');
-  elenyCard.innerHTML = '<div class="profile-emoji">🇺🇸</div><div class="profile-name">Eleny</div><div class="profile-hint">tap to enter</div>';
+  elenyCard.appendChild(avatarCanvas('eleny', { framing: 'full', baseYaw: -0.35, action: 'wave', interactive: false }));
+  elenyCard.appendChild(el('div', 'profile-name', 'Eleny'));
+  elenyCard.appendChild(el('div', 'profile-hint', 'tap to enter'));
   elenyCard.addEventListener('click', () => selectProfile('eleny'));
   select.appendChild(elenyCard);
 
@@ -4983,7 +5211,7 @@ function renderProfile() {
   view_.appendChild(backBtn);
 
   const header = el('div', 'profile-header');
-  header.appendChild(el('div', 'profile-header-flag', profile === 'luis' ? '🇲🇽' : '🇺🇸'));
+  header.appendChild(avatarThumbNode(profile, 'profile-header-flag'));
   header.appendChild(el('div', 'profile-header-name', profile === 'luis' ? 'Luis' : 'Eleny'));
   view_.appendChild(header);
 
@@ -4991,6 +5219,7 @@ function renderProfile() {
   switchBtn.addEventListener('click', goIntro);
   view_.appendChild(switchBtn);
 
+  view_.appendChild(buildAvatarStudio());
   view_.appendChild(buildAvailabilityCard());
 
   const tripCard = el('div', 'add-city-form profile-info-card');
@@ -5392,13 +5621,15 @@ function render() {
   app.appendChild(wrap);
 
   if (view !== 'intro' && view !== 'profile') {
-    const profileFab = el('button', 'profile-fab', profile === 'luis' ? '🇲🇽' : '🇺🇸');
+    const profileFab = el('button', 'profile-fab');
+    profileFab.appendChild(avatarThumbNode(profile, 'fab-thumb'));
     profileFab.setAttribute('aria-label', 'Profile');
     profileFab.addEventListener('click', goProfile);
     app.appendChild(profileFab);
   }
 
   root.appendChild(app);
+  requestAnimationFrame(mountAvatars);
 }
 
 render();
@@ -5417,6 +5648,7 @@ Promise.all([
 ])
   .then(() => { backfillIconicHighlights(); render(); loadWeather(); });
 registerServiceWorker();
+setTimeout(loadAvatars, 400);
 setupPullToRefresh();
 
 `;
@@ -5427,6 +5659,7 @@ export default function Page() {
   useEffect(() => {
     if (ranRef.current) return; // avoid double-run under React 18 strict mode in dev
     ranRef.current = true;
+    (window as any).loadAvatarEngine = () => import('@/lib/avatar');
     const script = document.createElement('script');
     script.textContent = APP_SCRIPT;
     document.body.appendChild(script);
