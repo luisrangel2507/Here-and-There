@@ -3021,6 +3021,12 @@ function api(path, opts) {
   return fetch(path, Object.assign({}, opts, { headers }));
 }
 
+// This app now supports multiple separate trips under the hood, but day to
+// day it's just Luis & Eleny — so the app skips the "join with a code"
+// screen and goes straight to their trip's traveler picker.
+const DEFAULT_TRIP_CODE = 'PVRBAC';
+function isDefaultTrip() { return tripCode === DEFAULT_TRIP_CODE; }
+
 const DEVICE_KEY = 'here-and-there-device';
 function saveDeviceIdentity() {
   try { localStorage.setItem(DEVICE_KEY, JSON.stringify({ tripId, travelerId, tripCode })); } catch (e) { /* private mode */ }
@@ -5049,40 +5055,44 @@ function renderPicker() {
   });
   view_.appendChild(select);
 
-  const newField = landingField('New here? Add your name', 'Your name');
-  const joinCard = el('div', 'add-city-form profile-info-card');
-  joinCard.appendChild(newField.wrap);
-  const joinBtn = el('button', 'confirm-btn', landingBusy ? 'Joining…' : '+ I\\'m new here');
-  joinBtn.disabled = landingBusy;
-  joinBtn.addEventListener('click', () => {
-    const name = newField.input.value.trim();
-    if (!name) return;
-    landingBusy = true; render();
-    fetch('/api/trips/' + trip.code + '/travelers', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name }),
-    })
-      .then(res => res.ok ? res.json() : Promise.reject(new Error('failed')))
-      .then(data => {
-        landingBusy = false;
-        tripId = data.tripId; travelerId = data.travelerId; tripCode = trip.code; tripName = trip.name;
-        travelers = (trip.travelers || []).concat([{ id: data.travelerId, name: data.name, isOrganizer: false }]);
-        isAdmin = false;
-        saveDeviceIdentity();
-        view = 'map';
-        loadTripData();
-        render();
+  // The default Luis & Eleny trip is just the two of them — no "add someone
+  // new" or "different trip code" escape hatches to keep the entry simple.
+  if (trip.code !== DEFAULT_TRIP_CODE) {
+    const newField = landingField('New here? Add your name', 'Your name');
+    const joinCard = el('div', 'add-city-form profile-info-card');
+    joinCard.appendChild(newField.wrap);
+    const joinBtn = el('button', 'confirm-btn', landingBusy ? 'Joining…' : '+ I\\'m new here');
+    joinBtn.disabled = landingBusy;
+    joinBtn.addEventListener('click', () => {
+      const name = newField.input.value.trim();
+      if (!name) return;
+      landingBusy = true; render();
+      fetch('/api/trips/' + trip.code + '/travelers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
       })
-      .catch(() => { landingBusy = false; landingError = 'Couldn\\'t join — try again.'; render(); });
-  });
-  joinCard.appendChild(joinBtn);
-  if (landingError) joinCard.appendChild(txt('div', 'passcode-error', landingError));
-  view_.appendChild(joinCard);
+        .then(res => res.ok ? res.json() : Promise.reject(new Error('failed')))
+        .then(data => {
+          landingBusy = false;
+          tripId = data.tripId; travelerId = data.travelerId; tripCode = trip.code; tripName = trip.name;
+          travelers = (trip.travelers || []).concat([{ id: data.travelerId, name: data.name, isOrganizer: false }]);
+          isAdmin = false;
+          saveDeviceIdentity();
+          view = 'map';
+          loadTripData();
+          render();
+        })
+        .catch(() => { landingBusy = false; landingError = 'Couldn\\'t join — try again.'; render(); });
+    });
+    joinCard.appendChild(joinBtn);
+    if (landingError) joinCard.appendChild(txt('div', 'passcode-error', landingError));
+    view_.appendChild(joinCard);
 
-  const backBtn = el('button', 'add-city-row', '← Different trip code');
-  backBtn.addEventListener('click', goLanding);
-  view_.appendChild(backBtn);
+    const backBtn = el('button', 'add-city-row', '← Different trip code');
+    backBtn.addEventListener('click', goLanding);
+    view_.appendChild(backBtn);
+  }
 
   return view_;
 }
@@ -5515,21 +5525,23 @@ function renderProfile() {
   switchBtn.addEventListener('click', goPicker);
   view_.appendChild(switchBtn);
 
-  const inviteCard = el('div', 'add-city-form profile-info-card');
-  inviteCard.appendChild(el('div', 'add-city-label', '🔗 INVITE THE GROUP'));
-  inviteCard.appendChild(txt('div', 'avail-hint', 'Share this trip code — anyone can join with it.'));
-  const codeRow = el('div', 'invite-code-row');
-  codeRow.appendChild(txt('div', 'invite-code', tripCode || ''));
-  const copyBtn = el('button', 'confirm-btn', 'Copy code');
-  copyBtn.addEventListener('click', () => {
-    try { navigator.clipboard.writeText(tripCode || ''); } catch (e) { /* unsupported */ }
-    copyBtn.textContent = 'Copied!';
-    setTimeout(() => { copyBtn.textContent = 'Copy code'; }, 1500);
-    haptic(8);
-  });
-  codeRow.appendChild(copyBtn);
-  inviteCard.appendChild(codeRow);
-  view_.appendChild(inviteCard);
+  if (!isDefaultTrip()) {
+    const inviteCard = el('div', 'add-city-form profile-info-card');
+    inviteCard.appendChild(el('div', 'add-city-label', '🔗 INVITE THE GROUP'));
+    inviteCard.appendChild(txt('div', 'avail-hint', 'Share this trip code — anyone can join with it.'));
+    const codeRow = el('div', 'invite-code-row');
+    codeRow.appendChild(txt('div', 'invite-code', tripCode || ''));
+    const copyBtn = el('button', 'confirm-btn', 'Copy code');
+    copyBtn.addEventListener('click', () => {
+      try { navigator.clipboard.writeText(tripCode || ''); } catch (e) { /* unsupported */ }
+      copyBtn.textContent = 'Copied!';
+      setTimeout(() => { copyBtn.textContent = 'Copy code'; }, 1500);
+      haptic(8);
+    });
+    codeRow.appendChild(copyBtn);
+    inviteCard.appendChild(codeRow);
+    view_.appendChild(inviteCard);
+  }
 
   const unitsCard = el('div', 'add-city-form profile-info-card');
   unitsCard.appendChild(el('div', 'add-city-label', '🌡️ TEMPERATURE'));
@@ -5623,9 +5635,11 @@ function renderProfile() {
 
   view_.appendChild(card);
 
-  const leaveBtn = el('button', 'delete-city-btn', '🚪 Leave this trip');
-  leaveBtn.addEventListener('click', leaveTrip);
-  view_.appendChild(leaveBtn);
+  if (!isDefaultTrip()) {
+    const leaveBtn = el('button', 'delete-city-btn', '🚪 Leave this trip');
+    leaveBtn.addEventListener('click', leaveTrip);
+    view_.appendChild(leaveBtn);
+  }
 
   return view_;
 }
@@ -5982,16 +5996,18 @@ function loadTripData() {
 }
 // The organizer's identity is never auto-restored (the passcode must be
 // re-proven each session) — a saved device that was the organizer lands on
-// the picker instead, with the roster already loaded.
-let resolvedView = 'landing';
+// the picker instead, with the roster already loaded. With no saved device
+// at all, this goes straight to the default Luis & Eleny trip's picker
+// instead of a "join with a code" screen.
+let resolvedView = 'picker';
 function resolveIdentity() {
   const device = loadDeviceIdentity();
-  if (!device || !device.tripCode) { resolvedView = 'landing'; return Promise.resolve(); }
-  return fetch('/api/trips/' + device.tripCode).then(res => res.ok ? res.json() : null).then(data => {
+  const code = (device && device.tripCode) || DEFAULT_TRIP_CODE;
+  return fetch('/api/trips/' + code).then(res => res.ok ? res.json() : null).then(data => {
     if (!data) { clearDeviceIdentity(); resolvedView = 'landing'; return; }
     tripId = data.tripId; tripCode = data.code; tripName = data.name; travelers = data.travelers;
     data.travelers.forEach(t => { if (t.avatar) profileInfo[t.id] = Object.assign({}, profileInfo[t.id], { avatar: t.avatar }); });
-    const found = device.travelerId && data.travelers.find(t => t.id === device.travelerId);
+    const found = device && device.travelerId && data.travelers.find(t => t.id === device.travelerId);
     if (!found || found.isOrganizer) {
       pickerTrip = data;
       resolvedView = 'picker';
