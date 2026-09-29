@@ -1503,15 +1503,6 @@ const APP_STYLE = `
   .reveal-duo{height:0;opacity:0;overflow:hidden;transition:height .6s var(--ease-out), opacity .6s ease;}
   .reveal-backdrop.revealed .reveal-duo{height:150px;opacity:1;}
   .activity-emoji.has-avatar{position:relative;overflow:visible;font-size:15px;}
-  .activity-emoji-badge{
-    position:absolute;
-    right:-5px; bottom:-5px;
-    width:19px;height:19px;
-    border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    font-size:11px;
-    background:rgba(20,10,30,0.75);
-  }
   .home-pin-flag.is-3d{background-size:cover;}
 
   /* flight routes & home bases */
@@ -2412,11 +2403,11 @@ const SPLASH_IMG = '/images/splash.jpg';
 const USA_MAP_IMG = '/images/usa-map.jpg';
 const BG_PHOTO_IMG = '/images/bg-photo.jpg';
 const PLAN_META = {
-  beach:     { label: 'Beach',     emoji: '🏖️', color: '#0EA5A0', dim: '#0a7d79' },
-  city:      { label: 'City',      emoji: '🏙️', color: '#FF6B5B', dim: '#e14f40' },
-  colonial:  { label: 'Colonial',  emoji: '🎭', color: '#8A5FBF', dim: '#6c479c' },
-  nature:    { label: 'Nature',    emoji: '🏔️', color: '#3F8F5C', dim: '#2f6c45' },
-  nightlife: { label: 'Nightlife', emoji: '🎉', color: '#E0457B', dim: '#b83362' },
+  beach:     { label: 'Beach',     color: '#0EA5A0', dim: '#0a7d79' },
+  city:      { label: 'City',      color: '#FF6B5B', dim: '#e14f40' },
+  colonial:  { label: 'Colonial',  color: '#8A5FBF', dim: '#6c479c' },
+  nature:    { label: 'Nature',    color: '#3F8F5C', dim: '#2f6c45' },
+  nightlife: { label: 'Nightlife', color: '#E0457B', dim: '#b83362' },
 };
 function planOf(d) { return PLAN_META[d.plan] || PLAN_META.city; }
 function hexToRgba(hex, alpha) {
@@ -2429,7 +2420,7 @@ function hexToRgba(hex, alpha) {
 
 const REGIONS = {
   mexico: {
-    label: '🇲🇽 Mexico',
+    label: 'Mexico',
     type: 'image',
     src: MEXICO_MAP_IMG,
     aspect: '900 / 686',
@@ -2473,7 +2464,7 @@ const REGIONS = {
     ],
   },
   usa: {
-    label: '🇺🇸 USA',
+    label: 'USA',
     type: 'image',
     src: USA_MAP_IMG,
     aspect: '1400 / 1052',
@@ -2969,7 +2960,7 @@ function showPhotoLightbox(src, alt, onReplace) {
   actions.appendChild(downloadLink);
 
   if (onReplace) {
-    const replaceBtn = el('button', 'lightbox-btn', '🔄 Replace');
+    const replaceBtn = el('button', 'lightbox-btn', 'Replace');
     replaceBtn.addEventListener('click', () => { close(); onReplace(); });
     actions.appendChild(replaceBtn);
   }
@@ -3018,7 +3009,6 @@ function showPasscodeModal() {
   return new Promise((resolve) => {
     const backdrop = el('div', 'passcode-backdrop');
     const card = el('div', 'passcode-card');
-    card.appendChild(el('div', 'passcode-icon', '🔒'));
     card.appendChild(el('div', 'passcode-title', 'Enter Passcode'));
     card.appendChild(el('div', 'passcode-sub', 'This unlocks Luis\\'s view.'));
 
@@ -3316,18 +3306,18 @@ function showRoundIntro() {
   box.appendChild(txt('div', 'round-sub', isFinal
     ? 'Only 2 left — one of you has to swipe one out.'
     : alive.length <= 3
-    ? '🔥 Final ' + alive.length + ' — it\\'s getting serious.'
+    ? 'Final ' + alive.length + ' — it\\'s getting serious.'
     : alive.length + ' destinations still in the running'));
   const tiles = el('div', 'round-tiles');
   alive.slice(0, 10).forEach((d, i) => {
-    const tile = txt('span', 'round-tile', planOf(d).emoji + ' ' + d.city);
+    const tile = txt('span', 'round-tile', d.city);
     tile.style.animationDelay = (0.9 + i * 0.07) + 's';
     tiles.appendChild(tile);
   });
   if (alive.length > 10) tiles.appendChild(txt('span', 'round-tile', '+' + (alive.length - 10) + ' more'));
   box.appendChild(tiles);
   const rules = el('div', 'round-rules');
-  [['♥', 'Keeps it in'], ['✕', 'Out for both of you'], ['🏆', 'Last one standing wins']].forEach(([icon, label], i) => {
+  [['♥', 'Keeps it in'], ['✕', 'Out for both of you'], ['1st', 'Last one standing wins']].forEach(([icon, label], i) => {
     const rule = el('div', 'round-rule');
     rule.style.animationDelay = (1.3 + i * 0.1) + 's';
     rule.appendChild(txt('div', 'round-rule-icon', icon));
@@ -3487,9 +3477,11 @@ function showMatch(id) {
   const plan = planOf(d);
   haptic([30, 60, 30, 60, 80]);
   const backdrop = el('div', 'match-backdrop');
-  const bits = ['💘', '✨', '🎉', '🌴', '☀️', '💛', '🥂'];
+  const shapes = ['●', '■', '▲', '◆'];
+  const colors = ['#FF6B5B', '#0EA5A0', '#FFC93C', '#8A5FBF', '#FF6F91'];
   for (let i = 0; i < 40; i++) {
-    const bit = txt('span', 'confetti-bit', bits[i % bits.length]);
+    const bit = txt('span', 'confetti-bit', shapes[i % shapes.length]);
+    bit.style.color = colors[i % colors.length];
     bit.style.left = (Math.random() * 100) + '%';
     bit.style.animationDelay = (Math.random() * 0.9) + 's';
     bit.style.animationDuration = (2.2 + Math.random() * 1.8) + 's';
@@ -3499,12 +3491,11 @@ function showMatch(id) {
   const box = el('div', 'match-box');
   box.appendChild(avatarDuo('celebrate'));
   box.appendChild(txt('div', 'match-kicker', 'IT\\'S A'));
-  box.appendChild(txt('div', 'match-title', 'Match 💘'));
+  box.appendChild(txt('div', 'match-title', 'Match'));
   const photo = el('div', 'match-photo');
   photo.style.setProperty('--plan-color', plan.color);
   photo.style.setProperty('--plan-dim', plan.dim);
   if (d.cover) photo.style.backgroundImage = 'url("' + d.cover + '")';
-  else photo.appendChild(txt('div', 'match-photo-emoji', plan.emoji));
   photo.appendChild(txt('div', 'match-photo-city', d.city));
   box.appendChild(photo);
   box.appendChild(txt('div', 'match-sub', 'You and ' + partnerName() + ' both want to go to ' + d.city + '.'));
@@ -3683,7 +3674,7 @@ function buildAvailabilityCard() {
 
   const card = el('div', 'add-city-form profile-info-card avail-card');
   card.id = 'availability';
-  card.appendChild(el('div', 'add-city-label', '📅 WHEN I\\'M FREE'));
+  card.appendChild(el('div', 'add-city-label', 'WHEN I\\'M FREE'));
   card.appendChild(txt('div', 'avail-hint', 'Tap or drag across the days you can travel. ' + partnerName() + ' sees them too.'));
 
   const nav = el('div', 'cal-nav');
@@ -3729,7 +3720,7 @@ function buildAvailabilityCard() {
   const windows = sharedWindows().slice(0, 3);
   const box = el('div', 'avail-windows');
   if (windows.length) {
-    box.appendChild(txt('div', 'avail-windows-title', '💘 You\\'re both free'));
+    box.appendChild(txt('div', 'avail-windows-title', 'You\\'re both free'));
     windows.forEach(w => {
       const row = el('div', 'avail-window');
       const info = el('div', 'avail-window-info');
@@ -3809,9 +3800,9 @@ function tripCountdown() {
   const w = winnerId();
   const place = w ? getDest(w).city : null;
   if (days > 1) return { big: String(days), label: 'days until ' + (place || 'our trip'), sub: formatTripDate(tripStart) };
-  if (days === 1) return { big: '1', label: 'day until ' + (place || 'our trip') + '!', sub: 'Pack your bags 🧳' };
-  if (days === 0) return { big: '✈️', label: 'Today\\'s the day!', sub: place ? 'Next stop: ' + place : 'Have the best trip' };
-  return { big: '🌴', label: 'Enjoy ' + (place || 'the trip') + '!', sub: 'Day ' + (1 - days) + ' of ' + tripDayCount() };
+  if (days === 1) return { big: '1', label: 'day until ' + (place || 'our trip') + '!', sub: 'Pack your bags' };
+  if (days === 0) return { big: 'Today', label: 'Today\\'s the day!', sub: place ? 'Next stop: ' + place : 'Have the best trip' };
+  return { big: String(1 - days), label: 'Enjoy ' + (place || 'the trip') + '!', sub: 'Day ' + (1 - days) + ' of ' + tripDayCount() };
 }
 
 // ---- the final destination ----
@@ -3863,9 +3854,11 @@ function runFlaps(cells, instant) {
   })));
 }
 function confettiInto(container, count) {
-  const bits = ['🎉', '✨', '💘', '🌴', '☀️', '✈️', '🥂'];
+  const shapes = ['●', '■', '▲', '◆'];
+  const colors = ['#FF6B5B', '#0EA5A0', '#FFC93C', '#8A5FBF', '#FF6F91'];
   for (let i = 0; i < count; i++) {
-    const bit = txt('span', 'confetti-bit', bits[i % bits.length]);
+    const bit = txt('span', 'confetti-bit', shapes[i % shapes.length]);
+    bit.style.color = colors[i % colors.length];
     bit.style.left = (Math.random() * 100) + '%';
     bit.style.animationDelay = (Math.random() * 0.9) + 's';
     bit.style.animationDuration = (2.4 + Math.random() * 2) + 's';
@@ -3893,14 +3886,14 @@ function showReveal(id) {
   const pass = el('div', 'boarding-pass');
   pass.style.setProperty('--plan-color', plan.color);
   const top = el('div', 'bp-top');
-  top.appendChild(txt('span', null, '✈️ BOARDING PASS'));
+  top.appendChild(txt('span', null, 'BOARDING PASS'));
   top.appendChild(txt('span', null, 'HERE & THERE'));
   pass.appendChild(top);
 
   const body = el('div', 'bp-body');
   const route = el('div', 'bp-route');
-  route.appendChild(bpField('FROM', 'MX 🇲🇽 · US 🇺🇸'));
-  route.appendChild(txt('div', 'bp-plane', '✈'));
+  route.appendChild(bpField('FROM', 'MX · US'));
+  route.appendChild(txt('div', 'bp-plane', '→'));
   const toField = el('div', 'bp-field bp-to');
   toField.appendChild(txt('div', 'bp-label', 'TO'));
   const code = splitFlap(d.code || d.city.slice(0, 3));
@@ -3917,7 +3910,7 @@ function showReveal(id) {
   const meta = el('div', 'bp-meta');
   meta.appendChild(bpField('PASSENGERS', 'LUIS & ELENY'));
   meta.appendChild(bpField('DEPARTS', tripStart ? formatTripDate(tripStart).toUpperCase() : 'TBD'));
-  meta.appendChild(bpField('SEAT', '💘', 'bp-seat'));
+  meta.appendChild(bpField('SEAT', 'TOGETHER', 'bp-seat'));
   body.appendChild(meta);
   pass.appendChild(body);
   pass.appendChild(txt('div', 'bp-stamp', 'CONFIRMED'));
@@ -3927,14 +3920,13 @@ function showReveal(id) {
   photo.style.setProperty('--plan-color', plan.color);
   photo.style.setProperty('--plan-dim', plan.dim);
   if (d.cover) photo.style.backgroundImage = 'url("' + d.cover + '")';
-  else photo.appendChild(txt('div', 'match-photo-emoji', plan.emoji));
   stage.appendChild(photo);
   const revealDuo = avatarDuo('celebrate');
   revealDuo.classList.add('reveal-duo');
   stage.appendChild(revealDuo);
 
   const actions = el('div', 'reveal-actions');
-  const planBtn = el('button', 'confirm-btn', '🗓️ Plan the trip →');
+  const planBtn = el('button', 'confirm-btn', 'Plan the trip →');
   planBtn.addEventListener('click', () => {
     backdrop.remove();
     pendingScrollTo = 'itinerary';
@@ -3962,7 +3954,7 @@ function showReveal(id) {
 }
 
 // ---- reactions on highlights ----
-const REACTION_META = { love: '😍', maybe: '🤔', nope: '❌' };
+const REACTION_META = { love: '♥', maybe: '?', nope: '✕' };
 let reactions = { luis: {}, eleny: {} };
 function reactionKey(destId, name) { return destId + '|' + name; }
 function reactionFor(who, destId, name) { return (reactions[who] || {})[reactionKey(destId, name)] || null; }
@@ -4010,11 +4002,11 @@ function buildReactions(d, h) {
   const theirs = reactionFor(partner, d.id, h.name);
   const box = el('div', 'rx');
   if (theirs) {
-    const badge = txt('span', 'rx-partner', (partner === 'luis' ? '🇲🇽' : '🇺🇸') + REACTION_META[theirs]);
+    const badge = txt('span', 'rx-partner', flagOf(partner) + REACTION_META[theirs]);
     badge.title = partnerName() + ' reacted';
     box.appendChild(badge);
   }
-  const btn = txt('button', 'rx-mine' + (mine ? ' has' : ''), mine ? REACTION_META[mine] : '☺︎');
+  const btn = txt('button', 'rx-mine' + (mine ? ' has' : ''), mine ? REACTION_META[mine] : '+');
   btn.setAttribute('aria-label', 'React');
   btn.addEventListener('click', (e) => { e.stopPropagation(); openReactionPicker(box, d.id, h.name); });
   box.appendChild(btn);
@@ -4078,7 +4070,7 @@ function autoPlan(destId) {
   });
   haptic(20);
   updateItinerary(destId, days);
-  logActivity('🗓️', 'auto-planned the trip to ' + d.city, destId);
+  logActivity('', 'auto-planned the trip to ' + d.city, destId);
 }
 function addStop(destId, dayIdx, name) {
   if (!name || !name.trim()) return;
@@ -4095,12 +4087,12 @@ function removeStop(destId, dayIdx, stopIdx) {
 function buildItinerary(d) {
   const section = el('div', 'detail-section itinerary');
   section.id = 'itinerary';
-  section.appendChild(el('div', 'detail-label', '🗓️ ITINERARY'));
+  section.appendChild(el('div', 'detail-label', 'ITINERARY'));
   section.appendChild(txt('div', 'itin-sub', tripStart
     ? formatTripDate(tripStart) + (tripEnd && tripEnd !== tripStart ? ' → ' + formatTripDate(tripEnd) : '')
     : 'Set your trip dates in your profile (tap your flag) to see real dates here.'));
 
-  const autoBtn = el('button', 'itin-auto', '✨ Auto-plan from your reactions');
+  const autoBtn = el('button', 'itin-auto', 'Auto-plan from your reactions');
   autoBtn.addEventListener('click', () => autoPlan(d.id));
   section.appendChild(autoBtn);
 
@@ -4122,7 +4114,7 @@ function buildItinerary(d) {
       row.appendChild(txt('span', 'itin-stop-num', String(stopIdx + 1)));
       row.appendChild(txt('span', 'itin-stop-name', stop.name));
       const both = reactionFor('luis', d.id, stop.name) === 'love' && reactionFor('eleny', d.id, stop.name) === 'love';
-      if (both) row.appendChild(txt('span', 'itin-stop-love', '😍😍'));
+      if (both) row.appendChild(txt('span', 'itin-stop-love', '♥ ♥'));
       const del = el('button', 'highlight-del', '×');
       del.addEventListener('click', () => removeStop(d.id, dayIdx, stopIdx));
       row.appendChild(del);
@@ -4138,7 +4130,7 @@ function buildItinerary(d) {
       if (suggestions.length) {
         const chips = el('div', 'itin-suggest');
         suggestions.forEach(x => {
-          const chip = txt('button', 'itin-chip', (x.score >= 3 ? '😍 ' : x.score >= 2 ? '💛 ' : '') + x.name);
+          const chip = txt('button', 'itin-chip', (x.score >= 3 ? '♥ ' : x.score >= 2 ? '+ ' : '') + x.name);
           chip.addEventListener('click', () => addStop(d.id, dayIdx, x.name));
           chips.appendChild(chip);
         });
@@ -4217,7 +4209,7 @@ function avatarOf(who) {
   if (info.avatar) return info.avatar;
   return avatarEngine ? avatarEngine.defaultAvatar(who) : null;
 }
-function flagOf(who) { return who === 'luis' ? '🇲🇽' : '🇺🇸'; }
+function flagOf(who) { return who === 'luis' ? 'L' : 'E'; }
 // Still headshot for small spots; shows the flag until the 3D engine has loaded.
 function avatarThumbNode(who, cls) {
   const node = txt('div', 'avatar-thumb' + (cls ? ' ' + cls : ''), flagOf(who));
@@ -4299,7 +4291,7 @@ function setMyAvatar(patch) {
 }
 function buildAvatarStudio() {
   const card = el('div', 'add-city-form profile-info-card studio');
-  card.appendChild(el('div', 'add-city-label', '🎮 MY AVATAR'));
+  card.appendChild(el('div', 'add-city-label', 'MY AVATAR'));
   const stage = el('div', 'studio-stage');
   stage.appendChild(avatarCanvas(profile, { framing: 'full', action: 'wave' }));
   stage.appendChild(txt('div', 'studio-hint', 'Drag to spin · tap to wave'));
@@ -4349,7 +4341,7 @@ function buildStudioOptions() {
   swatches('BOTTOMS', 'bottom', E.BOTTOM_COLORS);
   chips('EXTRAS', 'acc', E.ACCESSORIES);
   chips('FACE', 'face', E.FACES);
-  const random = el('button', 'studio-random', '🎲 Surprise me');
+  const random = el('button', 'studio-random', 'Surprise me');
   random.addEventListener('click', () => setMyAvatar(E.randomAvatar()));
   wrap.appendChild(random);
   return wrap;
@@ -4494,11 +4486,7 @@ function timeAgo(ms) {
 function buildActivityItem(item) {
   const row = el('div', 'activity-item' + (item.destId && getDest(item.destId) ? ' is-link' : ''));
   if (item.profile === 'luis' || item.profile === 'eleny') {
-    const face = avatarThumbNode(item.profile, 'activity-emoji has-avatar');
-    face.appendChild(txt('span', 'activity-emoji-badge', item.emoji));
-    row.appendChild(face);
-  } else {
-    row.appendChild(txt('div', 'activity-emoji', item.emoji));
+    row.appendChild(avatarThumbNode(item.profile, 'activity-emoji has-avatar'));
   }
   const body = el('div', 'activity-body');
   const line = el('div', 'activity-text');
@@ -4517,7 +4505,7 @@ function buildActivityCard() {
   const card = el('div', 'activity-card' + (activityOpen ? ' open' : ''));
   card.id = 'activity';
   const head = el('button', 'activity-head');
-  head.appendChild(txt('span', 'activity-title', '✨ What\\'s new'));
+  head.appendChild(txt('span', 'activity-title', 'What\\'s new'));
   if (unread) head.appendChild(txt('span', 'activity-badge', unread + ' new'));
   head.appendChild(txt('span', 'activity-chevron', '⌄'));
   head.addEventListener('click', () => {
@@ -4580,18 +4568,6 @@ async function loadWeather(force) {
     paintWeather();
   } catch (e) { weatherLoadedAt = 0; }
 }
-function weatherIcon(code, isDay) {
-  if (code === 0) return isDay ? '☀️' : '🌙';
-  if (code <= 2) return isDay ? '🌤️' : '☁️';
-  if (code === 3) return '☁️';
-  if (code === 45 || code === 48) return '🌫️';
-  if (code >= 51 && code <= 57) return '🌦️';
-  if (code >= 61 && code <= 67) return '🌧️';
-  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return '❄️';
-  if (code >= 80 && code <= 82) return '🌦️';
-  if (code >= 95) return '⛈️';
-  return '🌡️';
-}
 function weatherLabel(code) {
   if (code === 0) return 'Clear';
   if (code <= 2) return 'Partly cloudy';
@@ -4612,13 +4588,13 @@ function localTimeIn(tz) {
 }
 function weatherShort(id) {
   const w = weather[id];
-  return w ? weatherIcon(w.code, w.isDay) + ' ' + formatTemp(w.temp) : '';
+  return w ? formatTemp(w.temp) : '';
 }
 function weatherLong(id) {
   const w = weather[id];
   if (!w) return '';
   const time = w.tz ? localTimeIn(w.tz) : '';
-  return weatherIcon(w.code, w.isDay) + ' ' + formatTemp(w.temp) + ' · ' + weatherLabel(w.code) + (time ? ' · ' + time + ' there' : '');
+  return formatTemp(w.temp) + ' · ' + weatherLabel(w.code) + (time ? ' · ' + time + ' there' : '');
 }
 function weatherNode(tag, cls, id, long) {
   const node = txt(tag, cls, long ? weatherLong(id) : weatherShort(id));
@@ -4699,7 +4675,7 @@ function setupPullToRefresh() {
     pull = Math.min(dy * 0.5, 120);
     if (!indicator) {
       indicator = el('div', 'ptr');
-      indicator.appendChild(txt('span', 'ptr-plane', '✈️'));
+      indicator.appendChild(txt('span', 'ptr-plane', '▲'));
       document.body.appendChild(indicator);
     }
     indicator.style.transform = 'translate(-50%, ' + (pull - 46) + 'px) rotate(' + (pull * 2.6) + 'deg)';
@@ -4762,7 +4738,7 @@ function setCoverPhoto(id) {
     d.cover = dataUrl;
     render();
     savePhoto(photoKeyForCover(id), dataUrl).then(ok => {
-      if (ok) { logActivity('📸', 'added a cover photo of ' + d.city, id); return; }
+      if (ok) { logActivity('', 'added a cover photo of ' + d.city, id); return; }
       d.cover = previous;
       render();
       window.alert('That photo didn\\'t save — check your connection and try again.');
@@ -4865,11 +4841,11 @@ function renderMap() {
     const theirDays = freeDaysOf(profile === 'luis' ? 'eleny' : 'luis').length;
     const best = sharedWindows()[0];
     const nudgeText = best
-      ? '📅 You\\'re both free ' + formatWindow(best) + ' — lock in the dates?'
+      ? 'You\\'re both free ' + formatWindow(best) + ' — lock in the dates?'
       : !myDays && theirDays
-      ? '📅 ' + partnerName() + ' marked some free days — add yours'
+      ? partnerName() + ' marked some free days — add yours'
       : !myDays
-      ? '📅 Mark the dates you\\'re free to travel'
+      ? 'Mark the dates you\\'re free to travel'
       : null;
     if (nudgeText) {
       const nudge = txt('button', 'avail-nudge', nudgeText);
@@ -4880,7 +4856,7 @@ function renderMap() {
 
   if (shouldShowPushBanner()) {
     const banner = el('div', 'push-banner');
-    banner.appendChild(txt('div', 'push-banner-text', '🔔 Get a ping when ' + partnerName() + ' swipes, matches, or adds a city'));
+    banner.appendChild(txt('div', 'push-banner-text', 'Get a ping when ' + partnerName() + ' swipes, matches, or adds a city'));
     const onBtn = el('button', 'push-banner-on', 'Turn on');
     onBtn.addEventListener('click', enableNotifications);
     const offBtn = el('button', 'push-banner-x', '×');
@@ -4893,7 +4869,7 @@ function renderMap() {
 
   const toSwipe = swipeableDestinations().filter(d => !swipeOf(profile, d.id)).length;
   const newMatches = unseenMatchIds().length;
-  const swipeBtn = el('button', 'swipe-cta', '💘 Swipe · Round ' + swipeRound);
+  const swipeBtn = el('button', 'swipe-cta', 'Swipe · Round ' + swipeRound);
   if (newMatches) swipeBtn.appendChild(txt('span', 'swipe-cta-badge is-match', newMatches + ' new match' + (newMatches > 1 ? 'es' : '') + '!'));
   else if (toSwipe) swipeBtn.appendChild(txt('span', 'swipe-cta-badge', toSwipe + ' to swipe'));
   swipeBtn.addEventListener('click', goSwipe);
@@ -4901,7 +4877,7 @@ function renderMap() {
 
   if (winner) {
     const winBtn = el('button', 'winner-cta');
-    winBtn.appendChild(txt('span', null, '🏆 It\\'s decided: ' + winner.city));
+    winBtn.appendChild(txt('span', null, 'It\\'s decided: ' + winner.city));
     winBtn.appendChild(txt('span', 'winner-cta-sub', 'Tap for the reveal'));
     winBtn.addEventListener('click', () => showReveal(winner.id));
     view_.appendChild(winBtn);
@@ -4984,7 +4960,7 @@ function renderMap() {
     const dotWrap = el('div', 'pin-dot-wrap');
     dotWrap.appendChild(el('div', 'pin-ring'));
     dotWrap.appendChild(el('div', 'pin-dot'));
-    if (d.favorite) dotWrap.appendChild(el('div', 'pin-star', '⭐'));
+    if (d.favorite) dotWrap.appendChild(el('div', 'pin-star', '★'));
     if (intro) dotWrap.style.animationDelay = (0.25 + pinIdx * 0.07) + 's';
     pin.appendChild(dotWrap);
     pin.addEventListener('click', () => goDetail(d.id));
@@ -5003,16 +4979,16 @@ function renderMap() {
 
   mapCard.appendChild(stage);
   mapCard.appendChild(el('div', 'map-hint', addingCity && addingCity.step === 'pin'
-    ? '📍 Tap the map where this city goes'
+    ? 'Tap the map where this city goes'
     : movingPinId
-    ? '📍 Tap the map to move this pin'
+    ? 'Tap the map to move this pin'
     : placingHome
-    ? '🏠 Tap where you\\'ll fly or drive from'
+    ? 'Tap where you\\'ll fly or drive from'
     : 'Tap any pin to open the full proposal'));
   if (!addingCity && !movingPinId) {
     const homeBtn = el('button', 'home-chip' + (placingHome ? ' is-cancel' : ''), placingHome
       ? 'Cancel'
-      : homeOf(profile) ? '🏠 Move my home base' : '🏠 Set your home base to see flight routes');
+      : homeOf(profile) ? 'Move my home base' : 'Set your home base to see flight routes');
     homeBtn.addEventListener('click', () => { if (placingHome) { placingHome = false; render(); } else startPlacingHome(); });
     mapCard.appendChild(homeBtn);
   }
@@ -5030,7 +5006,7 @@ function renderMap() {
     const item = el('div', 'legend-item');
     item.style.setProperty('--plan-color', meta.color);
     item.appendChild(el('div', 'legend-swatch'));
-    item.appendChild(document.createTextNode(meta.emoji + ' ' + meta.label));
+    item.appendChild(document.createTextNode(meta.label));
     legend.appendChild(item);
   });
   mapCard.appendChild(legend);
@@ -5051,16 +5027,15 @@ function renderMap() {
     left.appendChild(el('div', 'dest-row-name', d.city));
     if (d.note) left.appendChild(el('div', 'dest-row-note', d.note));
     left.appendChild(weatherNode('div', 'dest-row-weather', d.id, false));
-    if (hiddenFromEleny) left.appendChild(el('div', 'dest-row-note', '🙈 Hidden from Eleny'));
+    if (hiddenFromEleny) left.appendChild(el('div', 'dest-row-note', 'Hidden from Eleny'));
     row.appendChild(left);
     const right = el('div', 'dest-row-right');
-    right.appendChild(el('span', 'dest-row-plan-emoji', plan.emoji));
-    if (d.favorite) right.appendChild(el('span', 'dest-row-heart', '💛'));
-    if (isMatch(d.id)) right.appendChild(el('span', 'dest-row-heart', '💘'));
+    if (d.favorite) right.appendChild(el('span', 'dest-row-heart', '♥'));
+    if (isMatch(d.id)) right.appendChild(el('span', 'dest-row-heart', '♥'));
     if (isAdmin) right.appendChild(el('div', 'dest-row-price', money(destTotal(d))));
     row.appendChild(right);
     if (isAdmin) {
-      const visBtn = el('button', 'dest-row-visibility', hiddenFromEleny ? '🙈' : '👁️');
+      const visBtn = el('button', 'dest-row-visibility', hiddenFromEleny ? 'Hidden' : 'Visible');
       visBtn.setAttribute('aria-label', hiddenFromEleny ? 'Show to Eleny' : 'Hide from Eleny');
       visBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleElenyVisibility(d.id); });
       row.appendChild(visBtn);
@@ -5082,7 +5057,7 @@ function renderMap() {
     let chosenPlan = 'city';
     Object.keys(PLAN_META).forEach(planKey => {
       const meta = PLAN_META[planKey];
-      const btn = el('button', 'city-tab' + (planKey === chosenPlan ? ' active' : ''), meta.emoji + ' ' + meta.label);
+      const btn = el('button', 'city-tab' + (planKey === chosenPlan ? ' active' : ''), meta.label);
       btn.addEventListener('click', () => {
         chosenPlan = planKey;
         planPicker.querySelectorAll('.city-tab').forEach(b => b.classList.remove('active'));
@@ -5126,16 +5101,13 @@ function buildSwipeCard(d, isTop) {
   card.style.setProperty('--plan-color', plan.color);
   card.style.setProperty('--plan-dim', plan.dim);
   if (d.cover) card.style.backgroundImage = coverBackground(d, false);
-  else {
-    card.classList.add('no-cover');
-    card.appendChild(txt('div', 'swipe-card-emoji', plan.emoji));
-  }
+  else card.classList.add('no-cover');
   card.appendChild(el('div', 'swipe-shine'));
   card.appendChild(weatherNode('div', 'swipe-weather', d.id, false));
   card.appendChild(txt('div', 'swipe-stamp stamp-like', 'LET\\'S GO'));
   card.appendChild(txt('div', 'swipe-stamp stamp-nope', 'OUT'));
   const info = el('div', 'swipe-card-info');
-  info.appendChild(txt('div', 'swipe-card-meta', plan.emoji + ' ' + plan.label + ' · ' + d.country));
+  info.appendChild(txt('div', 'swipe-card-meta', plan.label + ' · ' + d.country));
   info.appendChild(txt('div', 'swipe-card-city', d.city));
   if (d.vibe) info.appendChild(txt('div', 'swipe-card-vibe', d.vibe));
   if (d.highlights.length) {
@@ -5157,7 +5129,7 @@ function renderSwipe() {
   view_.appendChild(backBtn);
 
   view_.appendChild(el('h1', null, 'Would you <em>go</em>?'));
-  view_.appendChild(txt('p', 'sub', 'Right if you\\'d go. Left and it\\'s out — for both of you. The last one standing is where you\\'re going ✈️'));
+  view_.appendChild(txt('p', 'sub', 'Right if you\\'d go. Left and it\\'s out — for both of you. The last one standing is where you\\'re going.'));
 
   const all = swipeableDestinations();
   const deck = all.filter(d => !swipeOf(profile, d.id));
@@ -5167,18 +5139,18 @@ function renderSwipe() {
 
   if (winner) {
     const done = el('div', 'swipe-done is-winner');
-    done.appendChild(txt('div', 'swipe-done-emoji', '🏆'));
+    done.appendChild(txt('div', 'swipe-done-emoji', '★'));
     done.appendChild(txt('div', 'swipe-done-title', winner.city));
     done.appendChild(txt('div', 'swipe-done-sub', 'Last one standing — this is the one.'));
-    const planBtn = el('button', 'confirm-btn', '🗓️ Plan the trip →');
+    const planBtn = el('button', 'confirm-btn', 'Plan the trip →');
     planBtn.addEventListener('click', () => { pendingScrollTo = 'itinerary'; goDetail(winner.id); });
     done.appendChild(planBtn);
-    const replay = el('button', 'match-keep', '🎉 Watch the reveal');
+    const replay = el('button', 'match-keep', 'Watch the reveal');
     replay.addEventListener('click', () => showReveal(winner.id));
     done.appendChild(replay);
     view_.appendChild(done);
   } else if (deck.length) {
-    view_.appendChild(txt('div', 'swipe-progress', (all.length === 2 ? '🔥 FINAL ROUND' : 'ROUND ' + swipeRound)
+    view_.appendChild(txt('div', 'swipe-progress', (all.length === 2 ? 'FINAL ROUND' : 'ROUND ' + swipeRound)
       + ' · ' + all.length + ' LEFT · CARD ' + (all.length - deck.length + 1) + ' OF ' + all.length));
     const deckWrap = el('div', 'swipe-deck');
     if (deck[1]) deckWrap.appendChild(buildSwipeCard(deck[1], false));
@@ -5203,14 +5175,14 @@ function renderSwipe() {
     view_.appendChild(actions);
   } else {
     const done = el('div', 'swipe-done');
-    done.appendChild(txt('div', 'swipe-done-emoji', '⏳'));
+    done.appendChild(txt('div', 'swipe-done-emoji', '○'));
     done.appendChild(txt('div', 'swipe-done-title', 'Round ' + swipeRound + ' done on your side!'));
     done.appendChild(txt('div', 'swipe-done-sub', 'Waiting on ' + partnerName() + ' to finish — then the next round starts with whatever you both said yes to.'));
     view_.appendChild(done);
   }
 
   const matchBox = el('div', 'swipe-matches');
-  matchBox.appendChild(txt('div', 'swipe-matches-label', '💘 BOTH SAID YES' + (matches.length ? ' (' + matches.length + ')' : '')));
+  matchBox.appendChild(txt('div', 'swipe-matches-label', 'BOTH SAID YES' + (matches.length ? ' (' + matches.length + ')' : '')));
   if (matches.length) {
     const row = el('div', 'swipe-matches-row');
     matches.forEach(d => {
@@ -5227,13 +5199,13 @@ function renderSwipe() {
     });
     matchBox.appendChild(row);
   } else {
-    matchBox.appendChild(txt('div', 'swipe-matches-empty', 'Nothing yet — keep swiping 👀'));
+    matchBox.appendChild(txt('div', 'swipe-matches-empty', 'Nothing yet — keep swiping'));
   }
   if (!winner) view_.appendChild(matchBox);
 
   if (out.length) {
     const outBox = el('div', 'swipe-out');
-    outBox.appendChild(txt('div', 'swipe-matches-label', '💔 OUT (' + out.length + ')'));
+    outBox.appendChild(txt('div', 'swipe-matches-label', 'OUT (' + out.length + ')'));
     const row = el('div', 'swipe-out-row');
     out.forEach(d => {
       const chip = txt('button', 'out-chip', d.city + ' ↺');
@@ -5271,7 +5243,7 @@ function renderProfile() {
   view_.appendChild(buildAvailabilityCard());
 
   const tripCard = el('div', 'add-city-form profile-info-card');
-  tripCard.appendChild(el('div', 'add-city-label', '✈️ TRIP DATES'));
+  tripCard.appendChild(el('div', 'add-city-label', 'TRIP DATES'));
   const dateRow = el('div', 'trip-dates');
   [['start', 'Leaving', tripStart], ['end', 'Coming back', tripEnd]].forEach(([field, label, value]) => {
     const wrap = el('label', 'trip-date');
@@ -5289,7 +5261,7 @@ function renderProfile() {
   view_.appendChild(tripCard);
 
   const notifCard = el('div', 'add-city-form profile-info-card');
-  notifCard.appendChild(el('div', 'add-city-label', '🔔 NOTIFICATIONS'));
+  notifCard.appendChild(el('div', 'add-city-label', 'NOTIFICATIONS'));
   const perm = pushSupported() ? Notification.permission : 'unsupported';
   if (pushSubscribed && perm === 'granted') {
     notifCard.appendChild(txt('div', 'notif-status is-on', '✓ On — you\\'ll get a ping when ' + partnerName() + ' swipes, matches, or adds a city.'));
@@ -5300,7 +5272,7 @@ function renderProfile() {
       ? 'Add Here & There to your Home Screen, open it from there, then come back here.'
       : 'This browser doesn\\'t support notifications.'));
   } else {
-    const onBtn = el('button', 'confirm-btn', '🔔 Turn on notifications');
+    const onBtn = el('button', 'confirm-btn', 'Turn on notifications');
     onBtn.addEventListener('click', enableNotifications);
     notifCard.appendChild(onBtn);
   }
@@ -5309,7 +5281,7 @@ function renderProfile() {
   const info = profileInfo[profile] || {};
 
   const card = el('div', 'add-city-form profile-info-card');
-  card.appendChild(el('div', 'add-city-label', '🚨 IN CASE OF EMERGENCY'));
+  card.appendChild(el('div', 'add-city-label', 'IN CASE OF EMERGENCY'));
 
   const fields = [
     { key: 'contactName', label: 'Emergency contact name', placeholder: 'e.g. Mom — Carmen Rangel' },
@@ -5380,14 +5352,14 @@ function buildDetailCard(d, plan) {
     hero.dataset.morph = d.id;
     hero.style.backgroundImage = 'url("' + d.cover + '")';
     hero.addEventListener('click', () => showPhotoLightbox(d.cover, d.city, () => setCoverPhoto(d.id)));
-    const changeBtn = el('button', 'detail-cover-change', '📷 Change');
+    const changeBtn = el('button', 'detail-cover-change', 'Change');
     changeBtn.addEventListener('click', (e) => { e.stopPropagation(); setCoverPhoto(d.id); });
     hero.appendChild(changeBtn);
     card.appendChild(hero);
   } else if (!photosReady) {
     card.appendChild(el('div', 'detail-cover skeleton'));
   } else {
-    const addCover = el('button', 'detail-cover-add', '📷 Add a cover photo');
+    const addCover = el('button', 'detail-cover-add', 'Add a cover photo');
     addCover.addEventListener('click', () => setCoverPhoto(d.id));
     card.appendChild(addCover);
   }
@@ -5421,10 +5393,10 @@ function buildDetailCard(d, plan) {
   const head = el('div', 'detail-head');
   const headLeft = el('div', 'detail-head-left');
   headLeft.appendChild(el('div', 'detail-city', d.city));
-  if (winnerId() === d.id) headLeft.appendChild(txt('div', 'admin-pick-banner is-top-pick', '🏆 Our destination'));
+  if (winnerId() === d.id) headLeft.appendChild(txt('div', 'admin-pick-banner is-top-pick', 'Our destination'));
   headLeft.appendChild(el('div', 'detail-country', d.country));
   headLeft.appendChild(weatherNode('div', 'detail-weather', d.id, true));
-  headLeft.appendChild(el('div', 'detail-plan-chip', plan.emoji + ' ' + plan.label));
+  headLeft.appendChild(el('div', 'detail-plan-chip', plan.label));
   if (d.note) headLeft.appendChild(el('div', 'detail-note', d.note));
   head.appendChild(headLeft);
   head.appendChild(el('div', 'detail-code', d.code));
@@ -5472,7 +5444,7 @@ function buildDetailCard(d, plan) {
 
   const section = el('div', 'detail-section');
   section.appendChild(el('div', 'detail-label', 'HIGHLIGHTS'));
-  section.appendChild(txt('div', 'rx-hint', 'Tap ☺︎ to react — ' + partnerName() + ' sees it too.'));
+  section.appendChild(txt('div', 'rx-hint', 'Tap + to react — ' + partnerName() + ' sees it too.'));
 
   if (d.cities) {
     const cityTabs = el('div', 'city-tabs');
@@ -5508,7 +5480,7 @@ function buildDetailCard(d, plan) {
     } else if (!photosReady) {
       row.appendChild(el('div', 'highlight-thumb-loading'));
     } else {
-      const thumbBtn = el('button', 'highlight-thumb-btn', '📷');
+      const thumbBtn = el('button', 'highlight-thumb-btn', 'Photo');
       thumbBtn.setAttribute('aria-label', 'Add photo');
       thumbBtn.addEventListener('click', () => setHighlightPhoto(d.id, idx));
       row.appendChild(thumbBtn);
@@ -5563,7 +5535,7 @@ function buildDetailCard(d, plan) {
     } else if (!photosReady) {
       row.appendChild(el('div', 'highlight-thumb-loading'));
     } else {
-      const thumbBtn = el('button', 'highlight-thumb-btn', '📷');
+      const thumbBtn = el('button', 'highlight-thumb-btn', 'Photo');
       thumbBtn.setAttribute('aria-label', 'Add photo');
       thumbBtn.addEventListener('click', () => setLodgingPhoto(d.id, idx));
       row.appendChild(thumbBtn);
@@ -5574,7 +5546,7 @@ function buildDetailCard(d, plan) {
       link.href = l.url;
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
-      link.textContent = l.name + ' 🔗';
+      link.textContent = l.name;
       row.appendChild(link);
     } else {
       row.appendChild(el('div', 'highlight-name', l.name));
@@ -5612,8 +5584,8 @@ function buildDetailCard(d, plan) {
 
   const favBtn = el('button', 'fav-btn' + (d.favorite ? ' is-fav' : ''));
   favBtn.innerHTML = d.favorite
-    ? '<span class="heart">💛</span> On the shortlist'
-    : '🤍 Add to shortlist';
+    ? '<span class="heart">♥</span> On the shortlist'
+    : '♡ Add to shortlist';
   favBtn.addEventListener('click', () => toggleFavorite(d.id));
   card.appendChild(favBtn);
 
@@ -5622,12 +5594,12 @@ function buildDetailCard(d, plan) {
   }
 
   if (isAdmin && d.custom) {
-    const moveBtn = el('button', 'move-pin-btn', '📍 Move pin');
+    const moveBtn = el('button', 'move-pin-btn', 'Move pin');
     moveBtn.addEventListener('click', () => startMovingPin(d.id));
     card.appendChild(moveBtn);
   }
 
-  const deleteBtn = el('button', 'delete-city-btn', '🗑 Delete this city');
+  const deleteBtn = el('button', 'delete-city-btn', 'Delete this city');
   deleteBtn.addEventListener('click', () => deleteDestination(d.id));
   card.appendChild(deleteBtn);
 

@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     update: { reaction },
   });
   if (reaction === 'love') {
-    await logActivity(profile, '😍', 'loved ' + name + (typeof city === 'string' && city ? ' in ' + city : ''), destId);
+    await logActivity(profile, '', 'loved ' + name + (typeof city === 'string' && city ? ' in ' + city : ''), destId);
   }
   return NextResponse.json({ ok: true });
 }

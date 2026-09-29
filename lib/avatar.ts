@@ -22,8 +22,8 @@ export const HAIR_COLORS = ['#1f1a17', '#3b2518', '#6b3e22', '#a0652f', '#d9b36a
 export const TOP_COLORS = ['#FF6B5B', '#0EA5A0', '#FFC93C', '#8A5FBF', '#FF6F91', '#2B6CB0', '#FFFFFF', '#2B1B33', '#3F8F5C', '#F4A261'];
 export const BOTTOM_COLORS = ['#2B3A55', '#1f1a17', '#6b4f3a', '#d8c9a7', '#3F8F5C', '#FFFFFF'];
 export const ACCESSORIES: [string, string][] = [
-  ['none', 'None'], ['sunglasses', '🕶️ Shades'], ['cap', '🧢 Cap'], ['sunhat', '👒 Sun hat'],
-  ['beanie', '🧶 Beanie'], ['headphones', '🎧 Headphones'],
+  ['none', 'None'], ['sunglasses', 'Shades'], ['cap', 'Cap'], ['sunhat', 'Sun hat'],
+  ['beanie', 'Beanie'], ['headphones', 'Headphones'],
 ];
 export const FACES: [string, string][] = [['none', 'None'], ['mustache', 'Mustache'], ['beard', 'Beard'], ['stubble', 'Stubble']];
 

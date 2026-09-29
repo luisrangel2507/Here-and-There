@@ -5,12 +5,12 @@ import { logActivity } from '@/lib/activity';
 // Feed entry for each event: [profile ('both' = shared moment), emoji, text without the subject].
 function feedEntry(from: string, type: string, city: string, count: number): [string, string, string] | null {
   switch (type) {
-    case 'city_added': return [from, '📍', 'added ' + city];
-    case 'city_cut': return [from, '💔', 'swiped ' + city + ' out'];
-    case 'round': return ['both', '🔥', 'Round ' + city + ' starts — ' + count + ' destinations left'];
-    case 'winner': return ['both', '✈️', 'It\'s decided — you\'re going to ' + city + '!'];
-    case 'trip_dates': return [from, '🗓️', 'set the trip dates'];
-    case 'availability': return [from, '📅', 'marked new free days'];
+    case 'city_added': return [from, '', 'added ' + city];
+    case 'city_cut': return [from, '', 'swiped ' + city + ' out'];
+    case 'round': return ['both', '', 'Round ' + city + ' starts — ' + count + ' destinations left'];
+    case 'winner': return ['both', '', 'It\'s decided — you\'re going to ' + city + '!'];
+    case 'trip_dates': return [from, '', 'set the trip dates'];
+    case 'availability': return [from, '', 'marked new free days'];
     default: return null;
   }
 }
@@ -21,21 +21,21 @@ function compose(from: string, type: string, city: string, count: number): PushP
   const who = NAMES[from];
   switch (type) {
     case 'city_added':
-      return { title: '📍 New destination', body: who + ' added ' + city + ' — go swipe on it!', tag: 'city' };
+      return { title: 'New destination', body: who + ' added ' + city + ' — go swipe on it!', tag: 'city' };
     case 'city_cut':
       return {
-        title: '💔 ' + city + ' got cut',
+        title: city + ' got cut',
         body: who + ' swiped it out — ' + count + ' destination' + (count === 1 ? '' : 's') + ' left.',
         tag: 'swipes',
       };
     case 'round':
-      return { title: '🔥 Round ' + city + '!', body: 'You both said yes to ' + count + ' places — swipe again to narrow it down.', tag: 'round' };
+      return { title: 'Round ' + city + '!', body: 'You both said yes to ' + count + ' places — swipe again to narrow it down.', tag: 'round' };
     case 'winner':
-      return { title: '✈️ It\'s decided!', body: 'You\'re going to ' + city + '. Open the app for the big reveal.', tag: 'winner' };
+      return { title: 'It\'s decided!', body: 'You\'re going to ' + city + '. Open the app for the big reveal.', tag: 'winner' };
     case 'availability':
-      return { title: '📅 Free days updated', body: who + ' marked the days they can travel — see where you overlap.', tag: 'availability' };
+      return { title: 'Free days updated', body: who + ' marked the days they can travel — see where you overlap.', tag: 'availability' };
     case 'trip_dates':
-      return { title: '🗓️ Trip dates set', body: who + ' set the dates — the countdown is on.', tag: 'dates' };
+      return { title: 'Trip dates set', body: who + ' set the dates — the countdown is on.', tag: 'dates' };
     default:
       return null;
   }

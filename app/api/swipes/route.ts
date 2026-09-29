@@ -71,9 +71,9 @@ export async function POST(req: NextRequest) {
     const partnerSwipe = await prisma.swipe.findUnique({ where: { profile_destId: { profile: partner, destId } } });
     if (partnerSwipe && partnerSwipe.choice === 'like') {
       const city = typeof body.city === 'string' ? body.city.slice(0, 60) : 'a destination';
-      await logActivity('both', '💘', 'It\'s a match: ' + city, destId);
+      await logActivity('both', '', 'It\'s a match: ' + city, destId);
       sendToProfile(partner, {
-        title: '💘 It\'s a match!',
+        title: 'It\'s a match!',
         body: 'You and ' + NAMES[profile] + ' both want to go to ' + city + '.',
         tag: 'match-' + destId,
       }).catch(() => {});
