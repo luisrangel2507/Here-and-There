@@ -3,6 +3,9 @@ import { prisma } from '@/lib/db';
 import { logActivity } from '@/lib/activity';
 import { PROFILES } from '@/lib/push';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   const rows = await prisma.activity.findMany({ orderBy: { id: 'desc' }, take: 30 });
   return NextResponse.json(rows.map(r => ({

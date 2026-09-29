@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { cloudinary, publicIdForKey } from '@/lib/cloudinary';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const MAX_DATA_URL_LENGTH = 8_000_000; // ~6MB image, generous over the client-side compressed size
 
 export async function GET(req: NextRequest) {

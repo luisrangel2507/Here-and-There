@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
+// This route's data can change every request (deletes, dates, profile info),
+// so it must never be served from a cache — always hit the database fresh.
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const JSON_FIELDS = ['priorityOrder', 'blockedIds', 'hiddenIds', 'profileInfo', 'adminRanking', 'elenyHiddenIds'] as const;
 const DATE_FIELDS = ['tripStart', 'tripEnd'] as const;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;

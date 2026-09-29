@@ -2610,26 +2610,36 @@ let tripEnd = null;
 
 
 // Sends only the named fields, so one phone never overwrites what the other changed.
+// keepalive keeps the request alive even if the tab gets backgrounded right
+// after (e.g. right after tapping delete), instead of it being dropped mid-flight.
 async function saveState(fields) {
   const all = { blockedIds, hiddenIds, elenyHiddenIds, tripStart, tripEnd };
   const body = {};
   fields.forEach(f => { body[f] = all[f]; });
   try {
-    await fetch('/api/state', {
+    const res = await fetch('/api/state', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
+      keepalive: true,
     });
-  } catch (e) { /* best-effort only */ }
+    return res.ok;
+  } catch (e) { return false; }
 }
 async function saveProfileInfoNow() {
   try {
-    await fetch('/api/state', {
+    const res = await fetch('/api/state', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ profileInfoFor: { profile, info: profileInfo[profile] || {} } }),
+      keepalive: true,
     });
-  } catch (e) { /* best-effort only */ }
+    if (!res.ok) window.alert('That didn\\'t save — check your connection and try again.');
+    return res.ok;
+  } catch (e) {
+    window.alert('That didn\\'t save — check your connection and try again.');
+    return false;
+  }
 }
 async function loadPriorities() {
   try {
@@ -2659,6 +2669,7 @@ async function saveHighlights(destId) {
         destId,
         highlights: d.highlights.map(h => ({ name: h.name, city: h.city || null })),
       }),
+      keepalive: true,
     });
   } catch (e) { /* best-effort only */ }
 }
@@ -2687,6 +2698,7 @@ async function saveLodging(destId) {
         destId,
         lodging: (d.lodging || []).map(l => ({ name: l.name, url: l.url || null })),
       }),
+      keepalive: true,
     });
   } catch (e) { /* best-effort only */ }
 }
@@ -2716,6 +2728,7 @@ function saveCosts(destId) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ destId, costs: d.costs }),
+      keepalive: true,
     }).catch(() => {});
   }, 400);
 }
@@ -2773,6 +2786,7 @@ async function saveCustomDestinations(regionKey) {
         region: regionKey,
         destinations: REGIONS[regionKey].destinations.filter(d => d.custom),
       }),
+      keepalive: true,
     });
   } catch (e) { /* best-effort only */ }
 }
@@ -3133,8 +3147,13 @@ function deleteDestination(id) {
   const d = getDest(id);
   if (!window.confirm('Delete ' + d.city + '? This can\\'t be undone.')) return;
   hiddenIds.push(id);
-  saveState(['hiddenIds']);
   goMap();
+  saveState(['hiddenIds']).then(ok => {
+    if (ok) return;
+    hiddenIds = hiddenIds.filter(x => x !== id);
+    render();
+    window.alert('That didn\\'t save — check your connection and try deleting ' + d.city + ' again.');
+  });
 }
 function startMovingPin(id) {
   const d = getDest(id);
@@ -3192,6 +3211,7 @@ async function saveSwipe(destId, choice) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ profile, destId, choice, city: (getDest(destId) || {}).city }),
+      keepalive: true,
     });
     return res.ok;
   } catch (e) { return false; }
@@ -3266,6 +3286,7 @@ function maybeAdvanceRound() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ profile, resetRound: ids, fromRound }),
+    keepalive: true,
   }).then(res => res.json()).then(result => {
     if (result.advanced) { notifyPartner('round', String(result.round), alive.length); return; }
     // The other phone already started the next round.
@@ -3349,6 +3370,7 @@ function restoreDestination(id) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ profile, restore: x }),
+    keepalive: true,
   }).catch(() => {}));
   haptic(15);
   render();
@@ -3517,6 +3539,7 @@ function notifyPartner(type, city, count, destId) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ from: profile, type, city: city || '', count: count || 0, destId: destId || null }),
+    keepalive: true,
   }).then(() => loadActivity()).catch(() => {});
 }
 function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent); }
@@ -3977,6 +4000,7 @@ function setReaction(destId, name, reaction) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ profile, destId, name, reaction, city: (getDest(destId) || {}).city }),
+    keepalive: true,
   }).catch(() => {});
 }
 function closeReactionPicker() {
@@ -4035,6 +4059,7 @@ function saveItinerary(destId) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ destId, days: itineraries[destId] }),
+    keepalive: true,
   }).catch(() => {});
 }
 function getItinerary(destId) {
@@ -4466,6 +4491,7 @@ function logActivity(emoji, text, destId) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ profile, emoji, text, destId: destId || null }),
+    keepalive: true,
   }).catch(() => {});
 }
 function activitySeenKey() { return 'activity-seen-' + profile; }

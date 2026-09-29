@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { PROFILES, NAMES, partnerOf, sendToProfile } from '@/lib/push';
 import { logActivity } from '@/lib/activity';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const CHOICES = ['like', 'nope'];
 
 export async function GET() {

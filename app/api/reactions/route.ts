@@ -3,6 +3,9 @@ import { prisma } from '@/lib/db';
 import { PROFILES } from '@/lib/push';
 import { logActivity } from '@/lib/activity';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const REACTIONS = ['love', 'maybe', 'nope'];
 
 // { luis: { "<destId>|<name>": reaction }, eleny: {...} }
