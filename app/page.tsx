@@ -2609,6 +2609,15 @@ let tripStart = null; // 'YYYY-MM-DD'
 let tripEnd = null;
 
 
+// Describes a failed save so the alert says exactly what went wrong, since
+// that's the only way to see a production error without server log access.
+async function describeFailure(res, err) {
+  if (err) return 'network error: ' + (err && err.message ? err.message : String(err));
+  let bodyText = '';
+  try { bodyText = (await res.text()).slice(0, 200); } catch (e) { /* ignore */ }
+  return 'HTTP ' + res.status + (bodyText ? ' — ' + bodyText : '');
+}
+
 // Sends only the named fields, so one phone never overwrites what the other changed.
 // keepalive keeps the request alive even if the tab gets backgrounded right
 // after (e.g. right after tapping delete), instead of it being dropped mid-flight.
@@ -2623,8 +2632,9 @@ async function saveState(fields) {
       body: JSON.stringify(body),
       keepalive: true,
     });
-    return res.ok;
-  } catch (e) { return false; }
+    if (res.ok) return { ok: true };
+    return { ok: false, detail: await describeFailure(res) };
+  } catch (e) { return { ok: false, detail: await describeFailure(null, e) }; }
 }
 async function saveProfileInfoNow() {
   try {
@@ -2634,10 +2644,10 @@ async function saveProfileInfoNow() {
       body: JSON.stringify({ profileInfoFor: { profile, info: profileInfo[profile] || {} } }),
       keepalive: true,
     });
-    if (!res.ok) window.alert('That didn\\'t save — check your connection and try again.');
+    if (!res.ok) window.alert('That didn\\'t save (' + await describeFailure(res) + ') — check your connection and try again.');
     return res.ok;
   } catch (e) {
-    window.alert('That didn\\'t save — check your connection and try again.');
+    window.alert('That didn\\'t save (' + await describeFailure(null, e) + ') — check your connection and try again.');
     return false;
   }
 }
@@ -3148,11 +3158,11 @@ function deleteDestination(id) {
   if (!window.confirm('Delete ' + d.city + '? This can\\'t be undone.')) return;
   hiddenIds.push(id);
   goMap();
-  saveState(['hiddenIds']).then(ok => {
-    if (ok) return;
+  saveState(['hiddenIds']).then(result => {
+    if (result.ok) return;
     hiddenIds = hiddenIds.filter(x => x !== id);
     render();
-    window.alert('That didn\\'t save — check your connection and try deleting ' + d.city + ' again.');
+    window.alert('That didn\\'t save (' + result.detail + ') — check your connection and try deleting ' + d.city + ' again.');
   });
 }
 function startMovingPin(id) {
@@ -3628,14 +3638,20 @@ function setTripDate(field, value) {
   if (field === 'start') tripStart = value || null;
   else tripEnd = value || null;
   if (tripStart && tripEnd && tripEnd < tripStart) tripEnd = tripStart;
-  saveState(['tripStart', 'tripEnd']);
+  saveState(['tripStart', 'tripEnd']).then(result => {
+    if (result.ok) return;
+    window.alert('That didn\\'t save (' + result.detail + ') — check your connection and try again.');
+  });
   if (tripStart) notifyPartner('trip_dates');
   render();
 }
 function setTripRange(start, end) {
   tripStart = start;
   tripEnd = end;
-  saveState(['tripStart', 'tripEnd']);
+  saveState(['tripStart', 'tripEnd']).then(result => {
+    if (result.ok) return;
+    window.alert('That didn\\'t save (' + result.detail + ') — check your connection and try again.');
+  });
   notifyPartner('trip_dates');
   haptic([20, 40, 20]);
   render();

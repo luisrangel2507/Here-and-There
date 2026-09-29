@@ -29,34 +29,42 @@ export async function GET() {
 // Only the fields present in the body are written, so each phone can save
 // what it changed without overwriting what the other phone changed meanwhile.
 export async function POST(req: NextRequest) {
-  const body = (await req.json()) ?? {};
-  const data: Record<string, unknown> = {};
+  try {
+    const body = (await req.json()) ?? {};
+    const data: Record<string, unknown> = {};
 
-  for (const field of JSON_FIELDS) {
-    if (body[field] !== undefined) data[field] = body[field] ?? (field === 'profileInfo' ? {} : []);
-  }
-  for (const field of DATE_FIELDS) {
-    if (body[field] === undefined) continue;
-    if (body[field] !== null && !DATE_RE.test(body[field])) {
-      return NextResponse.json({ error: 'invalid ' + field }, { status: 400 });
+    for (const field of JSON_FIELDS) {
+      if (body[field] !== undefined) data[field] = body[field] ?? (field === 'profileInfo' ? {} : []);
     }
-    data[field] = body[field];
-  }
-  // Per-traveler profile info is merged in, so each phone only touches its own entry.
-  if (body.profileInfoFor && ['luis', 'eleny'].includes(body.profileInfoFor.profile)) {
-    const current = await prisma.appState.findUnique({ where: { id: 1 } });
-    const existing = (current && current.profileInfo && typeof current.profileInfo === 'object') ? current.profileInfo as Record<string, unknown> : {};
-    data.profileInfo = { ...existing, [body.profileInfoFor.profile]: body.profileInfoFor.info || {} };
-  }
-  if (body.lastSubmitAt !== undefined) {
-    data.lastSubmitAt = body.lastSubmitAt ? new Date(body.lastSubmitAt) : null;
-  }
+    for (const field of DATE_FIELDS) {
+      if (body[field] === undefined) continue;
+      if (body[field] !== null && !DATE_RE.test(body[field])) {
+        return NextResponse.json({ error: 'invalid ' + field }, { status: 400 });
+      }
+      data[field] = body[field];
+    }
+    // Per-traveler profile info is merged in, so each phone only touches its own entry.
+    if (body.profileInfoFor && ['luis', 'eleny'].includes(body.profileInfoFor.profile)) {
+      const current = await prisma.appState.findUnique({ where: { id: 1 } });
+      const existing = (current && current.profileInfo && typeof current.profileInfo === 'object') ? current.profileInfo as Record<string, unknown> : {};
+      data.profileInfo = { ...existing, [body.profileInfoFor.profile]: body.profileInfoFor.info || {} };
+    }
+    if (body.lastSubmitAt !== undefined) {
+      data.lastSubmitAt = body.lastSubmitAt ? new Date(body.lastSubmitAt) : null;
+    }
 
-  const row = await prisma.appState.upsert({
-    where: { id: 1 },
-    create: { id: 1, ...data },
-    update: data,
-  });
+    const row = await prisma.appState.upsert({
+      where: { id: 1 },
+      create: { id: 1, ...data },
+      update: data,
+    });
 
-  return NextResponse.json({ ok: true, updatedAt: row.updatedAt });
+    return NextResponse.json({ ok: true, updatedAt: row.updatedAt });
+  } catch (e) {
+    // Surfaced straight to the phone's alert — this is a private 2-person app,
+    // so exposing the real error beats a silent/opaque failure.
+    console.error('POST /api/state failed:', e);
+    const message = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
