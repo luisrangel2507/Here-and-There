@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Here & There — Aquí & Allá',
     short_name: 'Here & There',
-    description: 'Aquí & Allá — trip proposal',
+    description: 'Aquí & Allá — propuesta de viaje',
     start_url: '/',
     display: 'standalone',
     background_color: '#FFF9EF',

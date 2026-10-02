@@ -15,17 +15,17 @@ export type AvatarConfig = {
 
 export const SKINS = ['#FBD9C0', '#F1C09A', '#DDA078', '#C1845C', '#9C6441', '#6E4530'];
 export const HAIR_STYLES: [string, string][] = [
-  ['short', 'Short'], ['long', 'Long'], ['curly', 'Curly'], ['bun', 'Bun'],
-  ['ponytail', 'Ponytail'], ['buzz', 'Buzz'], ['bald', 'Bald'],
+  ['short', 'Corto'], ['long', 'Largo'], ['curly', 'Rizado'], ['bun', 'Chongo'],
+  ['ponytail', 'Cola de caballo'], ['buzz', 'Rapado'], ['bald', 'Calvo'],
 ];
 export const HAIR_COLORS = ['#1f1a17', '#3b2518', '#6b3e22', '#a0652f', '#d9b36a', '#b8483a', '#e6e2da', '#7a5cc2'];
 export const TOP_COLORS = ['#FF6B5B', '#0EA5A0', '#FFC93C', '#8A5FBF', '#FF6F91', '#2B6CB0', '#FFFFFF', '#2B1B33', '#3F8F5C', '#F4A261'];
 export const BOTTOM_COLORS = ['#2B3A55', '#1f1a17', '#6b4f3a', '#d8c9a7', '#3F8F5C', '#FFFFFF'];
 export const ACCESSORIES: [string, string][] = [
-  ['none', 'None'], ['sunglasses', 'Shades'], ['cap', 'Cap'], ['sunhat', 'Sun hat'],
-  ['beanie', 'Beanie'], ['headphones', 'Headphones'],
+  ['none', 'Ninguno'], ['sunglasses', 'Lentes de sol'], ['cap', 'Gorra'], ['sunhat', 'Sombrero'],
+  ['beanie', 'Gorro'], ['headphones', 'Audífonos'],
 ];
-export const FACES: [string, string][] = [['none', 'None'], ['mustache', 'Mustache'], ['beard', 'Beard'], ['stubble', 'Stubble']];
+export const FACES: [string, string][] = [['none', 'Ninguno'], ['mustache', 'Bigote'], ['beard', 'Barba'], ['stubble', 'Barba corta']];
 
 export function defaultAvatar(who: string): AvatarConfig {
   return who === 'luis'

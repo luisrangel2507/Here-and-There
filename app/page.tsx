@@ -2403,13 +2403,14 @@ const SPLASH_IMG = '/images/splash.jpg';
 const USA_MAP_IMG = '/images/usa-map.jpg';
 const BG_PHOTO_IMG = '/images/bg-photo.jpg';
 const PLAN_META = {
-  beach:     { label: 'Beach',     color: '#0EA5A0', dim: '#0a7d79' },
-  city:      { label: 'City',      color: '#FF6B5B', dim: '#e14f40' },
-  colonial:  { label: 'Colonial',  color: '#8A5FBF', dim: '#6c479c' },
-  nature:    { label: 'Nature',    color: '#3F8F5C', dim: '#2f6c45' },
-  nightlife: { label: 'Nightlife', color: '#E0457B', dim: '#b83362' },
+  beach:     { label: 'Playa',          color: '#0EA5A0', dim: '#0a7d79' },
+  city:      { label: 'Ciudad',         color: '#FF6B5B', dim: '#e14f40' },
+  colonial:  { label: 'Colonial',       color: '#8A5FBF', dim: '#6c479c' },
+  nature:    { label: 'Naturaleza',     color: '#3F8F5C', dim: '#2f6c45' },
+  nightlife: { label: 'Vida nocturna',  color: '#E0457B', dim: '#b83362' },
 };
 function planOf(d) { return PLAN_META[d.plan] || PLAN_META.city; }
+function countryLabel(country) { return country === 'Mexico' ? 'México' : 'EE. UU.'; }
 function hexToRgba(hex, alpha) {
   const h = hex.replace('#', '');
   const r = parseInt(h.substring(0,2), 16);
@@ -2420,42 +2421,42 @@ function hexToRgba(hex, alpha) {
 
 const REGIONS = {
   mexico: {
-    label: 'Mexico',
+    label: 'México',
     type: 'image',
     src: MEXICO_MAP_IMG,
     aspect: '900 / 686',
     destinations: [
       {
         id: 'cdmx', city: 'Ciudad de México', country: 'Mexico', code: 'CDMX', plan: 'city',
-        vibe: 'Huge, chaotic, and endlessly good — ancient pyramids on the edge of town, world-class museums and cantinas downtown, and rooftop mezcal in Roma/Condesa at night. High altitude, big energy, a taco stand on every corner.',
+        vibe: 'Enorme, caótica y siempre buena — pirámides milenarias en las afueras, museos de primer nivel y cantinas en el centro, y mezcal en azoteas de Roma/Condesa por la noche. Altitud alta, energía a tope, un puesto de tacos en cada esquina.',
         price: 7807, note: null,
         highlights: [{ name: 'Pirámides', photo: null }, { name: 'Trajineras', photo: null }, { name: 'Chapultepec', photo: null }, { name: 'Bellas Artes', photo: null }, { name: 'Polanco', photo: null }, { name: 'La Mexicana', photo: null }, { name: 'Bar hopping Roma', photo: null }],
         photo: null, favorite: false, pin: { x: 58.0, y: 64.1 },
       },
       {
         id: 'cabo', city: 'Los Cabos', country: 'Mexico', code: 'SJD', plan: 'beach',
-        vibe: 'Desert cliffs dropping straight into turquoise water, the Arch, and a resort strip built for doing nothing productive on purpose. Loud beach clubs by day, quiet marina dinners by night — polished and a little touristy, in a good way.',
+        vibe: 'Acantilados de desierto que caen directo al agua turquesa, el Arco, y una franja de resorts hecha para no hacer nada productivo, a propósito. Beach clubs ruidosos de día, cenas tranquilas en la marina de noche — pulido y un poco turístico, en el buen sentido.',
         price: 7920, note: null,
-        highlights: [{ name: 'Mango Deck', photo: null }, { name: 'Bar hopping', photo: null }, { name: 'All-inclusive Rosewood · $5k/night', photo: null }],
+        highlights: [{ name: 'Mango Deck', photo: null }, { name: 'Bar hopping', photo: null }, { name: 'All-inclusive Rosewood · $5k/noche', photo: null }],
         photo: null, favorite: false, pin: { x: 24.7, y: 48.3 },
       },
       {
         id: 'gdl', city: 'Guadalajara', country: 'Mexico', code: 'GDL', plan: 'city',
-        vibe: 'The birthplace of mariachi and tequila, with a walkable colonial centro, leafy plazas, and Tlaquepaque\\'s craft markets just outside town. Calmer and cheaper than CDMX, with a food scene that punches well above its size.',
+        vibe: 'La cuna del mariachi y el tequila, con un centro colonial para caminar, plazas arboladas y los mercados de artesanías de Tlaquepaque a las afueras. Más tranquila y barata que la CDMX, con una escena gastronómica que sorprende para su tamaño.',
         price: 8000, note: null,
         highlights: [{ name: 'Catedral de Guadalajara', photo: null }, { name: 'Hospicio Cabañas', photo: null }, { name: 'Teatro Degollado', photo: null }, { name: 'Mercado San Juan de Dios', photo: null }, { name: 'Tlaquepaque', photo: null }, { name: 'Tonalá', photo: null }, { name: 'Templo Expiatorio', photo: null }, { name: 'Plaza Tapatía', photo: null }, { name: 'Basílica de Zapopan', photo: null }, { name: 'Barranca de Huentitán', photo: null }],
         photo: null, favorite: false, pin: { x: 44.6, y: 58.5 },
       },
       {
         id: 'pvr', city: 'Puerto Vallarta', country: 'Mexico', code: 'PVR', plan: 'beach',
-        vibe: 'Cobblestone streets and a jungle-covered mountainside meet the Pacific along a long malecón made for sunset walks. Romantic, a little bohemian, and famously LGBTQ+-friendly — fish tacos on the beach, then rooftop drinks watching the sky turn orange.',
+        vibe: 'Calles empedradas y una montaña cubierta de selva se encuentran con el Pacífico a lo largo de un malecón hecho para caminar al atardecer. Romántico, un poco bohemio y famoso por ser muy LGBTQ+-friendly — tacos de pescado en la playa, luego drinks en una azotea viendo el cielo pintarse naranja.',
         price: 9739, note: null,
         highlights: [{ name: 'Malecón', photo: null }, { name: 'Playa Los Muertos', photo: null }, { name: 'Isla Cuale', photo: null }, { name: 'Zona Romántica', photo: null }, { name: 'Marina Vallarta', photo: null }, { name: 'Playa Mismaloya', photo: null }, { name: 'Sayulita', photo: null }, { name: 'Los Arcos', photo: null }, { name: 'Iglesia de Guadalupe', photo: null }, { name: 'Boca de Tomatlán', photo: null }],
         photo: null, favorite: false, pin: { x: 38.9, y: 59.2 },
       },
       {
         id: 'bajio', city: 'Guanajuato', country: 'Mexico', code: 'BJX', plan: 'colonial',
-        vibe: 'A hillside maze of candy-colored houses, underground tunnel roads, and callejones too narrow for cars — plus San Miguel de Allende\\'s cathedral-postcard streets a short drive away. Storybook colonial Mexico, best explored on foot and slightly lost.',
+        vibe: 'Un laberinto de cerros con casas de colores, túneles subterráneos y callejones demasiado angostos para carros — más las calles de postal de San Miguel de Allende a un corto viaje en coche. México colonial de cuento, mejor explorado a pie y un poco perdidos.',
         price: 7807, note: 'San Miguel de Allende / Guanajuato Capital',
         cities: ['Guanajuato Capital', 'San Miguel de Allende'],
         highlights: [{ name: 'Ciudad de México', photo: null }, { name: 'Guanajuato capital', photo: null }, { name: 'San Miguel de Allende', photo: null }],
@@ -2464,28 +2465,28 @@ const REGIONS = {
     ],
   },
   usa: {
-    label: 'USA',
+    label: 'EE. UU.',
     type: 'image',
     src: USA_MAP_IMG,
     aspect: '1400 / 1052',
     destinations: [
       {
         id: 'tahoe', city: 'Lake Tahoe', country: 'USA', code: 'RNO', plan: 'nature',
-        vibe: 'A ridiculously blue alpine lake ringed by pine forest and mountains — hike or paddleboard in summer, ski slopes minutes from the shore in winter. Crisp air, cozy cabins, and views that make you stop mid-sentence.',
-        price: 7920, note: 'via SF Airport',
+        vibe: 'Un lago alpino de un azul ridículo, rodeado de bosque de pinos y montañas — hiking o paddleboard en verano, pistas de esquí a minutos de la orilla en invierno. Aire fresco, cabañas acogedoras y vistas que te dejan a media frase.',
+        price: 7920, note: 'vía aeropuerto de SF',
         highlights: [{ name: 'Emerald Bay', photo: null }, { name: 'Heavenly Ski Resort', photo: null }, { name: 'Sand Harbor', photo: null }, { name: 'Palisades Tahoe', photo: null }, { name: 'Vikingsholm', photo: null }, { name: 'Rubicon Trail', photo: null }, { name: 'Tahoe Rim Trail', photo: null }, { name: 'D.L. Bliss State Park', photo: null }, { name: 'South Lake Tahoe waterfront', photo: null }, { name: 'Fannette Island', photo: null }],
         photo: null, favorite: false, pin: { x: 16.65, y: 32.9 },
       },
       {
         id: 'vegas', city: 'Las Vegas', country: 'USA', code: 'LAS', plan: 'nightlife',
-        vibe: 'Neon Strip, all-night casinos, pool parties, and a headline show for every mood. Nobody sleeps, everything\\'s open at 3am, and the whole trip can be as extra (or as chill by the pool) as you want it to be.',
+        vibe: 'El Strip de neón, casinos abiertos toda la noche, pool parties y un show para cada mood. Nadie duerme, todo está abierto a las 3am, y el viaje puede ser tan extra (o tan chill junto a la alberca) como quieras.',
         costs: { edu: 4000, eleny: 3000 }, note: null,
         highlights: [{ name: 'The Strip', photo: null }, { name: 'Bellagio Fountains', photo: null }, { name: 'Fremont Street', photo: null }, { name: 'Caesars Palace', photo: null }, { name: 'Red Rock Canyon', photo: null }, { name: 'High Roller', photo: null }, { name: 'The Sphere', photo: null }, { name: 'Hoover Dam', photo: null }, { name: 'Venetian Grand Canal Shoppes', photo: null }, { name: 'Cirque du Soleil', photo: null }],
         photo: null, favorite: false, pin: { x: 23.4, y: 46.25 },
       },
       {
         id: 'austin', city: 'Austin / San Antonio', country: 'USA', code: 'AUS', plan: 'city',
-        vibe: 'Two very different Texas cities an hour apart: Austin\\'s live music, food trucks, and lake days versus San Antonio\\'s Alamo, River Walk, and old-Texas history. Easy to combine into one relaxed road-trip-style visit.',
+        vibe: 'Dos ciudades de Texas muy distintas a una hora de distancia: la música en vivo, food trucks y días de lago de Austin contra el Álamo, el River Walk y la historia del viejo Texas de San Antonio. Fácil de combinar en una sola visita tipo road trip, sin prisa.',
         costs: { edu: 3000, eleny: 4500 }, note: null,
         cities: ['Austin', 'San Antonio'],
         highlights: [{ name: 'The Alamo', photo: null }, { name: 'River Walk', photo: null }, { name: 'South Congress Ave', photo: null }, { name: 'Texas State Capitol', photo: null }, { name: 'Lady Bird Lake', photo: null }, { name: 'Barton Springs Pool', photo: null }, { name: 'Sixth Street', photo: null }, { name: 'McNay Art Museum', photo: null }, { name: 'Zilker Park', photo: null }, { name: 'Franklin Barbecue', photo: null }],
@@ -2493,14 +2494,14 @@ const REGIONS = {
       },
       {
         id: 'miami', city: 'Miami', country: 'USA', code: 'MIA', plan: 'beach',
-        vibe: 'Art Deco pastels on South Beach, Cuban coffee on every block, and a nightlife scene that starts late and doesn\\'t apologize for it. Hot, glamorous, and unmistakably Latin — beach by day, salsa by night.',
+        vibe: 'Pasteles Art Deco en South Beach, café cubano en cada cuadra, y una vida nocturna que empieza tarde y no se disculpa por eso. Caliente, glamorosa e inconfundiblemente latina — playa de día, salsa de noche.',
         costs: { edu: 7261, eleny: 6000 }, note: null,
         highlights: [{ name: 'South Beach', photo: null }, { name: 'Art Deco District', photo: null }, { name: 'Wynwood Walls', photo: null }, { name: 'Little Havana', photo: null }, { name: 'Bayside Marketplace', photo: null }, { name: 'Vizcaya Museum & Gardens', photo: null }, { name: 'Coral Gables', photo: null }, { name: 'Brickell City Centre', photo: null }, { name: 'Ocean Drive', photo: null }, { name: 'Key Biscayne', photo: null }],
         photo: null, favorite: false, pin: { x: 81.1, y: 73.4 },
       },
       {
         id: 'sandiego', city: 'San Diego', country: 'USA', code: 'SAN', plan: 'beach',
-        vibe: 'Laid-back surf town energy, near-perfect weather year-round, and a craft beer scene to match. Balboa Park, easy beach days, and a short hop to Mexico if you want tacos on the other side of the border.',
+        vibe: 'Energía relajada de pueblo surfero, clima casi perfecto todo el año, y una escena de cerveza artesanal a la altura. Balboa Park, días fáciles de playa, y un salto corto a México si quieres tacos del otro lado de la frontera.',
         price: 6500, note: null,
         highlights: [{ name: 'Balboa Park', photo: null }, { name: 'San Diego Zoo', photo: null }, { name: 'Gaslamp Quarter', photo: null }, { name: 'La Jolla Cove', photo: null }, { name: 'USS Midway Museum', photo: null }, { name: 'Coronado Island', photo: null }, { name: 'Old Town San Diego', photo: null }, { name: 'Sunset Cliffs', photo: null }, { name: 'Pacific Beach', photo: null }, { name: 'Torrey Pines', photo: null }],
         photo: null, favorite: false, pin: { x: 19.15, y: 54.6 },
@@ -2612,7 +2613,7 @@ let tripEnd = null;
 // Describes a failed save so the alert says exactly what went wrong, since
 // that's the only way to see a production error without server log access.
 async function describeFailure(res, err) {
-  if (err) return 'network error: ' + (err && err.message ? err.message : String(err));
+  if (err) return 'error de red: ' + (err && err.message ? err.message : String(err));
   let bodyText = '';
   try { bodyText = (await res.text()).slice(0, 200); } catch (e) { /* ignore */ }
   return 'HTTP ' + res.status + (bodyText ? ' — ' + bodyText : '');
@@ -2644,10 +2645,10 @@ async function saveProfileInfoNow() {
       body: JSON.stringify({ profileInfoFor: { profile, info: profileInfo[profile] || {} } }),
       keepalive: true,
     });
-    if (!res.ok) window.alert('That didn\\'t save (' + await describeFailure(res) + ') — check your connection and try again.');
+    if (!res.ok) window.alert('No se guardó (' + await describeFailure(res) + ') — revisa tu conexión e intenta de nuevo.');
     return res.ok;
   } catch (e) {
-    window.alert('That didn\\'t save (' + await describeFailure(null, e) + ') — check your connection and try again.');
+    window.alert('No se guardó (' + await describeFailure(null, e) + ') — revisa tu conexión e intenta de nuevo.');
     return false;
   }
 }
@@ -2823,7 +2824,7 @@ function addCustomDestination(city, plan) {
   const existing = allDestinations().find(x => !hiddenIds.includes(x.id) && cityKey(x) === key);
   if (existing) {
     addingCity = null;
-    window.alert(existing.city + ' is already on the map.');
+    window.alert(existing.city + ' ya está en el mapa.');
     goDetail(cityGroups().repOf[existing.id] || existing.id);
     return;
   }
@@ -2956,7 +2957,7 @@ function pickPhoto(onPicked) {
       const dataUrl = await fileToCompressedDataUrl(file);
       onPicked(dataUrl);
     } catch (e) {
-      window.alert('Could not load that photo.');
+      window.alert('No se pudo cargar esa foto.');
     }
   });
   input.click();
@@ -2966,7 +2967,7 @@ function showPhotoLightbox(src, alt, onReplace) {
   const backdrop = el('div', 'lightbox-backdrop');
 
   const closeBtn = el('button', 'lightbox-close', '×');
-  closeBtn.setAttribute('aria-label', 'Close');
+  closeBtn.setAttribute('aria-label', 'Cerrar');
   backdrop.appendChild(closeBtn);
 
   const img = document.createElement('img');
@@ -2980,11 +2981,11 @@ function showPhotoLightbox(src, alt, onReplace) {
   downloadLink.className = 'lightbox-btn';
   downloadLink.href = src;
   downloadLink.download = (alt || 'photo').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.jpg';
-  downloadLink.textContent = '⬇ Download';
+  downloadLink.textContent = '⬇ Descargar';
   actions.appendChild(downloadLink);
 
   if (onReplace) {
-    const replaceBtn = el('button', 'lightbox-btn', 'Replace');
+    const replaceBtn = el('button', 'lightbox-btn', 'Reemplazar');
     replaceBtn.addEventListener('click', () => { close(); onReplace(); });
     actions.appendChild(replaceBtn);
   }
@@ -3033,8 +3034,8 @@ function showPasscodeModal() {
   return new Promise((resolve) => {
     const backdrop = el('div', 'passcode-backdrop');
     const card = el('div', 'passcode-card');
-    card.appendChild(el('div', 'passcode-title', 'Enter Passcode'));
-    card.appendChild(el('div', 'passcode-sub', 'This unlocks Luis\\'s view.'));
+    card.appendChild(el('div', 'passcode-title', 'Ingresa la contraseña'));
+    card.appendChild(el('div', 'passcode-sub', 'Esto desbloquea la vista de Luis.'));
 
     const input = document.createElement('input');
     input.type = 'password';
@@ -3049,8 +3050,8 @@ function showPasscodeModal() {
     card.appendChild(error);
 
     const actions = el('div', 'passcode-actions');
-    const cancelBtn = el('button', 'passcode-btn passcode-cancel', 'Cancel');
-    const okBtn = el('button', 'passcode-btn passcode-ok', 'Unlock');
+    const cancelBtn = el('button', 'passcode-btn passcode-cancel', 'Cancelar');
+    const okBtn = el('button', 'passcode-btn passcode-ok', 'Desbloquear');
     actions.appendChild(cancelBtn);
     actions.appendChild(okBtn);
     card.appendChild(actions);
@@ -3068,7 +3069,7 @@ function showPasscodeModal() {
         close(true);
         return;
       }
-      error.textContent = 'Incorrect passcode';
+      error.textContent = 'Contraseña incorrecta';
       input.value = '';
       input.focus();
       card.classList.remove('shake');
@@ -3155,14 +3156,14 @@ function goMap() {
 }
 function deleteDestination(id) {
   const d = getDest(id);
-  if (!window.confirm('Delete ' + d.city + '? This can\\'t be undone.')) return;
+  if (!window.confirm('¿Borrar ' + d.city + '? Esto no se puede deshacer.')) return;
   hiddenIds.push(id);
   goMap();
   saveState(['hiddenIds']).then(result => {
     if (result.ok) return;
     hiddenIds = hiddenIds.filter(x => x !== id);
     render();
-    window.alert('That didn\\'t save (' + result.detail + ') — check your connection and try deleting ' + d.city + ' again.');
+    window.alert('No se guardó (' + result.detail + ') — revisa tu conexión e intenta borrar ' + d.city + ' otra vez.');
   });
 }
 function startMovingPin(id) {
@@ -3330,25 +3331,25 @@ function showRoundIntro() {
   backdrop.appendChild(el('div', 'round-rays'));
   const box = el('div', 'round-box');
   box.appendChild(txt('div', 'round-kicker', swipeRound === 1
-    ? 'LET THE GAMES BEGIN'
-    : 'YOU BOTH SAID YES TO ' + alive.length));
-  box.appendChild(txt('div', 'round-word', isFinal ? 'FINAL' : 'ROUND'));
-  box.appendChild(txt('div', 'round-number' + (isFinal ? ' is-text' : ''), isFinal ? 'ROUND' : String(swipeRound)));
+    ? 'QUE EMPIECEN LOS JUEGOS'
+    : 'LOS DOS DIJERON QUE SÍ A ' + alive.length));
+  box.appendChild(txt('div', 'round-word', isFinal ? 'ÚLTIMA' : 'RONDA'));
+  box.appendChild(txt('div', 'round-number' + (isFinal ? ' is-text' : ''), isFinal ? 'RONDA' : String(swipeRound)));
   box.appendChild(txt('div', 'round-sub', isFinal
-    ? 'Only 2 left — one of you has to swipe one out.'
+    ? 'Solo quedan 2 — uno de los dos tiene que eliminar una.'
     : alive.length <= 3
-    ? 'Final ' + alive.length + ' — it\\'s getting serious.'
-    : alive.length + ' destinations still in the running'));
+    ? 'Últimas ' + alive.length + ' — esto se pone serio.'
+    : alive.length + ' destinos siguen en juego'));
   const tiles = el('div', 'round-tiles');
   alive.slice(0, 10).forEach((d, i) => {
     const tile = txt('span', 'round-tile', d.city);
     tile.style.animationDelay = (0.9 + i * 0.07) + 's';
     tiles.appendChild(tile);
   });
-  if (alive.length > 10) tiles.appendChild(txt('span', 'round-tile', '+' + (alive.length - 10) + ' more'));
+  if (alive.length > 10) tiles.appendChild(txt('span', 'round-tile', '+' + (alive.length - 10) + ' más'));
   box.appendChild(tiles);
   const rules = el('div', 'round-rules');
-  [['♥', 'Keeps it in'], ['✕', 'Out for both of you'], ['1st', 'Last one standing wins']].forEach(([icon, label], i) => {
+  [['♥', 'Se queda'], ['✕', 'Fuera para los dos'], ['1º', 'Gana el que quede al final']].forEach(([icon, label], i) => {
     const rule = el('div', 'round-rule');
     rule.style.animationDelay = (1.3 + i * 0.1) + 's';
     rule.appendChild(txt('div', 'round-rule-icon', icon));
@@ -3356,7 +3357,7 @@ function showRoundIntro() {
     rules.appendChild(rule);
   });
   box.appendChild(rules);
-  const go = el('button', 'confirm-btn round-go', 'Let\\'s go →');
+  const go = el('button', 'confirm-btn round-go', 'Vamos →');
   go.addEventListener('click', () => {
     haptic(15);
     backdrop.classList.add('leaving');
@@ -3369,7 +3370,7 @@ function showRoundIntro() {
 }
 function restoreDestination(id) {
   const d = getDest(id);
-  if (!d || !window.confirm('Bring ' + d.city + ' back into play?')) return;
+  if (!d || !window.confirm('¿Regresar ' + d.city + ' al juego?')) return;
   const ids = groupIds(id);
   ids.forEach(x => ['luis', 'eleny'].forEach(who => { if (swipes[who][x] === 'nope') delete swipes[who][x]; }));
   if (ids.some(x => blockedIds.includes(x))) {
@@ -3522,7 +3523,7 @@ function showMatch(id) {
   }
   const box = el('div', 'match-box');
   box.appendChild(avatarDuo('celebrate'));
-  box.appendChild(txt('div', 'match-kicker', 'IT\\'S A'));
+  box.appendChild(txt('div', 'match-kicker', 'ES UN'));
   box.appendChild(txt('div', 'match-title', 'Match'));
   const photo = el('div', 'match-photo');
   photo.style.setProperty('--plan-color', plan.color);
@@ -3530,11 +3531,11 @@ function showMatch(id) {
   if (d.cover) photo.style.backgroundImage = 'url("' + d.cover + '")';
   photo.appendChild(txt('div', 'match-photo-city', d.city));
   box.appendChild(photo);
-  box.appendChild(txt('div', 'match-sub', 'You and ' + partnerName() + ' both want to go to ' + d.city + '.'));
-  const seeBtn = el('button', 'confirm-btn', 'See the trip →');
+  box.appendChild(txt('div', 'match-sub', 'Tú y ' + partnerName() + ' quieren ir a ' + d.city + '.'));
+  const seeBtn = el('button', 'confirm-btn', 'Ver el viaje →');
   seeBtn.addEventListener('click', () => { backdrop.remove(); goDetail(id); });
   box.appendChild(seeBtn);
-  const keepBtn = el('button', 'match-keep', 'Keep swiping');
+  const keepBtn = el('button', 'match-keep', 'Seguir deslizando');
   keepBtn.addEventListener('click', () => backdrop.remove());
   box.appendChild(keepBtn);
   backdrop.appendChild(box);
@@ -3574,8 +3575,8 @@ function urlBase64ToUint8Array(base64) {
 async function enableNotifications() {
   if (!pushSupported()) {
     window.alert(isIOS() && !isStandalone()
-      ? 'Open Here & There from its Home Screen icon to turn on notifications.'
-      : 'This browser can\\'t show notifications.');
+      ? 'Abre Here & There desde el ícono en tu pantalla de inicio para activar las notificaciones.'
+      : 'Este navegador no puede mostrar notificaciones.');
     return;
   }
   try {
@@ -3596,7 +3597,7 @@ async function enableNotifications() {
     haptic(20);
     render();
   } catch (e) {
-    window.alert('Couldn\\'t turn on notifications — try again in a moment.');
+    window.alert('No se pudieron activar las notificaciones — intenta de nuevo en un momento.');
   }
 }
 function pushBannerDismissed() {
@@ -3621,7 +3622,7 @@ function daysUntil(str) {
   return Math.round((parseDay(str) - today) / 86400000);
 }
 function formatTripDate(str) {
-  return parseDay(str).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  return parseDay(str).toLocaleDateString('es-MX', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 function tripDayCount() {
   if (!tripStart || !tripEnd) return 3;
@@ -3632,7 +3633,7 @@ function dayDate(idx) {
   if (!tripStart) return null;
   const date = parseDay(tripStart);
   date.setDate(date.getDate() + idx);
-  return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  return date.toLocaleDateString('es-MX', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 function setTripDate(field, value) {
   if (field === 'start') tripStart = value || null;
@@ -3640,7 +3641,7 @@ function setTripDate(field, value) {
   if (tripStart && tripEnd && tripEnd < tripStart) tripEnd = tripStart;
   saveState(['tripStart', 'tripEnd']).then(result => {
     if (result.ok) return;
-    window.alert('That didn\\'t save (' + result.detail + ') — check your connection and try again.');
+    window.alert('No se guardó (' + result.detail + ') — revisa tu conexión e intenta de nuevo.');
   });
   if (tripStart) notifyPartner('trip_dates');
   render();
@@ -3650,7 +3651,7 @@ function setTripRange(start, end) {
   tripEnd = end;
   saveState(['tripStart', 'tripEnd']).then(result => {
     if (result.ok) return;
-    window.alert('That didn\\'t save (' + result.detail + ') — check your connection and try again.');
+    window.alert('No se guardó (' + result.detail + ') — revisa tu conexión e intenta de nuevo.');
   });
   notifyPartner('trip_dates');
   haptic([20, 40, 20]);
@@ -3692,7 +3693,7 @@ function sharedWindows() {
   return windows.sort((a, b) => b.length - a.length || (a.start < b.start ? -1 : 1));
 }
 function formatShort(str) {
-  return parseDay(str).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return parseDay(str).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' });
 }
 function formatWindow(w) {
   return w.start === w.end ? formatShort(w.start) : formatShort(w.start) + ' – ' + formatShort(w.end);
@@ -3713,26 +3714,26 @@ function buildAvailabilityCard() {
 
   const card = el('div', 'add-city-form profile-info-card avail-card');
   card.id = 'availability';
-  card.appendChild(el('div', 'add-city-label', 'WHEN I\\'M FREE'));
-  card.appendChild(txt('div', 'avail-hint', 'Tap or drag across the days you can travel. ' + partnerName() + ' sees them too.'));
+  card.appendChild(el('div', 'add-city-label', 'CUÁNDO ESTOY LIBRE'));
+  card.appendChild(txt('div', 'avail-hint', 'Toca o arrastra sobre los días en que puedes viajar. ' + partnerName() + ' también los ve.'));
 
   const nav = el('div', 'cal-nav');
   const prev = el('button', 'cal-arrow', '‹');
-  prev.setAttribute('aria-label', 'Previous month');
+  prev.setAttribute('aria-label', 'Mes anterior');
   const thisMonth = new Date();
   const atFirst = calendarMonth.getFullYear() === thisMonth.getFullYear() && calendarMonth.getMonth() === thisMonth.getMonth();
   prev.disabled = atFirst;
   prev.addEventListener('click', () => { calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1); refreshAvailabilityCard(); });
   const next = el('button', 'cal-arrow', '›');
-  next.setAttribute('aria-label', 'Next month');
+  next.setAttribute('aria-label', 'Mes siguiente');
   next.addEventListener('click', () => { calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1); refreshAvailabilityCard(); });
   nav.appendChild(prev);
-  nav.appendChild(txt('div', 'cal-month', calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })));
+  nav.appendChild(txt('div', 'cal-month', calendarMonth.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })));
   nav.appendChild(next);
   card.appendChild(nav);
 
   const grid = el('div', 'cal-grid');
-  ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(d => grid.appendChild(txt('div', 'cal-dow', d)));
+  ['D', 'L', 'M', 'M', 'J', 'V', 'S'].forEach(d => grid.appendChild(txt('div', 'cal-dow', d)));
   const first = calendarMonth.getDay();
   for (let i = 0; i < first; i++) grid.appendChild(el('div', 'cal-pad'));
   const daysInMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0).getDate();
@@ -3750,43 +3751,43 @@ function buildAvailabilityCard() {
   card.appendChild(grid);
 
   const legend = el('div', 'cal-legend');
-  legend.appendChild(txt('span', 'cal-key key-mine', 'You'));
+  legend.appendChild(txt('span', 'cal-key key-mine', 'Tú'));
   legend.appendChild(txt('span', 'cal-key key-theirs', partnerName()));
-  legend.appendChild(txt('span', 'cal-key key-both', 'Both free'));
-  if (tripStart) legend.appendChild(txt('span', 'cal-key key-trip', 'Trip'));
+  legend.appendChild(txt('span', 'cal-key key-both', 'Ambos libres'));
+  if (tripStart) legend.appendChild(txt('span', 'cal-key key-trip', 'Viaje'));
   card.appendChild(legend);
 
   const windows = sharedWindows().slice(0, 3);
   const box = el('div', 'avail-windows');
   if (windows.length) {
-    box.appendChild(txt('div', 'avail-windows-title', 'You\\'re both free'));
+    box.appendChild(txt('div', 'avail-windows-title', 'Ambos están libres'));
     windows.forEach(w => {
       const row = el('div', 'avail-window');
       const info = el('div', 'avail-window-info');
       info.appendChild(txt('div', 'avail-window-dates', formatWindow(w)));
-      info.appendChild(txt('div', 'avail-window-len', w.length + (w.length === 1 ? ' day' : ' days')));
+      info.appendChild(txt('div', 'avail-window-len', w.length + (w.length === 1 ? ' día' : ' días')));
       row.appendChild(info);
       const isCurrent = tripStart === w.start && (tripEnd || tripStart) === w.end;
-      const use = el('button', 'avail-use' + (isCurrent ? ' is-set' : ''), isCurrent ? '✓ Trip dates' : 'Use these dates');
+      const use = el('button', 'avail-use' + (isCurrent ? ' is-set' : ''), isCurrent ? '✓ Fechas del viaje' : 'Usar estas fechas');
       if (!isCurrent) use.addEventListener('click', () => setTripRange(w.start, w.end));
       row.appendChild(use);
       box.appendChild(row);
     });
   } else if (!mine.size) {
     box.appendChild(txt('div', 'avail-empty', theirs.size
-      ? partnerName() + ' marked ' + theirs.size + ' free day' + (theirs.size === 1 ? '' : 's') + ' — add yours to find the overlap.'
-      : 'Mark your free days to get started.'));
+      ? partnerName() + ' marcó ' + theirs.size + (theirs.size === 1 ? ' día libre' : ' días libres') + ' — agrega los tuyos para encontrar el cruce.'
+      : 'Marca tus días libres para empezar.'));
   } else if (!theirs.size) {
-    box.appendChild(txt('div', 'avail-empty', 'Waiting on ' + partnerName() + ' to mark some free days.'));
+    box.appendChild(txt('div', 'avail-empty', 'Esperando a que ' + partnerName() + ' marque algunos días libres.'));
   } else {
-    box.appendChild(txt('div', 'avail-empty', 'No overlap yet — try a few more days.'));
+    box.appendChild(txt('div', 'avail-empty', 'Todavía no hay cruce — intenta marcar más días.'));
   }
   card.appendChild(box);
 
   if (mine.size) {
-    const clear = el('button', 'avail-clear', 'Clear my days');
+    const clear = el('button', 'avail-clear', 'Borrar mis días');
     clear.addEventListener('click', () => {
-      if (!window.confirm('Clear all the days you marked as free?')) return;
+      if (!window.confirm('¿Borrar todos los días que marcaste como libres?')) return;
       setMyFreeDays([]);
       refreshAvailabilityCard();
     });
@@ -3838,10 +3839,10 @@ function tripCountdown() {
   if (daysUntil(tripEnd || tripStart) < 0) return null;
   const w = winnerId();
   const place = w ? getDest(w).city : null;
-  if (days > 1) return { big: String(days), label: 'days until ' + (place || 'our trip'), sub: formatTripDate(tripStart) };
-  if (days === 1) return { big: '1', label: 'day until ' + (place || 'our trip') + '!', sub: 'Pack your bags' };
-  if (days === 0) return { big: 'Today', label: 'Today\\'s the day!', sub: place ? 'Next stop: ' + place : 'Have the best trip' };
-  return { big: String(1 - days), label: 'Enjoy ' + (place || 'the trip') + '!', sub: 'Day ' + (1 - days) + ' of ' + tripDayCount() };
+  if (days > 1) return { big: String(days), label: 'días para ' + (place || 'nuestro viaje'), sub: formatTripDate(tripStart) };
+  if (days === 1) return { big: '1', label: '¡día para ' + (place || 'nuestro viaje') + '!', sub: 'Prepara tu maleta' };
+  if (days === 0) return { big: 'Hoy', label: '¡Hoy es el día!', sub: place ? 'Siguiente parada: ' + place : 'Que tengan el mejor viaje' };
+  return { big: String(1 - days), label: '¡Disfruten ' + (place || 'el viaje') + '!', sub: 'Día ' + (1 - days) + ' de ' + tripDayCount() };
 }
 
 // ---- the final destination ----
@@ -3920,39 +3921,39 @@ function showReveal(id) {
 
   const backdrop = el('div', 'reveal-backdrop');
   const stage = el('div', 'reveal-stage');
-  stage.appendChild(txt('div', 'reveal-kicker', 'YOUR NEXT ADVENTURE IS…'));
+  stage.appendChild(txt('div', 'reveal-kicker', 'TU PRÓXIMA AVENTURA ES…'));
 
   const pass = el('div', 'boarding-pass');
   pass.style.setProperty('--plan-color', plan.color);
   const top = el('div', 'bp-top');
-  top.appendChild(txt('span', null, 'BOARDING PASS'));
+  top.appendChild(txt('span', null, 'PASE DE ABORDAR'));
   top.appendChild(txt('span', null, 'HERE & THERE'));
   pass.appendChild(top);
 
   const body = el('div', 'bp-body');
   const route = el('div', 'bp-route');
-  route.appendChild(bpField('FROM', 'MX · US'));
+  route.appendChild(bpField('DE', 'MX · US'));
   route.appendChild(txt('div', 'bp-plane', '→'));
   const toField = el('div', 'bp-field bp-to');
-  toField.appendChild(txt('div', 'bp-label', 'TO'));
+  toField.appendChild(txt('div', 'bp-label', 'A'));
   const code = splitFlap(d.code || d.city.slice(0, 3));
   code.wrap.classList.add('flap-code');
   toField.appendChild(code.wrap);
   route.appendChild(toField);
   body.appendChild(route);
 
-  body.appendChild(txt('div', 'bp-label', 'DESTINATION'));
+  body.appendChild(txt('div', 'bp-label', 'DESTINO'));
   const city = splitFlap(d.city);
   city.wrap.classList.add('flap-city');
   body.appendChild(city.wrap);
 
   const meta = el('div', 'bp-meta');
-  meta.appendChild(bpField('PASSENGERS', 'LUIS & ELENY'));
-  meta.appendChild(bpField('DEPARTS', tripStart ? formatTripDate(tripStart).toUpperCase() : 'TBD'));
-  meta.appendChild(bpField('SEAT', 'TOGETHER', 'bp-seat'));
+  meta.appendChild(bpField('PASAJEROS', 'LUIS & MICH'));
+  meta.appendChild(bpField('SALIDA', tripStart ? formatTripDate(tripStart).toUpperCase() : 'POR CONFIRMAR'));
+  meta.appendChild(bpField('ASIENTO', 'JUNTOS', 'bp-seat'));
   body.appendChild(meta);
   pass.appendChild(body);
-  pass.appendChild(txt('div', 'bp-stamp', 'CONFIRMED'));
+  pass.appendChild(txt('div', 'bp-stamp', 'CONFIRMADO'));
   stage.appendChild(pass);
 
   const photo = el('div', 'reveal-photo');
@@ -3965,13 +3966,13 @@ function showReveal(id) {
   stage.appendChild(revealDuo);
 
   const actions = el('div', 'reveal-actions');
-  const planBtn = el('button', 'confirm-btn', 'Plan the trip →');
+  const planBtn = el('button', 'confirm-btn', 'Planear el viaje →');
   planBtn.addEventListener('click', () => {
     backdrop.remove();
     pendingScrollTo = 'itinerary';
     goDetail(id);
   });
-  const closeBtn = el('button', 'match-keep', 'Close');
+  const closeBtn = el('button', 'match-keep', 'Cerrar');
   closeBtn.addEventListener('click', () => backdrop.remove());
   actions.appendChild(planBtn);
   actions.appendChild(closeBtn);
@@ -4043,11 +4044,11 @@ function buildReactions(d, h) {
   const box = el('div', 'rx');
   if (theirs) {
     const badge = txt('span', 'rx-partner', flagOf(partner) + REACTION_META[theirs]);
-    badge.title = partnerName() + ' reacted';
+    badge.title = partnerName() + ' reaccionó';
     box.appendChild(badge);
   }
   const btn = txt('button', 'rx-mine' + (mine ? ' has' : ''), mine ? REACTION_META[mine] : '+');
-  btn.setAttribute('aria-label', 'React');
+  btn.setAttribute('aria-label', 'Reaccionar');
   btn.addEventListener('click', (e) => { e.stopPropagation(); openReactionPicker(box, d.id, h.name); });
   box.appendChild(btn);
   return box;
@@ -4099,7 +4100,7 @@ function updateItinerary(destId, days) {
 }
 function autoPlan(destId) {
   const d = getDest(destId);
-  if (itineraryHasStops(destId) && !window.confirm('Replace the current plan with an auto-plan?')) return;
+  if (itineraryHasStops(destId) && !window.confirm('¿Reemplazar el plan actual con uno automático?')) return;
   const ranked = d.highlights
     .map((h, i) => ({ name: h.name, score: highlightScore(destId, h.name), i }))
     .filter(x => x.score >= 0)
@@ -4111,7 +4112,7 @@ function autoPlan(destId) {
   });
   haptic(20);
   updateItinerary(destId, days);
-  logActivity('', 'auto-planned the trip to ' + d.city, destId);
+  logActivity('', 'armó el plan automático para ' + d.city, destId);
 }
 function addStop(destId, dayIdx, name) {
   if (!name || !name.trim()) return;
@@ -4128,12 +4129,12 @@ function removeStop(destId, dayIdx, stopIdx) {
 function buildItinerary(d) {
   const section = el('div', 'detail-section itinerary');
   section.id = 'itinerary';
-  section.appendChild(el('div', 'detail-label', 'ITINERARY'));
+  section.appendChild(el('div', 'detail-label', 'ITINERARIO'));
   section.appendChild(txt('div', 'itin-sub', tripStart
     ? formatTripDate(tripStart) + (tripEnd && tripEnd !== tripStart ? ' → ' + formatTripDate(tripEnd) : '')
-    : 'Set your trip dates in your profile (tap your flag) to see real dates here.'));
+    : 'Pon las fechas de tu viaje en tu perfil (toca tu bandera) para ver fechas reales aquí.'));
 
-  const autoBtn = el('button', 'itin-auto', 'Auto-plan from your reactions');
+  const autoBtn = el('button', 'itin-auto', 'Armar plan automático con tus reacciones');
   autoBtn.addEventListener('click', () => autoPlan(d.id));
   section.appendChild(autoBtn);
 
@@ -4144,12 +4145,12 @@ function buildItinerary(d) {
   days.forEach((day, dayIdx) => {
     const dayCard = el('div', 'itin-day');
     const head = el('div', 'itin-day-head');
-    head.appendChild(txt('span', 'itin-day-num', 'Day ' + (dayIdx + 1)));
+    head.appendChild(txt('span', 'itin-day-num', 'Día ' + (dayIdx + 1)));
     const date = dayDate(dayIdx);
     if (date) head.appendChild(txt('span', 'itin-day-date', date));
     dayCard.appendChild(head);
 
-    if (!day.length) dayCard.appendChild(txt('div', 'itin-empty', 'Nothing planned yet'));
+    if (!day.length) dayCard.appendChild(txt('div', 'itin-empty', 'Nada planeado todavía'));
     day.forEach((stop, stopIdx) => {
       const row = el('div', 'itin-stop');
       row.appendChild(txt('span', 'itin-stop-num', String(stopIdx + 1)));
@@ -4179,15 +4180,15 @@ function buildItinerary(d) {
       }
       const form = el('div', 'add-form');
       const input = document.createElement('input');
-      input.placeholder = 'Or type anything (dinner, beach day…)';
-      const addBtn = el('button', null, 'Add');
+      input.placeholder = 'O escribe lo que sea (cena, día de playa…)';
+      const addBtn = el('button', null, 'Agregar');
       addBtn.addEventListener('click', () => addStop(d.id, dayIdx, input.value));
       input.addEventListener('keydown', (e) => { if (e.key === 'Enter') addStop(d.id, dayIdx, input.value); });
       form.appendChild(input);
       form.appendChild(addBtn);
       dayCard.appendChild(form);
     } else {
-      const addRow = el('div', 'add-row', '+ add stop');
+      const addRow = el('div', 'add-row', '+ agregar parada');
       addRow.addEventListener('click', () => { openItineraryDay = dayIdx; refreshDetailCard(d.id); });
       dayCard.appendChild(addRow);
     }
@@ -4332,10 +4333,10 @@ function setMyAvatar(patch) {
 }
 function buildAvatarStudio() {
   const card = el('div', 'add-city-form profile-info-card studio');
-  card.appendChild(el('div', 'add-city-label', 'MY AVATAR'));
+  card.appendChild(el('div', 'add-city-label', 'MI AVATAR'));
   const stage = el('div', 'studio-stage');
   stage.appendChild(avatarCanvas(profile, { framing: 'full', action: 'wave' }));
-  stage.appendChild(txt('div', 'studio-hint', 'Drag to spin · tap to wave'));
+  stage.appendChild(txt('div', 'studio-hint', 'Arrastra para girar · toca para saludar'));
   card.appendChild(stage);
   card.appendChild(buildStudioOptions());
   return card;
@@ -4344,7 +4345,7 @@ function buildStudioOptions() {
   const wrap = el('div', 'studio-options');
   wrap.id = 'studio-options';
   if (!avatarEngine) {
-    wrap.appendChild(txt('div', 'avail-empty', 'Loading your avatar…'));
+    wrap.appendChild(txt('div', 'avail-empty', 'Cargando tu avatar…'));
     return wrap;
   }
   const E = avatarEngine;
@@ -4375,14 +4376,14 @@ function buildStudioOptions() {
     });
     row(label).appendChild(box);
   };
-  swatches('SKIN', 'skin', E.SKINS);
-  chips('HAIR', 'hair', E.HAIR_STYLES);
-  swatches('HAIR COLOR', 'hairColor', E.HAIR_COLORS);
-  swatches('TOP', 'top', E.TOP_COLORS);
-  swatches('BOTTOMS', 'bottom', E.BOTTOM_COLORS);
+  swatches('PIEL', 'skin', E.SKINS);
+  chips('CABELLO', 'hair', E.HAIR_STYLES);
+  swatches('COLOR DE CABELLO', 'hairColor', E.HAIR_COLORS);
+  swatches('PARTE DE ARRIBA', 'top', E.TOP_COLORS);
+  swatches('PANTALÓN', 'bottom', E.BOTTOM_COLORS);
   chips('EXTRAS', 'acc', E.ACCESSORIES);
-  chips('FACE', 'face', E.FACES);
-  const random = el('button', 'studio-random', 'Surprise me');
+  chips('CARA', 'face', E.FACES);
+  const random = el('button', 'studio-random', 'Sorpréndeme');
   random.addEventListener('click', () => setMyAvatar(E.randomAvatar()));
   wrap.appendChild(random);
   return wrap;
@@ -4483,7 +4484,7 @@ function buildHomePins() {
     pin.style.setProperty('--route-color', ROUTE_COLORS[who]);
     pin.appendChild(el('div', 'home-pin-pulse'));
     pin.appendChild(avatarThumbNode(who, 'home-pin-flag'));
-    pin.title = (who === profile ? 'Your' : (who === 'luis' ? 'Luis' : 'Mich') + '\\'s') + ' home base';
+    pin.title = who === profile ? 'Tu base' : 'La base de ' + (who === 'luis' ? 'Luis' : 'Mich');
     pins.push(pin);
   });
   return pins;
@@ -4519,11 +4520,11 @@ function markActivitySeen() {
 }
 function timeAgo(ms) {
   const sec = Math.max(0, (Date.now() - ms) / 1000);
-  if (sec < 60) return 'just now';
-  if (sec < 3600) return Math.floor(sec / 60) + 'm ago';
-  if (sec < 86400) return Math.floor(sec / 3600) + 'h ago';
-  if (sec < 7 * 86400) return Math.floor(sec / 86400) + 'd ago';
-  return new Date(ms).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  if (sec < 60) return 'justo ahora';
+  if (sec < 3600) return 'hace ' + Math.floor(sec / 60) + 'm';
+  if (sec < 86400) return 'hace ' + Math.floor(sec / 3600) + 'h';
+  if (sec < 7 * 86400) return 'hace ' + Math.floor(sec / 86400) + 'd';
+  return new Date(ms).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' });
 }
 function buildActivityItem(item) {
   const row = el('div', 'activity-item' + (item.destId && getDest(item.destId) ? ' is-link' : ''));
@@ -4532,7 +4533,7 @@ function buildActivityItem(item) {
   }
   const body = el('div', 'activity-body');
   const line = el('div', 'activity-text');
-  if (item.profile !== 'both') line.appendChild(txt('strong', null, (item.profile === profile ? 'You' : (item.profile === 'luis' ? 'Luis' : 'Mich')) + ' '));
+  if (item.profile !== 'both') line.appendChild(txt('strong', null, (item.profile === profile ? 'Tú' : (item.profile === 'luis' ? 'Luis' : 'Mich')) + ' '));
   line.appendChild(document.createTextNode(item.text));
   body.appendChild(line);
   body.appendChild(txt('div', 'activity-time', timeAgo(item.at)));
@@ -4547,8 +4548,8 @@ function buildActivityCard() {
   const card = el('div', 'activity-card' + (activityOpen ? ' open' : ''));
   card.id = 'activity';
   const head = el('button', 'activity-head');
-  head.appendChild(txt('span', 'activity-title', 'What\\'s new'));
-  if (unread) head.appendChild(txt('span', 'activity-badge', unread + ' new'));
+  head.appendChild(txt('span', 'activity-title', 'Novedades'));
+  if (unread) head.appendChild(txt('span', 'activity-badge', unread + ' nuevas'));
   head.appendChild(txt('span', 'activity-chevron', '⌄'));
   head.addEventListener('click', () => {
     activityOpen = !activityOpen;
@@ -4611,14 +4612,14 @@ async function loadWeather(force) {
   } catch (e) { weatherLoadedAt = 0; }
 }
 function weatherLabel(code) {
-  if (code === 0) return 'Clear';
-  if (code <= 2) return 'Partly cloudy';
-  if (code === 3) return 'Cloudy';
-  if (code === 45 || code === 48) return 'Foggy';
-  if (code >= 51 && code <= 67) return 'Rainy';
-  if (code >= 71 && code <= 86 && !(code >= 80 && code <= 82)) return 'Snowy';
-  if (code >= 80 && code <= 82) return 'Showers';
-  if (code >= 95) return 'Stormy';
+  if (code === 0) return 'Despejado';
+  if (code <= 2) return 'Parcialmente nublado';
+  if (code === 3) return 'Nublado';
+  if (code === 45 || code === 48) return 'Neblina';
+  if (code >= 51 && code <= 67) return 'Lluvioso';
+  if (code >= 71 && code <= 86 && !(code >= 80 && code <= 82)) return 'Nevado';
+  if (code >= 80 && code <= 82) return 'Chubascos';
+  if (code >= 95) return 'Tormentoso';
   return '';
 }
 // °F for Mich, °C for Luis.
@@ -4626,7 +4627,7 @@ function formatTemp(c) {
   return profile === 'eleny' ? Math.round(c * 9 / 5 + 32) + '°F' : Math.round(c) + '°C';
 }
 function localTimeIn(tz) {
-  try { return new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: tz }); } catch (e) { return ''; }
+  try { return new Date().toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit', timeZone: tz }); } catch (e) { return ''; }
 }
 function weatherShort(id) {
   const w = weather[id];
@@ -4636,7 +4637,7 @@ function weatherLong(id) {
   const w = weather[id];
   if (!w) return '';
   const time = w.tz ? localTimeIn(w.tz) : '';
-  return formatTemp(w.temp) + ' · ' + weatherLabel(w.code) + (time ? ' · ' + time + ' there' : '');
+  return formatTemp(w.temp) + ' · ' + weatherLabel(w.code) + (time ? ' · ' + time + ' allá' : '');
 }
 function weatherNode(tag, cls, id, long) {
   const node = txt(tag, cls, long ? weatherLong(id) : weatherShort(id));
@@ -4769,7 +4770,7 @@ function setHighlightPhoto(id, idx) {
       if (ok) return;
       h.photo = previous;
       render();
-      window.alert('That photo didn\\'t save — check your connection and try again.');
+      window.alert('Esa foto no se guardó — revisa tu conexión e intenta de nuevo.');
     });
   });
 }
@@ -4780,10 +4781,10 @@ function setCoverPhoto(id) {
     d.cover = dataUrl;
     render();
     savePhoto(photoKeyForCover(id), dataUrl).then(ok => {
-      if (ok) { logActivity('', 'added a cover photo of ' + d.city, id); return; }
+      if (ok) { logActivity('', 'agregó una foto de portada de ' + d.city, id); return; }
       d.cover = previous;
       render();
-      window.alert('That photo didn\\'t save — check your connection and try again.');
+      window.alert('Esa foto no se guardó — revisa tu conexión e intenta de nuevo.');
     });
   });
 }
@@ -4798,7 +4799,7 @@ function setLodgingPhoto(id, idx) {
       if (ok) return;
       l.photo = previous;
       render();
-      window.alert('That photo didn\\'t save — check your connection and try again.');
+      window.alert('Esa foto no se guardó — revisa tu conexión e intenta de nuevo.');
     });
   });
 }
@@ -4823,15 +4824,15 @@ function renderIntro() {
   const hero = document.createElement('img');
   hero.className = 'intro-hero';
   hero.src = INTRO_HERO_IMG;
-  hero.alt = 'Mich and Luis';
+  hero.alt = 'Mich y Luis';
   view_.appendChild(hero);
 
   const header = el('div');
   header.style.textAlign = 'center';
-  header.appendChild(el('h1', null, 'Where should we <em>run away</em> to?'));
+  header.appendChild(el('h1', null, '¿A dónde deberíamos <em>escapar</em>?'));
   view_.appendChild(header);
 
-  const chooseLabel = el('div', 'sub', 'Choose the traveler');
+  const chooseLabel = el('div', 'sub', 'Elige quién eres');
   chooseLabel.style.textAlign = 'center';
   chooseLabel.style.marginTop = '4px';
   view_.appendChild(chooseLabel);
@@ -4841,14 +4842,14 @@ function renderIntro() {
   const luisCard = el('div', 'profile-card');
   luisCard.appendChild(avatarCanvas('luis', { framing: 'full', baseYaw: 0.35, action: 'wave', interactive: false }));
   luisCard.appendChild(el('div', 'profile-name', 'Luis'));
-  luisCard.appendChild(el('div', 'profile-hint', 'passcode required'));
+  luisCard.appendChild(el('div', 'profile-hint', 'requiere contraseña'));
   luisCard.addEventListener('click', () => selectProfile('luis'));
   select.appendChild(luisCard);
 
   const elenyCard = el('div', 'profile-card');
   elenyCard.appendChild(avatarCanvas('eleny', { framing: 'full', baseYaw: -0.35, action: 'wave', interactive: false }));
   elenyCard.appendChild(el('div', 'profile-name', 'Mich'));
-  elenyCard.appendChild(el('div', 'profile-hint', 'tap to enter'));
+  elenyCard.appendChild(el('div', 'profile-hint', 'toca para entrar'));
   elenyCard.addEventListener('click', () => selectProfile('eleny'));
   select.appendChild(elenyCard);
 
@@ -4883,11 +4884,11 @@ function renderMap() {
     const theirDays = freeDaysOf(profile === 'luis' ? 'eleny' : 'luis').length;
     const best = sharedWindows()[0];
     const nudgeText = best
-      ? 'You\\'re both free ' + formatWindow(best) + ' — lock in the dates?'
+      ? 'Ambos están libres ' + formatWindow(best) + ' — ¿confirmamos las fechas?'
       : !myDays && theirDays
-      ? partnerName() + ' marked some free days — add yours'
+      ? partnerName() + ' marcó algunos días libres — agrega los tuyos'
       : !myDays
-      ? 'Mark the dates you\\'re free to travel'
+      ? 'Marca las fechas en que puedes viajar'
       : null;
     if (nudgeText) {
       const nudge = txt('button', 'avail-nudge', nudgeText);
@@ -4898,11 +4899,11 @@ function renderMap() {
 
   if (shouldShowPushBanner()) {
     const banner = el('div', 'push-banner');
-    banner.appendChild(txt('div', 'push-banner-text', 'Get a ping when ' + partnerName() + ' swipes, matches, or adds a city'));
-    const onBtn = el('button', 'push-banner-on', 'Turn on');
+    banner.appendChild(txt('div', 'push-banner-text', 'Recibe un aviso cuando ' + partnerName() + ' deslice, haga match o agregue una ciudad'));
+    const onBtn = el('button', 'push-banner-on', 'Activar');
     onBtn.addEventListener('click', enableNotifications);
     const offBtn = el('button', 'push-banner-x', '×');
-    offBtn.setAttribute('aria-label', 'Dismiss');
+    offBtn.setAttribute('aria-label', 'Cerrar');
     offBtn.addEventListener('click', dismissPushBanner);
     banner.appendChild(onBtn);
     banner.appendChild(offBtn);
@@ -4911,16 +4912,16 @@ function renderMap() {
 
   const toSwipe = swipeableDestinations().filter(d => !swipeOf(profile, d.id)).length;
   const newMatches = unseenMatchIds().length;
-  const swipeBtn = el('button', 'swipe-cta', 'Swipe · Round ' + swipeRound);
-  if (newMatches) swipeBtn.appendChild(txt('span', 'swipe-cta-badge is-match', newMatches + ' new match' + (newMatches > 1 ? 'es' : '') + '!'));
-  else if (toSwipe) swipeBtn.appendChild(txt('span', 'swipe-cta-badge', toSwipe + ' to swipe'));
+  const swipeBtn = el('button', 'swipe-cta', 'Deslizar · Ronda ' + swipeRound);
+  if (newMatches) swipeBtn.appendChild(txt('span', 'swipe-cta-badge is-match', newMatches + (newMatches > 1 ? ' matches nuevos' : ' match nuevo') + '!'));
+  else if (toSwipe) swipeBtn.appendChild(txt('span', 'swipe-cta-badge', toSwipe + ' por deslizar'));
   swipeBtn.addEventListener('click', goSwipe);
   if (!winner) view_.appendChild(swipeBtn);
 
   if (winner) {
     const winBtn = el('button', 'winner-cta');
-    winBtn.appendChild(txt('span', null, 'It\\'s decided: ' + winner.city));
-    winBtn.appendChild(txt('span', 'winner-cta-sub', 'Tap for the reveal'));
+    winBtn.appendChild(txt('span', null, 'Ya se decidió: ' + winner.city));
+    winBtn.appendChild(txt('span', 'winner-cta-sub', 'Toca para la revelación'));
     winBtn.addEventListener('click', () => showReveal(winner.id));
     view_.appendChild(winBtn);
     if (!revealSeen(winner.id)) setTimeout(() => { if (view === 'map' && !revealSeen(winner.id)) showReveal(winner.id); }, 600);
@@ -4972,7 +4973,7 @@ function renderMap() {
     const img = document.createElement('img');
     img.className = 'map-img';
     img.src = r.src;
-    img.alt = r.label + ' map';
+    img.alt = 'Mapa de ' + r.label;
     stage.appendChild(img);
   } else {
     const svgNS = 'http://www.w3.org/2000/svg';
@@ -5021,22 +5022,22 @@ function renderMap() {
 
   mapCard.appendChild(stage);
   mapCard.appendChild(el('div', 'map-hint', addingCity && addingCity.step === 'pin'
-    ? 'Tap the map where this city goes'
+    ? 'Toca el mapa donde va esta ciudad'
     : movingPinId
-    ? 'Tap the map to move this pin'
+    ? 'Toca el mapa para mover este pin'
     : placingHome
-    ? 'Tap where you\\'ll fly or drive from'
-    : 'Tap any pin to open the full proposal'));
+    ? 'Toca desde dónde volarás o manejarás'
+    : 'Toca cualquier pin para ver la propuesta completa'));
   if (!addingCity && !movingPinId) {
     const homeBtn = el('button', 'home-chip' + (placingHome ? ' is-cancel' : ''), placingHome
-      ? 'Cancel'
-      : homeOf(profile) ? 'Move my home base' : 'Set your home base to see flight routes');
+      ? 'Cancelar'
+      : homeOf(profile) ? 'Mover mi base' : 'Pon tu base para ver las rutas de vuelo');
     homeBtn.addEventListener('click', () => { if (placingHome) { placingHome = false; render(); } else startPlacingHome(); });
     mapCard.appendChild(homeBtn);
   }
 
   if (movingPinId) {
-    const cancelMoveRow = el('button', 'add-city-row', 'Cancel moving pin');
+    const cancelMoveRow = el('button', 'add-city-row', 'Cancelar mover pin');
     cancelMoveRow.addEventListener('click', () => { movingPinId = null; render(); });
     view_.appendChild(cancelMoveRow);
   }
@@ -5069,7 +5070,7 @@ function renderMap() {
     left.appendChild(el('div', 'dest-row-name', d.city));
     if (d.note) left.appendChild(el('div', 'dest-row-note', d.note));
     left.appendChild(weatherNode('div', 'dest-row-weather', d.id, false));
-    if (hiddenFromEleny) left.appendChild(el('div', 'dest-row-note', 'Hidden from Mich'));
+    if (hiddenFromEleny) left.appendChild(el('div', 'dest-row-note', 'Oculto para Mich'));
     row.appendChild(left);
     const right = el('div', 'dest-row-right');
     if (d.favorite) right.appendChild(el('span', 'dest-row-heart', '♥'));
@@ -5077,8 +5078,8 @@ function renderMap() {
     if (isAdmin) right.appendChild(el('div', 'dest-row-price', money(destTotal(d))));
     row.appendChild(right);
     if (isAdmin) {
-      const visBtn = el('button', 'dest-row-visibility', hiddenFromEleny ? 'Hidden' : 'Visible');
-      visBtn.setAttribute('aria-label', hiddenFromEleny ? 'Show to Mich' : 'Hide from Mich');
+      const visBtn = el('button', 'dest-row-visibility', hiddenFromEleny ? 'Oculto' : 'Visible');
+      visBtn.setAttribute('aria-label', hiddenFromEleny ? 'Mostrar a Mich' : 'Ocultar de Mich');
       visBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleElenyVisibility(d.id); });
       row.appendChild(visBtn);
     }
@@ -5089,12 +5090,12 @@ function renderMap() {
 
   if (addingCity && addingCity.step === 'form') {
     const form = el('div', 'add-city-form');
-    form.appendChild(el('div', 'add-city-label', 'New city name'));
+    form.appendChild(el('div', 'add-city-label', 'Nombre de la nueva ciudad'));
     const input = document.createElement('input');
-    input.placeholder = 'e.g. Oaxaca';
+    input.placeholder = 'ej. Oaxaca';
     form.appendChild(input);
 
-    form.appendChild(el('div', 'add-city-label', 'Type'));
+    form.appendChild(el('div', 'add-city-label', 'Tipo'));
     const planPicker = el('div', 'add-city-plans');
     let chosenPlan = 'city';
     Object.keys(PLAN_META).forEach(planKey => {
@@ -5110,9 +5111,9 @@ function renderMap() {
     form.appendChild(planPicker);
 
     const actions = el('div', 'add-city-actions');
-    const cancelBtn = el('button', 'add-city-cancel-btn', 'Cancel');
+    const cancelBtn = el('button', 'add-city-cancel-btn', 'Cancelar');
     cancelBtn.addEventListener('click', () => { addingCity = null; render(); });
-    const addBtn = el('button', 'add-city-add-btn', 'Add city');
+    const addBtn = el('button', 'add-city-add-btn', 'Agregar ciudad');
     addBtn.addEventListener('click', () => addCustomDestination(input.value, chosenPlan));
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') addCustomDestination(input.value, chosenPlan); });
     actions.appendChild(cancelBtn);
@@ -5121,11 +5122,11 @@ function renderMap() {
 
     view_.appendChild(form);
   } else if (addingCity && addingCity.step === 'pin') {
-    const cancelRow = el('button', 'add-city-row', 'Cancel adding a city');
+    const cancelRow = el('button', 'add-city-row', 'Cancelar agregar ciudad');
     cancelRow.addEventListener('click', () => { addingCity = null; render(); });
     view_.appendChild(cancelRow);
   } else {
-    const addCityRow = el('div', 'add-city-row', '+ add city');
+    const addCityRow = el('div', 'add-city-row', '+ agregar ciudad');
     addCityRow.addEventListener('click', () => { addingCity = { step: 'pin' }; render(); });
     view_.appendChild(addCityRow);
   }
@@ -5146,10 +5147,10 @@ function buildSwipeCard(d, isTop) {
   else card.classList.add('no-cover');
   card.appendChild(el('div', 'swipe-shine'));
   card.appendChild(weatherNode('div', 'swipe-weather', d.id, false));
-  card.appendChild(txt('div', 'swipe-stamp stamp-like', 'LET\\'S GO'));
-  card.appendChild(txt('div', 'swipe-stamp stamp-nope', 'OUT'));
+  card.appendChild(txt('div', 'swipe-stamp stamp-like', 'VAMOS'));
+  card.appendChild(txt('div', 'swipe-stamp stamp-nope', 'FUERA'));
   const info = el('div', 'swipe-card-info');
-  info.appendChild(txt('div', 'swipe-card-meta', plan.label + ' · ' + d.country));
+  info.appendChild(txt('div', 'swipe-card-meta', plan.label + ' · ' + countryLabel(d.country)));
   info.appendChild(txt('div', 'swipe-card-city', d.city));
   if (d.vibe) info.appendChild(txt('div', 'swipe-card-vibe', d.vibe));
   if (d.highlights.length) {
@@ -5166,12 +5167,12 @@ function renderSwipe() {
   swipeRerender = true;
   view_.appendChild(appTitle());
 
-  const backBtn = el('button', 'back-btn', '← Back to map');
+  const backBtn = el('button', 'back-btn', '← Volver al mapa');
   backBtn.addEventListener('click', goMap);
   view_.appendChild(backBtn);
 
-  view_.appendChild(el('h1', null, 'Would you <em>go</em>?'));
-  view_.appendChild(txt('p', 'sub', 'Right if you\\'d go. Left and it\\'s out — for both of you. The last one standing is where you\\'re going.'));
+  view_.appendChild(el('h1', null, '¿Tú <em>irías</em>?'));
+  view_.appendChild(txt('p', 'sub', 'Derecha si irías. Izquierda y queda fuera — para los dos. El último que quede es a donde van.'));
 
   const all = swipeableDestinations();
   const deck = all.filter(d => !swipeOf(profile, d.id));
@@ -5183,17 +5184,17 @@ function renderSwipe() {
     const done = el('div', 'swipe-done is-winner');
     done.appendChild(txt('div', 'swipe-done-emoji', '★'));
     done.appendChild(txt('div', 'swipe-done-title', winner.city));
-    done.appendChild(txt('div', 'swipe-done-sub', 'Last one standing — this is the one.'));
-    const planBtn = el('button', 'confirm-btn', 'Plan the trip →');
+    done.appendChild(txt('div', 'swipe-done-sub', 'El último que queda — este es.'));
+    const planBtn = el('button', 'confirm-btn', 'Planear el viaje →');
     planBtn.addEventListener('click', () => { pendingScrollTo = 'itinerary'; goDetail(winner.id); });
     done.appendChild(planBtn);
-    const replay = el('button', 'match-keep', 'Watch the reveal');
+    const replay = el('button', 'match-keep', 'Ver la revelación');
     replay.addEventListener('click', () => showReveal(winner.id));
     done.appendChild(replay);
     view_.appendChild(done);
   } else if (deck.length) {
-    view_.appendChild(txt('div', 'swipe-progress', (all.length === 2 ? 'FINAL ROUND' : 'ROUND ' + swipeRound)
-      + ' · ' + all.length + ' LEFT · CARD ' + (all.length - deck.length + 1) + ' OF ' + all.length));
+    view_.appendChild(txt('div', 'swipe-progress', (all.length === 2 ? 'RONDA FINAL' : 'RONDA ' + swipeRound)
+      + ' · QUEDAN ' + all.length + ' · TARJETA ' + (all.length - deck.length + 1) + ' DE ' + all.length));
     const deckWrap = el('div', 'swipe-deck');
     if (deck[1]) deckWrap.appendChild(buildSwipeCard(deck[1], false));
     const top = buildSwipeCard(deck[0], true);
@@ -5203,13 +5204,13 @@ function renderSwipe() {
 
     const actions = el('div', 'swipe-actions');
     const nopeBtn = el('button', 'swipe-btn swipe-btn-nope', '✕');
-    nopeBtn.setAttribute('aria-label', 'Swipe out');
+    nopeBtn.setAttribute('aria-label', 'Eliminar');
     nopeBtn.addEventListener('click', () => flyOut(top, 'nope', deck[0].id));
     const infoBtn = el('button', 'swipe-btn swipe-btn-info', 'i');
-    infoBtn.setAttribute('aria-label', 'See details');
+    infoBtn.setAttribute('aria-label', 'Ver detalles');
     infoBtn.addEventListener('click', () => goDetail(deck[0].id));
     const likeBtn = el('button', 'swipe-btn swipe-btn-like', '♥');
-    likeBtn.setAttribute('aria-label', 'Let\\'s go');
+    likeBtn.setAttribute('aria-label', 'Vamos');
     likeBtn.addEventListener('click', () => flyOut(top, 'like', deck[0].id));
     actions.appendChild(nopeBtn);
     actions.appendChild(infoBtn);
@@ -5218,13 +5219,13 @@ function renderSwipe() {
   } else {
     const done = el('div', 'swipe-done');
     done.appendChild(txt('div', 'swipe-done-emoji', '○'));
-    done.appendChild(txt('div', 'swipe-done-title', 'Round ' + swipeRound + ' done on your side!'));
-    done.appendChild(txt('div', 'swipe-done-sub', 'Waiting on ' + partnerName() + ' to finish — then the next round starts with whatever you both said yes to.'));
+    done.appendChild(txt('div', 'swipe-done-title', '¡Ronda ' + swipeRound + ' lista de tu lado!'));
+    done.appendChild(txt('div', 'swipe-done-sub', 'Esperando a que ' + partnerName() + ' termine — luego empieza la siguiente ronda con todo a lo que ambos dijeron que sí.'));
     view_.appendChild(done);
   }
 
   const matchBox = el('div', 'swipe-matches');
-  matchBox.appendChild(txt('div', 'swipe-matches-label', 'BOTH SAID YES' + (matches.length ? ' (' + matches.length + ')' : '')));
+  matchBox.appendChild(txt('div', 'swipe-matches-label', 'LOS DOS DIJERON QUE SÍ' + (matches.length ? ' (' + matches.length + ')' : '')));
   if (matches.length) {
     const row = el('div', 'swipe-matches-row');
     matches.forEach(d => {
@@ -5241,22 +5242,22 @@ function renderSwipe() {
     });
     matchBox.appendChild(row);
   } else {
-    matchBox.appendChild(txt('div', 'swipe-matches-empty', 'Nothing yet — keep swiping'));
+    matchBox.appendChild(txt('div', 'swipe-matches-empty', 'Nada todavía — sigue deslizando'));
   }
   if (!winner) view_.appendChild(matchBox);
 
   if (out.length) {
     const outBox = el('div', 'swipe-out');
-    outBox.appendChild(txt('div', 'swipe-matches-label', 'OUT (' + out.length + ')'));
+    outBox.appendChild(txt('div', 'swipe-matches-label', 'FUERA (' + out.length + ')'));
     const row = el('div', 'swipe-out-row');
     out.forEach(d => {
       const chip = txt('button', 'out-chip', d.city + ' ↺');
-      chip.setAttribute('aria-label', 'Bring back ' + d.city);
+      chip.setAttribute('aria-label', 'Regresar ' + d.city);
       chip.addEventListener('click', () => restoreDestination(d.id));
       row.appendChild(chip);
     });
     outBox.appendChild(row);
-    outBox.appendChild(txt('div', 'swipe-out-hint', 'Swiped one out by mistake? Tap it to bring it back.'));
+    outBox.appendChild(txt('div', 'swipe-out-hint', '¿Eliminaste una por error? Tócala para regresarla.'));
     view_.appendChild(outBox);
   }
 
@@ -5268,7 +5269,7 @@ function renderProfile() {
   const view_ = el('div', 'view');
   view_.appendChild(appTitle());
 
-  const backBtn = el('button', 'back-btn', '← Back');
+  const backBtn = el('button', 'back-btn', '← Volver');
   backBtn.addEventListener('click', backFromProfile);
   view_.appendChild(backBtn);
 
@@ -5277,7 +5278,7 @@ function renderProfile() {
   header.appendChild(el('div', 'profile-header-name', profile === 'luis' ? 'Luis' : 'Mich'));
   view_.appendChild(header);
 
-  const switchBtn = el('button', 'add-city-row', '↺ Switch to ' + (profile === 'luis' ? 'Mich' : 'Luis'));
+  const switchBtn = el('button', 'add-city-row', '↺ Cambiar a ' + (profile === 'luis' ? 'Mich' : 'Luis'));
   switchBtn.addEventListener('click', goIntro);
   view_.appendChild(switchBtn);
 
@@ -5285,9 +5286,9 @@ function renderProfile() {
   view_.appendChild(buildAvailabilityCard());
 
   const tripCard = el('div', 'add-city-form profile-info-card');
-  tripCard.appendChild(el('div', 'add-city-label', 'TRIP DATES'));
+  tripCard.appendChild(el('div', 'add-city-label', 'FECHAS DEL VIAJE'));
   const dateRow = el('div', 'trip-dates');
-  [['start', 'Leaving', tripStart], ['end', 'Coming back', tripEnd]].forEach(([field, label, value]) => {
+  [['start', 'Salida', tripStart], ['end', 'Regreso', tripEnd]].forEach(([field, label, value]) => {
     const wrap = el('label', 'trip-date');
     wrap.appendChild(txt('span', 'add-city-label', label));
     const input = document.createElement('input');
@@ -5299,22 +5300,22 @@ function renderProfile() {
     dateRow.appendChild(wrap);
   });
   tripCard.appendChild(dateRow);
-  tripCard.appendChild(txt('div', 'trip-dates-hint', 'Shared with ' + partnerName() + ' — starts the countdown on the map.'));
+  tripCard.appendChild(txt('div', 'trip-dates-hint', 'Se comparte con ' + partnerName() + ' — activa la cuenta regresiva en el mapa.'));
   view_.appendChild(tripCard);
 
   const notifCard = el('div', 'add-city-form profile-info-card');
-  notifCard.appendChild(el('div', 'add-city-label', 'NOTIFICATIONS'));
+  notifCard.appendChild(el('div', 'add-city-label', 'NOTIFICACIONES'));
   const perm = pushSupported() ? Notification.permission : 'unsupported';
   if (pushSubscribed && perm === 'granted') {
-    notifCard.appendChild(txt('div', 'notif-status is-on', '✓ On — you\\'ll get a ping when ' + partnerName() + ' swipes, matches, or adds a city.'));
+    notifCard.appendChild(txt('div', 'notif-status is-on', '✓ Activadas — recibirás un aviso cuando ' + partnerName() + ' deslice, haga match o agregue una ciudad.'));
   } else if (perm === 'denied') {
-    notifCard.appendChild(txt('div', 'notif-status', 'Blocked. Turn them on in your phone\\'s Settings → Notifications → Here & There.'));
+    notifCard.appendChild(txt('div', 'notif-status', 'Bloqueadas. Actívalas en Configuración de tu teléfono → Notificaciones → Here & There.'));
   } else if (perm === 'unsupported') {
     notifCard.appendChild(txt('div', 'notif-status', isIOS() && !isStandalone()
-      ? 'Add Here & There to your Home Screen, open it from there, then come back here.'
-      : 'This browser doesn\\'t support notifications.'));
+      ? 'Agrega Here & There a tu pantalla de inicio, ábrela desde ahí y vuelve aquí.'
+      : 'Este navegador no soporta notificaciones.'));
   } else {
-    const onBtn = el('button', 'confirm-btn', 'Turn on notifications');
+    const onBtn = el('button', 'confirm-btn', 'Activar notificaciones');
     onBtn.addEventListener('click', enableNotifications);
     notifCard.appendChild(onBtn);
   }
@@ -5323,11 +5324,11 @@ function renderProfile() {
   const info = profileInfo[profile] || {};
 
   const card = el('div', 'add-city-form profile-info-card');
-  card.appendChild(el('div', 'add-city-label', 'IN CASE OF EMERGENCY'));
+  card.appendChild(el('div', 'add-city-label', 'EN CASO DE EMERGENCIA'));
 
   const fields = [
-    { key: 'contactName', label: 'Emergency contact name', placeholder: 'e.g. Mom — Carmen Rangel' },
-    { key: 'contactPhone', label: 'Emergency contact phone', placeholder: '+52 555 000 0000' },
+    { key: 'contactName', label: 'Nombre del contacto de emergencia', placeholder: 'ej. Mamá — Carmen Rangel' },
+    { key: 'contactPhone', label: 'Teléfono del contacto de emergencia', placeholder: '+52 555 000 0000' },
   ];
   fields.forEach(f => {
     card.appendChild(el('div', 'add-city-label', f.label));
@@ -5338,25 +5339,25 @@ function renderProfile() {
     card.appendChild(input);
   });
 
-  card.appendChild(el('div', 'add-city-label', 'Blood type'));
+  card.appendChild(el('div', 'add-city-label', 'Tipo de sangre'));
   const bloodSelect = document.createElement('select');
   bloodSelect.className = 'blood-type-select';
   const bloodOptions = ['', 'O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'];
   bloodOptions.forEach(opt => {
     const optEl = document.createElement('option');
     optEl.value = opt;
-    optEl.textContent = opt || 'Select…';
+    optEl.textContent = opt || 'Selecciona…';
     if ((info.bloodType || '') === opt) optEl.selected = true;
     bloodSelect.appendChild(optEl);
   });
   bloodSelect.addEventListener('change', () => saveProfileInfo('bloodType', bloodSelect.value));
   card.appendChild(bloodSelect);
 
-  card.appendChild(el('div', 'add-city-label', 'Allergies / medical notes'));
+  card.appendChild(el('div', 'add-city-label', 'Alergias / notas médicas'));
   const textarea = document.createElement('textarea');
   textarea.className = 'profile-textarea';
   textarea.value = info.allergies || '';
-  textarea.placeholder = 'e.g. Penicillin, shellfish…';
+  textarea.placeholder = 'ej. Penicilina, mariscos…';
   textarea.addEventListener('input', () => saveProfileInfo('allergies', textarea.value));
   card.appendChild(textarea);
 
@@ -5371,7 +5372,7 @@ function renderDetail() {
   const plan = planOf(d);
   view_.appendChild(appTitle());
 
-  const backBtn = el('button', 'back-btn', detailReturnView === 'swipe' ? '← Back to swiping' : '← Back to map');
+  const backBtn = el('button', 'back-btn', detailReturnView === 'swipe' ? '← Volver a deslizar' : '← Volver al mapa');
   backBtn.addEventListener('click', detailReturnView === 'swipe' ? goSwipe : goMap);
   view_.appendChild(backBtn);
 
@@ -5394,14 +5395,14 @@ function buildDetailCard(d, plan) {
     hero.dataset.morph = d.id;
     hero.style.backgroundImage = 'url("' + d.cover + '")';
     hero.addEventListener('click', () => showPhotoLightbox(d.cover, d.city, () => setCoverPhoto(d.id)));
-    const changeBtn = el('button', 'detail-cover-change', 'Change');
+    const changeBtn = el('button', 'detail-cover-change', 'Cambiar');
     changeBtn.addEventListener('click', (e) => { e.stopPropagation(); setCoverPhoto(d.id); });
     hero.appendChild(changeBtn);
     card.appendChild(hero);
   } else if (!photosReady) {
     card.appendChild(el('div', 'detail-cover skeleton'));
   } else {
-    const addCover = el('button', 'detail-cover-add', 'Add a cover photo');
+    const addCover = el('button', 'detail-cover-add', 'Agregar foto de portada');
     addCover.addEventListener('click', () => setCoverPhoto(d.id));
     card.appendChild(addCover);
   }
@@ -5410,7 +5411,7 @@ function buildDetailCard(d, plan) {
   const photoLodging = (d.lodging || []).map((l, idx) => ({ l, idx })).filter(x => x.l.photo);
   if (photoHighlights.length > 0 || photoLodging.length > 0) {
     const gallery = el('div', 'gallery');
-    gallery.appendChild(el('div', 'gallery-label', 'PHOTOS'));
+    gallery.appendChild(el('div', 'gallery-label', 'FOTOS'));
     const scroller = el('div', 'gallery-scroll');
     photoHighlights.forEach(({ h, idx }) => {
       const img = document.createElement('img');
@@ -5435,8 +5436,8 @@ function buildDetailCard(d, plan) {
   const head = el('div', 'detail-head');
   const headLeft = el('div', 'detail-head-left');
   headLeft.appendChild(el('div', 'detail-city', d.city));
-  if (winnerId() === d.id) headLeft.appendChild(txt('div', 'admin-pick-banner is-top-pick', 'Our destination'));
-  headLeft.appendChild(el('div', 'detail-country', d.country));
+  if (winnerId() === d.id) headLeft.appendChild(txt('div', 'admin-pick-banner is-top-pick', 'Nuestro destino'));
+  headLeft.appendChild(el('div', 'detail-country', countryLabel(d.country)));
   headLeft.appendChild(weatherNode('div', 'detail-weather', d.id, true));
   headLeft.appendChild(el('div', 'detail-plan-chip', plan.label));
   if (d.note) headLeft.appendChild(el('div', 'detail-note', d.note));
@@ -5448,17 +5449,17 @@ function buildDetailCard(d, plan) {
 
   if (isAdmin) {
     const priceBlock = el('div', 'price-block');
-    priceBlock.appendChild(el('div', 'price-total-label', 'ESTIMATED TOTAL (only you see this)'));
+    priceBlock.appendChild(el('div', 'price-total-label', 'TOTAL ESTIMADO (solo tú ves esto)'));
     const totalEl = el('div', 'price-total', money(destTotal(d)));
     if (lastPriceAnimatedFor !== d.id) { lastPriceAnimatedFor = d.id; countUp(totalEl, destTotal(d), money, 900); }
     priceBlock.appendChild(totalEl);
 
     const currentCosts = (d.costs && d.costs.myTransport != null) ? d.costs : EMPTY_COSTS;
     const costFields = [
-      { key: 'myTransport', label: 'My transport' },
-      { key: 'elenyTransport', label: 'Mich\\'s transport' },
-      { key: 'gas', label: 'Gas' },
-      { key: 'tolls', label: 'Tolls (casetas)' },
+      { key: 'myTransport', label: 'Mi transporte' },
+      { key: 'elenyTransport', label: 'Transporte de Mich' },
+      { key: 'gas', label: 'Gasolina' },
+      { key: 'tolls', label: 'Casetas' },
       { key: 'hotel', label: 'Hotel / Airbnb' },
     ];
     const costGrid = el('div', 'cost-grid');
@@ -5485,8 +5486,8 @@ function buildDetailCard(d, plan) {
   if (winnerId() === d.id || itineraryHasStops(d.id)) card.appendChild(buildItinerary(d));
 
   const section = el('div', 'detail-section');
-  section.appendChild(el('div', 'detail-label', 'HIGHLIGHTS'));
-  section.appendChild(txt('div', 'rx-hint', 'Tap + to react — ' + partnerName() + ' sees it too.'));
+  section.appendChild(el('div', 'detail-label', 'LO DESTACADO'));
+  section.appendChild(txt('div', 'rx-hint', 'Toca + para reaccionar — ' + partnerName() + ' también lo ve.'));
 
   if (d.cities) {
     const cityTabs = el('div', 'city-tabs');
@@ -5504,7 +5505,7 @@ function buildDetailCard(d, plan) {
 
   const visibleHighlights = d.highlights.filter(matchesCity);
   if (visibleHighlights.length === 0 && !openAddHighlight) {
-    section.appendChild(el('div', 'highlight-empty', 'No highlights added yet.'));
+    section.appendChild(el('div', 'highlight-empty', 'Todavía no hay nada agregado.'));
   }
 
   const highlightsBox = el('div', 'highlights');
@@ -5522,8 +5523,8 @@ function buildDetailCard(d, plan) {
     } else if (!photosReady) {
       row.appendChild(el('div', 'highlight-thumb-loading'));
     } else {
-      const thumbBtn = el('button', 'highlight-thumb-btn', 'Photo');
-      thumbBtn.setAttribute('aria-label', 'Add photo');
+      const thumbBtn = el('button', 'highlight-thumb-btn', 'Foto');
+      thumbBtn.setAttribute('aria-label', 'Agregar foto');
       thumbBtn.addEventListener('click', () => setHighlightPhoto(d.id, idx));
       row.appendChild(thumbBtn);
     }
@@ -5540,15 +5541,15 @@ function buildDetailCard(d, plan) {
   if (openAddHighlight) {
     const form = el('div', 'add-form');
     const input = document.createElement('input');
-    input.placeholder = 'e.g. Sunset boat tour';
-    const addBtn = el('button', null, 'Add');
+    input.placeholder = 'ej. Paseo en bote al atardecer';
+    const addBtn = el('button', null, 'Agregar');
     addBtn.addEventListener('click', () => addHighlight(d.id, input.value));
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') addHighlight(d.id, input.value); });
     form.appendChild(input);
     form.appendChild(addBtn);
     section.appendChild(form);
   } else {
-    const addRow = el('div', 'add-row', '+ add highlight');
+    const addRow = el('div', 'add-row', '+ agregar destacado');
     addRow.addEventListener('click', () => { openAddHighlight = true; render(); });
     section.appendChild(addRow);
   }
@@ -5556,11 +5557,11 @@ function buildDetailCard(d, plan) {
   card.appendChild(section);
 
   const lodgingSection = el('div', 'detail-section');
-  lodgingSection.appendChild(el('div', 'detail-label', 'LODGING'));
+  lodgingSection.appendChild(el('div', 'detail-label', 'HOSPEDAJE'));
 
   const lodgingList = d.lodging || [];
   if (lodgingList.length === 0 && !openAddLodging) {
-    lodgingSection.appendChild(el('div', 'highlight-empty', 'No lodging added yet.'));
+    lodgingSection.appendChild(el('div', 'highlight-empty', 'Todavía no hay hospedaje agregado.'));
   }
 
   const lodgingBox = el('div', 'highlights');
@@ -5577,8 +5578,8 @@ function buildDetailCard(d, plan) {
     } else if (!photosReady) {
       row.appendChild(el('div', 'highlight-thumb-loading'));
     } else {
-      const thumbBtn = el('button', 'highlight-thumb-btn', 'Photo');
-      thumbBtn.setAttribute('aria-label', 'Add photo');
+      const thumbBtn = el('button', 'highlight-thumb-btn', 'Foto');
+      thumbBtn.setAttribute('aria-label', 'Agregar foto');
       thumbBtn.addEventListener('click', () => setLodgingPhoto(d.id, idx));
       row.appendChild(thumbBtn);
     }
@@ -5603,11 +5604,11 @@ function buildDetailCard(d, plan) {
   if (openAddLodging) {
     const form = el('div', 'add-form add-form-stack');
     const nameInput = document.createElement('input');
-    nameInput.placeholder = 'e.g. Rosewood San Miguel';
+    nameInput.placeholder = 'ej. Rosewood San Miguel';
     const urlInput = document.createElement('input');
     urlInput.type = 'url';
-    urlInput.placeholder = 'Link (Airbnb, hotel site…) — optional';
-    const addBtn = el('button', null, 'Add');
+    urlInput.placeholder = 'Link (Airbnb, sitio del hotel…) — opcional';
+    const addBtn = el('button', null, 'Agregar');
     const submitLodging = () => addLodging(d.id, nameInput.value, urlInput.value);
     addBtn.addEventListener('click', submitLodging);
     nameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitLodging(); });
@@ -5617,7 +5618,7 @@ function buildDetailCard(d, plan) {
     form.appendChild(addBtn);
     lodgingSection.appendChild(form);
   } else {
-    const addLodgingRow = el('div', 'add-row', '+ add lodging');
+    const addLodgingRow = el('div', 'add-row', '+ agregar hospedaje');
     addLodgingRow.addEventListener('click', () => { openAddLodging = true; render(); });
     lodgingSection.appendChild(addLodgingRow);
   }
@@ -5626,22 +5627,22 @@ function buildDetailCard(d, plan) {
 
   const favBtn = el('button', 'fav-btn' + (d.favorite ? ' is-fav' : ''));
   favBtn.innerHTML = d.favorite
-    ? '<span class="heart">♥</span> On the shortlist'
-    : '♡ Add to shortlist';
+    ? '<span class="heart">♥</span> En la lista corta'
+    : '♡ Agregar a la lista corta';
   favBtn.addEventListener('click', () => toggleFavorite(d.id));
   card.appendChild(favBtn);
 
   if (d.favorite) {
-    card.appendChild(el('div', 'fav-note', 'Noted — this one just made the cut.'));
+    card.appendChild(el('div', 'fav-note', 'Anotado — esta hizo el corte.'));
   }
 
   if (isAdmin && d.custom) {
-    const moveBtn = el('button', 'move-pin-btn', 'Move pin');
+    const moveBtn = el('button', 'move-pin-btn', 'Mover pin');
     moveBtn.addEventListener('click', () => startMovingPin(d.id));
     card.appendChild(moveBtn);
   }
 
-  const deleteBtn = el('button', 'delete-city-btn', 'Delete this city');
+  const deleteBtn = el('button', 'delete-city-btn', 'Borrar esta ciudad');
   deleteBtn.addEventListener('click', () => deleteDestination(d.id));
   card.appendChild(deleteBtn);
 
@@ -5692,7 +5693,7 @@ function render() {
   if (view !== 'intro' && view !== 'profile') {
     const profileFab = el('button', 'profile-fab');
     profileFab.appendChild(avatarThumbNode(profile, 'fab-thumb'));
-    profileFab.setAttribute('aria-label', 'Profile');
+    profileFab.setAttribute('aria-label', 'Perfil');
     profileFab.addEventListener('click', goProfile);
     app.appendChild(profileFab);
   }

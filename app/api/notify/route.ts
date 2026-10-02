@@ -5,12 +5,12 @@ import { logActivity } from '@/lib/activity';
 // Feed entry for each event: [profile ('both' = shared moment), emoji, text without the subject].
 function feedEntry(from: string, type: string, city: string, count: number): [string, string, string] | null {
   switch (type) {
-    case 'city_added': return [from, '', 'added ' + city];
-    case 'city_cut': return [from, '', 'swiped ' + city + ' out'];
-    case 'round': return ['both', '', 'Round ' + city + ' starts — ' + count + ' destinations left'];
-    case 'winner': return ['both', '', 'It\'s decided — you\'re going to ' + city + '!'];
-    case 'trip_dates': return [from, '', 'set the trip dates'];
-    case 'availability': return [from, '', 'marked new free days'];
+    case 'city_added': return [from, '', 'agregó ' + city];
+    case 'city_cut': return [from, '', 'eliminó ' + city];
+    case 'round': return ['both', '', 'Empieza la ronda ' + city + ' — quedan ' + count + ' destinos'];
+    case 'winner': return ['both', '', '¡Ya se decidió — van a ' + city + '!'];
+    case 'trip_dates': return [from, '', 'puso las fechas del viaje'];
+    case 'availability': return [from, '', 'marcó nuevos días libres'];
     default: return null;
   }
 }
@@ -21,21 +21,21 @@ function compose(from: string, type: string, city: string, count: number): PushP
   const who = NAMES[from];
   switch (type) {
     case 'city_added':
-      return { title: 'New destination', body: who + ' added ' + city + ' — go swipe on it!', tag: 'city' };
+      return { title: 'Nuevo destino', body: who + ' agregó ' + city + ' — ¡ve a deslizar!', tag: 'city' };
     case 'city_cut':
       return {
-        title: city + ' got cut',
-        body: who + ' swiped it out — ' + count + ' destination' + (count === 1 ? '' : 's') + ' left.',
+        title: city + ' quedó fuera',
+        body: who + ' lo eliminó — quedan ' + count + ' destino' + (count === 1 ? '' : 's') + '.',
         tag: 'swipes',
       };
     case 'round':
-      return { title: 'Round ' + city + '!', body: 'You both said yes to ' + count + ' places — swipe again to narrow it down.', tag: 'round' };
+      return { title: 'Ronda ' + city + '!', body: 'Los dos dijeron que sí a ' + count + ' lugares — sigue deslizando para elegir.', tag: 'round' };
     case 'winner':
-      return { title: 'It\'s decided!', body: 'You\'re going to ' + city + '. Open the app for the big reveal.', tag: 'winner' };
+      return { title: '¡Ya se decidió!', body: 'Van a ' + city + '. Abre la app para la gran revelación.', tag: 'winner' };
     case 'availability':
-      return { title: 'Free days updated', body: who + ' marked the days they can travel — see where you overlap.', tag: 'availability' };
+      return { title: 'Días libres actualizados', body: who + ' marcó los días en que puede viajar — mira dónde se cruzan.', tag: 'availability' };
     case 'trip_dates':
-      return { title: 'Trip dates set', body: who + ' set the dates — the countdown is on.', tag: 'dates' };
+      return { title: 'Fechas del viaje definidas', body: who + ' puso las fechas — ya empezó la cuenta regresiva.', tag: 'dates' };
     default:
       return null;
   }
