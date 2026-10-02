@@ -1,4 +1,4 @@
-# Here & There ☀️ (Aquí & Allá)
+# ¿De aquí a dónde? ☀️
 
 Trip-proposal app for Mich & Luis — Next.js 14 + Postgres (Neon) + Railway.
 

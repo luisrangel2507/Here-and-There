@@ -3575,7 +3575,7 @@ function urlBase64ToUint8Array(base64) {
 async function enableNotifications() {
   if (!pushSupported()) {
     window.alert(isIOS() && !isStandalone()
-      ? 'Abre Here & There desde el ícono en tu pantalla de inicio para activar las notificaciones.'
+      ? 'Abre ¿De aquí a dónde? desde el ícono en tu pantalla de inicio para activar las notificaciones.'
       : 'Este navegador no puede mostrar notificaciones.');
     return;
   }
@@ -3927,7 +3927,7 @@ function showReveal(id) {
   pass.style.setProperty('--plan-color', plan.color);
   const top = el('div', 'bp-top');
   top.appendChild(txt('span', null, 'PASE DE ABORDAR'));
-  top.appendChild(txt('span', null, 'HERE & THERE'));
+  top.appendChild(txt('span', null, '¿DE AQUÍ A DÓNDE?'));
   pass.appendChild(top);
 
   const body = el('div', 'bp-body');
@@ -4811,7 +4811,7 @@ function el(tag, className, html) {
   return node;
 }
 function appTitle() {
-  return el('div', 'app-title', '🌵 Here <span class="app-title-amp">&</span> There <span class="app-title-icon">🌁</span>');
+  return el('div', 'app-title', '🌵 ¿De aquí a dónde? <span class="app-title-icon">🌁</span>');
 }
 
 function renderIntro() {
@@ -5309,10 +5309,10 @@ function renderProfile() {
   if (pushSubscribed && perm === 'granted') {
     notifCard.appendChild(txt('div', 'notif-status is-on', '✓ Activadas — recibirás un aviso cuando ' + partnerName() + ' deslice, haga match o agregue una ciudad.'));
   } else if (perm === 'denied') {
-    notifCard.appendChild(txt('div', 'notif-status', 'Bloqueadas. Actívalas en Configuración de tu teléfono → Notificaciones → Here & There.'));
+    notifCard.appendChild(txt('div', 'notif-status', 'Bloqueadas. Actívalas en Configuración de tu teléfono → Notificaciones → ¿De aquí a dónde?.'));
   } else if (perm === 'unsupported') {
     notifCard.appendChild(txt('div', 'notif-status', isIOS() && !isStandalone()
-      ? 'Agrega Here & There a tu pantalla de inicio, ábrela desde ahí y vuelve aquí.'
+      ? 'Agrega ¿De aquí a dónde? a tu pantalla de inicio, ábrela desde ahí y vuelve aquí.'
       : 'Este navegador no soporta notificaciones.'));
   } else {
     const onBtn = el('button', 'confirm-btn', 'Activar notificaciones');
@@ -5668,7 +5668,7 @@ function render() {
     const img = document.createElement('img');
     img.className = 'splash-img';
     img.src = SPLASH_IMG;
-    img.alt = 'Here & There';
+    img.alt = '¿De aquí a dónde?';
     splash.appendChild(img);
     root.appendChild(splash);
     return;

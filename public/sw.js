@@ -5,7 +5,7 @@ self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim(
 self.addEventListener('push', (event) => {
   let data = {};
   try { data = event.data ? event.data.json() : {}; } catch (e) { data = { body: event.data && event.data.text() }; }
-  const show = self.registration.showNotification(data.title || 'Here & There', {
+  const show = self.registration.showNotification(data.title || '¿De aquí a dónde?', {
     body: data.body || '',
     icon: '/images/icon-192.png',
     badge: '/images/icon-192.png',

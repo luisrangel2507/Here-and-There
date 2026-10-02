@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Here & There ☀️',
-  description: 'Aquí & Allá — trip proposal',
+  title: '¿De aquí a dónde? ☀️',
+  description: 'Propuesta de viaje',
   manifest: '/manifest.webmanifest',
   appleWebApp: {
-    title: 'Here & There',
+    title: '¿De aquí a dónde?',
     statusBarStyle: 'black-translucent',
   },
   icons: {
