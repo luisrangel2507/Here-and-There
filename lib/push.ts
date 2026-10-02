@@ -2,7 +2,7 @@ import webpush from 'web-push';
 import { prisma } from '@/lib/db';
 
 export const PROFILES = ['luis', 'eleny'];
-export const NAMES: Record<string, string> = { luis: 'Luis', eleny: 'Eleny' };
+export const NAMES: Record<string, string> = { luis: 'Luis', eleny: 'Mich' };
 
 export function partnerOf(profile: string) {
   return profile === 'luis' ? 'eleny' : 'luis';

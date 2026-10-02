@@ -1,6 +1,6 @@
 # Here & There ☀️ (Aquí & Allá)
 
-Trip-proposal app for Eleny & Luis — Next.js 14 + Postgres (Neon) + Railway.
+Trip-proposal app for Mich & Luis — Next.js 14 + Postgres (Neon) + Railway.
 
 This is the same app you already saw as a single HTML file, ported into a
 Next.js project so it can be deployed for real and so the "Daily priority
@@ -51,7 +51,7 @@ Open http://localhost:3000.
    (already wired in `package.json`, which reads Railway's `PORT`).
 
 That's the whole loop — from here it's normal Claude Code work: `railway
-logs` to debug, `railway open` to grab the live URL to send to Eleny.
+logs` to debug, `railway open` to grab the live URL to send to Mich.
 
 ## Notes / things to revisit later
 

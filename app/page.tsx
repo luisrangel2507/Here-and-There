@@ -2603,7 +2603,7 @@ function allDestinations() {
 
 let blockedIds = [];
 let hiddenIds = [];
-let elenyHiddenIds = []; // destinations Luis has hidden from Eleny's map/list (still visible to Luis)
+let elenyHiddenIds = []; // destinations Luis has hidden from Mich's map/list (still visible to Luis)
 let profileInfo = {};
 let tripStart = null; // 'YYYY-MM-DD'
 let tripEnd = null;
@@ -2726,7 +2726,7 @@ async function loadLodgingData() {
   } catch (e) { /* keep defaults */ }
 }
 
-// ---- admin-only cost breakdown (never shown to Eleny) ----
+// ---- admin-only cost breakdown (never shown to Mich) ----
 const EMPTY_COSTS = { myTransport: 0, elenyTransport: 0, gas: 0, tolls: 0, hotel: 0 };
 
 let costsSaveTimer = null;
@@ -3195,7 +3195,7 @@ let swipeDragging = false;
 let swipeRerender = false;
 let detailReturnView = 'map';
 
-function partnerName() { return profile === 'luis' ? 'Eleny' : 'Luis'; }
+function partnerName() { return profile === 'luis' ? 'Mich' : 'Luis'; }
 function haptic(pattern) {
   try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) { /* unsupported */ }
 }
@@ -3228,7 +3228,7 @@ async function saveSwipe(destId, choice) {
 }
 
 // Elimination: a left swipe from either traveler takes a destination out for both.
-// Anything hidden from Eleny isn't in play at all.
+// Anything hidden from Mich isn't in play at all.
 // The same city added twice (e.g. a built-in and a "+ add city" copy) plays as one:
 // the copy with the most info represents it, and a swipe on any copy counts for all.
 function cityKey(d) {
@@ -4483,7 +4483,7 @@ function buildHomePins() {
     pin.style.setProperty('--route-color', ROUTE_COLORS[who]);
     pin.appendChild(el('div', 'home-pin-pulse'));
     pin.appendChild(avatarThumbNode(who, 'home-pin-flag'));
-    pin.title = (who === profile ? 'Your' : (who === 'luis' ? 'Luis' : 'Eleny') + '\\'s') + ' home base';
+    pin.title = (who === profile ? 'Your' : (who === 'luis' ? 'Luis' : 'Mich') + '\\'s') + ' home base';
     pins.push(pin);
   });
   return pins;
@@ -4532,7 +4532,7 @@ function buildActivityItem(item) {
   }
   const body = el('div', 'activity-body');
   const line = el('div', 'activity-text');
-  if (item.profile !== 'both') line.appendChild(txt('strong', null, (item.profile === profile ? 'You' : (item.profile === 'luis' ? 'Luis' : 'Eleny')) + ' '));
+  if (item.profile !== 'both') line.appendChild(txt('strong', null, (item.profile === profile ? 'You' : (item.profile === 'luis' ? 'Luis' : 'Mich')) + ' '));
   line.appendChild(document.createTextNode(item.text));
   body.appendChild(line);
   body.appendChild(txt('div', 'activity-time', timeAgo(item.at)));
@@ -4621,7 +4621,7 @@ function weatherLabel(code) {
   if (code >= 95) return 'Stormy';
   return '';
 }
-// °F for Eleny, °C for Luis.
+// °F for Mich, °C for Luis.
 function formatTemp(c) {
   return profile === 'eleny' ? Math.round(c * 9 / 5 + 32) + '°F' : Math.round(c) + '°C';
 }
@@ -4823,7 +4823,7 @@ function renderIntro() {
   const hero = document.createElement('img');
   hero.className = 'intro-hero';
   hero.src = INTRO_HERO_IMG;
-  hero.alt = 'Eleny and Luis';
+  hero.alt = 'Mich and Luis';
   view_.appendChild(hero);
 
   const header = el('div');
@@ -4847,7 +4847,7 @@ function renderIntro() {
 
   const elenyCard = el('div', 'profile-card');
   elenyCard.appendChild(avatarCanvas('eleny', { framing: 'full', baseYaw: -0.35, action: 'wave', interactive: false }));
-  elenyCard.appendChild(el('div', 'profile-name', 'Eleny'));
+  elenyCard.appendChild(el('div', 'profile-name', 'Mich'));
   elenyCard.appendChild(el('div', 'profile-hint', 'tap to enter'));
   elenyCard.addEventListener('click', () => selectProfile('eleny'));
   select.appendChild(elenyCard);
@@ -5069,7 +5069,7 @@ function renderMap() {
     left.appendChild(el('div', 'dest-row-name', d.city));
     if (d.note) left.appendChild(el('div', 'dest-row-note', d.note));
     left.appendChild(weatherNode('div', 'dest-row-weather', d.id, false));
-    if (hiddenFromEleny) left.appendChild(el('div', 'dest-row-note', 'Hidden from Eleny'));
+    if (hiddenFromEleny) left.appendChild(el('div', 'dest-row-note', 'Hidden from Mich'));
     row.appendChild(left);
     const right = el('div', 'dest-row-right');
     if (d.favorite) right.appendChild(el('span', 'dest-row-heart', '♥'));
@@ -5078,7 +5078,7 @@ function renderMap() {
     row.appendChild(right);
     if (isAdmin) {
       const visBtn = el('button', 'dest-row-visibility', hiddenFromEleny ? 'Hidden' : 'Visible');
-      visBtn.setAttribute('aria-label', hiddenFromEleny ? 'Show to Eleny' : 'Hide from Eleny');
+      visBtn.setAttribute('aria-label', hiddenFromEleny ? 'Show to Mich' : 'Hide from Mich');
       visBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleElenyVisibility(d.id); });
       row.appendChild(visBtn);
     }
@@ -5274,10 +5274,10 @@ function renderProfile() {
 
   const header = el('div', 'profile-header');
   header.appendChild(avatarThumbNode(profile, 'profile-header-flag'));
-  header.appendChild(el('div', 'profile-header-name', profile === 'luis' ? 'Luis' : 'Eleny'));
+  header.appendChild(el('div', 'profile-header-name', profile === 'luis' ? 'Luis' : 'Mich'));
   view_.appendChild(header);
 
-  const switchBtn = el('button', 'add-city-row', '↺ Switch to ' + (profile === 'luis' ? 'Eleny' : 'Luis'));
+  const switchBtn = el('button', 'add-city-row', '↺ Switch to ' + (profile === 'luis' ? 'Mich' : 'Luis'));
   switchBtn.addEventListener('click', goIntro);
   view_.appendChild(switchBtn);
 
@@ -5456,7 +5456,7 @@ function buildDetailCard(d, plan) {
     const currentCosts = (d.costs && d.costs.myTransport != null) ? d.costs : EMPTY_COSTS;
     const costFields = [
       { key: 'myTransport', label: 'My transport' },
-      { key: 'elenyTransport', label: 'Eleny\\'s transport' },
+      { key: 'elenyTransport', label: 'Mich\\'s transport' },
       { key: 'gas', label: 'Gas' },
       { key: 'tolls', label: 'Tolls (casetas)' },
       { key: 'hotel', label: 'Hotel / Airbnb' },
