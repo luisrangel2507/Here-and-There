@@ -4829,7 +4829,7 @@ function renderIntro() {
 
   const header = el('div');
   header.style.textAlign = 'center';
-  header.appendChild(el('h1', null, '¿A dónde deberíamos <em>escapar</em>?'));
+  header.appendChild(el('h1', null, '¿A dónde <em>nos escapamos</em>?'));
   view_.appendChild(header);
 
   const chooseLabel = el('div', 'sub', 'Elige quién eres');
