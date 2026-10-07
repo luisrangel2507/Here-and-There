@@ -560,14 +560,14 @@ const APP_STYLE = `
     font-family:'Fraunces', serif;
     font-style:italic;
     font-weight:700;
-    font-size:24px;
+    font-size:20px;
     color:#fff;
     text-shadow:0 1px 8px rgba(0,0,0,0.2);
     margin-bottom:18px;
     letter-spacing:0.02em;
   }
   .intro-title{
-    font-size:34px;
+    font-size:29px;
     margin-bottom:24px;
     animation:popIn .5s var(--ease-spring) both;
   }
