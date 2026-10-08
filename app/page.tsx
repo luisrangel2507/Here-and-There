@@ -1230,7 +1230,23 @@ const APP_STYLE = `
     font-weight:600;
     letter-spacing:0.08em;
     color:rgba(255,255,255,0.8);
-    margin-bottom:10px;
+    margin-bottom:8px;
+  }
+  .swipe-progress-bar{
+    width:100%;
+    max-width:380px;
+    height:4px;
+    margin:0 auto 16px;
+    border-radius:999px;
+    background:rgba(255,255,255,0.15);
+    overflow:hidden;
+  }
+  .swipe-progress-fill{
+    height:100%;
+    border-radius:999px;
+    background:linear-gradient(90deg, var(--sky-pink), var(--coral));
+    box-shadow:0 0 10px rgba(255,107,91,0.6);
+    transition:width .4s var(--ease-out);
   }
   .swipe-deck{
     position:relative;
@@ -1243,26 +1259,29 @@ const APP_STYLE = `
   .swipe-card{
     position:absolute;
     inset:0;
-    border-radius:26px;
+    border-radius:28px;
     overflow:hidden;
     background:linear-gradient(160deg, var(--plan-color), var(--plan-dim) 60%, #2B1B33);
     background-size:cover;
     background-position:center;
-    box-shadow:0 26px 50px rgba(20,10,30,0.45);
+    box-shadow:0 26px 50px rgba(20,10,30,0.45), 0 0 0 1px rgba(255,255,255,0.09) inset;
     user-select:none;
     -webkit-user-select:none;
     touch-action:pan-y;
     will-change:transform;
+    transition:transform .35s var(--ease-out), filter .35s var(--ease-out);
   }
-  .swipe-card.is-top{cursor:grab;animation:cardRise .35s var(--ease-out) both;}
+  .swipe-card.no-cover{background-image:radial-gradient(120% 90% at 50% -10%, rgba(255,255,255,0.22), transparent 60%), linear-gradient(160deg, var(--plan-color), var(--plan-dim) 60%, #2B1B33) !important;}
+  .swipe-card.is-top{cursor:grab;animation:cardRise .35s var(--ease-out) both;z-index:3;}
   .swipe-card.is-top:active{cursor:grabbing;}
-  .swipe-card.is-next{transform:scale(0.94) translateY(14px);filter:brightness(0.8);}
+  .swipe-card.is-next{transform:scale(0.93) translate(18px, 8px) rotate(4deg);filter:brightness(0.82);z-index:2;}
+  .swipe-card.is-back{transform:scale(0.86) translate(-22px, 16px) rotate(-5deg);filter:brightness(0.6);z-index:1;}
   @keyframes cardRise{ from{transform:scale(0.94) translateY(14px);} to{transform:none;} }
   .swipe-card::after{
     content:'';
     position:absolute;
     inset:0;
-    background:linear-gradient(180deg, rgba(20,10,30,0) 35%, rgba(20,10,30,0.88) 100%);
+    background:linear-gradient(180deg, rgba(20,10,30,0) 30%, rgba(20,10,30,0.5) 68%, rgba(20,10,30,0.92) 100%);
     pointer-events:none;
   }
   .swipe-card-emoji{
@@ -1281,40 +1300,59 @@ const APP_STYLE = `
     padding:22px 22px 24px;
     color:#fff;
   }
-  .swipe-card-meta{font-size:12px;font-weight:600;opacity:0.9;margin-bottom:2px;}
+  .swipe-card-meta{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:11.5px;
+    font-weight:700;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    opacity:0.95;
+    margin-bottom:6px;
+  }
+  .swipe-card-meta::before{
+    content:'';
+    width:7px; height:7px;
+    border-radius:50%;
+    background:#fff;
+    box-shadow:0 0 8px rgba(255,255,255,0.8);
+  }
   .swipe-card-city{
     font-family:'Fraunces', serif;
     font-style:italic;
     font-weight:700;
-    font-size:36px;
+    font-size:38px;
     line-height:1.05;
-    text-shadow:0 2px 18px rgba(0,0,0,0.4);
+    text-shadow:0 2px 18px rgba(0,0,0,0.45);
   }
   .swipe-card-vibe{
     font-size:12.5px;
     line-height:1.5;
-    margin-top:8px;
+    margin-top:9px;
     opacity:0.92;
     display:-webkit-box;
     -webkit-line-clamp:3;
     -webkit-box-orient:vertical;
     overflow:hidden;
   }
-  .swipe-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+  .swipe-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;}
   .swipe-chip{
     font-size:11px;
-    font-weight:600;
-    padding:4px 10px;
+    font-weight:700;
+    padding:5px 12px;
     border-radius:999px;
-    background:rgba(255,255,255,0.2);
-    backdrop-filter:blur(6px);
+    background:rgba(255,255,255,0.14);
+    border:1px solid rgba(255,255,255,0.28);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
   }
   .swipe-stamp{
     position:absolute;
     top:28px;
     z-index:2;
-    padding:6px 14px;
-    border:3px solid currentColor;
+    padding:7px 16px;
+    border:3.5px solid currentColor;
     border-radius:12px;
     font-family:'Poppins', sans-serif;
     font-weight:800;
@@ -1323,6 +1361,7 @@ const APP_STYLE = `
     opacity:0;
     pointer-events:none;
     text-shadow:0 2px 12px rgba(0,0,0,0.25);
+    box-shadow:0 0 24px -4px currentColor;
   }
   .stamp-like{left:22px;color:#5CE1A0;transform:rotate(-14deg);}
   .stamp-nope{right:22px;color:#FF6B7A;transform:rotate(14deg);}
@@ -1331,7 +1370,7 @@ const APP_STYLE = `
     justify-content:center;
     align-items:center;
     gap:22px;
-    margin:16px 0 30px;
+    margin:18px 0 30px;
   }
   .swipe-btn{
     border:none;
@@ -1343,13 +1382,15 @@ const APP_STYLE = `
     font-family:'Poppins', sans-serif;
     font-weight:700;
     background:#fff;
-    box-shadow:0 12px 26px rgba(20,10,30,0.3);
+    box-shadow:0 12px 26px rgba(20,10,30,0.35);
+    transition:transform .15s var(--ease-spring), box-shadow .15s ease;
   }
-  .swipe-btn-nope, .swipe-btn-like{width:64px;height:64px;font-size:28px;}
-  .swipe-btn-nope{color:#FF5A6E;}
-  .swipe-btn-like{color:#fff;background:linear-gradient(135deg, var(--sky-pink), var(--coral));}
+  .swipe-btn:active{transform:scale(0.88);}
+  .swipe-btn-nope, .swipe-btn-like{width:68px;height:68px;font-size:28px;}
+  .swipe-btn-nope{color:#FF5A6E;box-shadow:0 12px 26px rgba(255,90,110,0.3);}
+  .swipe-btn-like{color:#fff;background:linear-gradient(135deg, var(--sky-pink), var(--coral));box-shadow:0 12px 26px rgba(255,107,91,0.45);}
   .swipe-btn-info{
-    width:44px;height:44px;
+    width:46px;height:46px;
     font-size:18px;
     font-family:'Fraunces', serif;
     font-style:italic;
@@ -1653,13 +1694,16 @@ const APP_STYLE = `
     position:absolute;
     top:16px; right:16px;
     z-index:2;
-    padding:6px 12px;
+    padding:6px 13px;
     border-radius:999px;
     background:rgba(20,10,30,0.4);
-    backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,0.18);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
     color:#fff;
     font-size:12.5px;
     font-weight:700;
+    box-shadow:0 6px 16px rgba(20,10,30,0.3);
     transition:opacity .4s ease;
   }
   .swipe-weather.is-empty{opacity:0;}
@@ -5136,24 +5180,28 @@ function renderMap() {
   return view_;
 }
 
-function buildSwipeCard(d, isTop) {
+function buildSwipeCard(d, tier) {
+  // tier: 0 = top (draggable), 1 = next (peeking), 2 = back (deep in the stack)
   const plan = planOf(d);
-  const card = el('div', 'swipe-card ' + (isTop ? 'is-top' : 'is-next'));
+  const tierClass = tier === 0 ? 'is-top' : tier === 1 ? 'is-next' : 'is-back';
+  const card = el('div', 'swipe-card ' + tierClass);
   card.dataset.coverFor = d.id;
-  if (isTop) card.dataset.morph = d.id;
+  if (tier === 0) card.dataset.morph = d.id;
   card.style.setProperty('--plan-color', plan.color);
   card.style.setProperty('--plan-dim', plan.dim);
   if (d.cover) card.style.backgroundImage = coverBackground(d, false);
   else card.classList.add('no-cover');
-  card.appendChild(el('div', 'swipe-shine'));
-  card.appendChild(weatherNode('div', 'swipe-weather', d.id, false));
-  card.appendChild(txt('div', 'swipe-stamp stamp-like', 'VAMOS'));
-  card.appendChild(txt('div', 'swipe-stamp stamp-nope', 'FUERA'));
+  if (tier < 2) {
+    card.appendChild(el('div', 'swipe-shine'));
+    card.appendChild(weatherNode('div', 'swipe-weather', d.id, false));
+    card.appendChild(txt('div', 'swipe-stamp stamp-like', 'VAMOS'));
+    card.appendChild(txt('div', 'swipe-stamp stamp-nope', 'FUERA'));
+  }
   const info = el('div', 'swipe-card-info');
   info.appendChild(txt('div', 'swipe-card-meta', plan.label + ' · ' + countryLabel(d.country)));
   info.appendChild(txt('div', 'swipe-card-city', d.city));
-  if (d.vibe) info.appendChild(txt('div', 'swipe-card-vibe', d.vibe));
-  if (d.highlights.length) {
+  if (tier === 0 && d.vibe) info.appendChild(txt('div', 'swipe-card-vibe', d.vibe));
+  if (tier === 0 && d.highlights.length) {
     const chips = el('div', 'swipe-chips');
     d.highlights.slice(0, 3).forEach(h => chips.appendChild(txt('span', 'swipe-chip', h.name)));
     info.appendChild(chips);
@@ -5193,11 +5241,18 @@ function renderSwipe() {
     done.appendChild(replay);
     view_.appendChild(done);
   } else if (deck.length) {
+    const cardIdx = all.length - deck.length + 1;
     view_.appendChild(txt('div', 'swipe-progress', (all.length === 2 ? 'RONDA FINAL' : 'RONDA ' + swipeRound)
-      + ' · QUEDAN ' + all.length + ' · TARJETA ' + (all.length - deck.length + 1) + ' DE ' + all.length));
+      + ' · QUEDAN ' + all.length + ' · TARJETA ' + cardIdx + ' DE ' + all.length));
+    const progressBar = el('div', 'swipe-progress-bar');
+    const progressFill = el('div', 'swipe-progress-fill');
+    progressFill.style.width = (cardIdx / all.length * 100) + '%';
+    progressBar.appendChild(progressFill);
+    view_.appendChild(progressBar);
     const deckWrap = el('div', 'swipe-deck');
-    if (deck[1]) deckWrap.appendChild(buildSwipeCard(deck[1], false));
-    const top = buildSwipeCard(deck[0], true);
+    if (deck[2]) deckWrap.appendChild(buildSwipeCard(deck[2], 2));
+    if (deck[1]) deckWrap.appendChild(buildSwipeCard(deck[1], 1));
+    const top = buildSwipeCard(deck[0], 0);
     deckWrap.appendChild(top);
     attachSwipeDrag(top, deck[0].id);
     view_.appendChild(deckWrap);
