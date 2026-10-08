@@ -2915,6 +2915,33 @@ async function savePhoto(key, dataUrl) {
 
 const loadedPhotoDestIds = new Set();
 const photoFetchPromises = new Map(); // destId -> in-flight promise, shared by every caller
+
+// Fetches every destination's photos in a single request (instead of one
+// request per destination), so covers don't visibly pop in one at a time
+// across the map/swipe/detail screens. Falls back to the old per-destination
+// loading below if this fails.
+async function fetchAllPhotosMap() {
+  try {
+    const res = await fetch('/api/photos');
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) { return null; }
+}
+function applyPhotosMap(map) {
+  if (!map) return;
+  allDestinations().forEach(d => {
+    if (map[photoKeyForCover(d.id)]) d.cover = map[photoKeyForCover(d.id)];
+    d.highlights.forEach(h => {
+      const hKey = photoKeyForHighlight(d.id, h.name);
+      if (map[hKey]) h.photo = map[hKey];
+    });
+    (d.lodging || []).forEach(l => {
+      const lKey = photoKeyForLodging(d.id, l.name);
+      if (map[lKey]) l.photo = map[lKey];
+    });
+    loadedPhotoDestIds.add(d.id);
+  });
+}
 function loadPhotosFor(destId) {
   if (loadedPhotoDestIds.has(destId)) return Promise.resolve();
   if (photoFetchPromises.has(destId)) return photoFetchPromises.get(destId);
@@ -5771,8 +5798,14 @@ Promise.all([
   loadReactions(),
   loadItineraries(),
   loadActivity(),
+  fetchAllPhotosMap(),
 ])
-  .then(() => { backfillIconicHighlights(); render(); loadWeather(); });
+  .then(([, , , , , , , , photosMap]) => {
+    backfillIconicHighlights();
+    applyPhotosMap(photosMap);
+    render();
+    loadWeather();
+  });
 registerServiceWorker();
 setTimeout(loadAvatars, 400);
 setupPullToRefresh();
