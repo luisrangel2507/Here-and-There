@@ -2159,14 +2159,6 @@ const APP_STYLE = `
   .itin-day .add-row{margin:4px 0 6px;}
   .itin-day .add-form{margin:6px 0 8px;}
 
-  /* view transitions */
-  html.vt-running .view, html.vt-running .view *{animation:none !important;}
-  ::view-transition-old(root){animation:vtFadeOut .2s ease both;}
-  ::view-transition-new(root){animation:vtFadeIn .32s var(--ease-out) both;}
-  @keyframes vtFadeOut{ to{opacity:0;} }
-  @keyframes vtFadeIn{ from{opacity:0;transform:translateY(10px);} }
-  ::view-transition-group(dest-morph){animation-duration:.45s;animation-timing-function:cubic-bezier(0.16, 1, 0.3, 1);}
-  ::view-transition-old(dest-morph), ::view-transition-new(dest-morph){height:100%;overflow:clip;object-fit:cover;}
   @media (prefers-reduced-motion: reduce){
     *{animation-duration:0.01ms !important;transition-duration:0.01ms !important;}
   }
@@ -4228,22 +4220,12 @@ function buildItinerary(d) {
 
 // ---- transitions & live sync ----
 let mapScrollY = 0;
-// Runs a screen change inside a View Transition when the browser supports it;
-// the element tagged data-morph="<id>" in the old and new screen morphs between them.
-function navigate(update, morphId) {
-  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (!document.startViewTransition || reduced) { update(); return; }
-  const tag = (node) => { if (node) node.style.viewTransitionName = 'dest-morph'; };
-  if (morphId) tag(document.querySelector('[data-morph="' + morphId + '"]'));
-  document.documentElement.classList.add('vt-running');
-  const transition = document.startViewTransition(() => {
-    update();
-    if (morphId) tag(document.querySelector('[data-morph="' + morphId + '"]'));
-  });
-  transition.finished.finally(() => {
-    document.documentElement.classList.remove('vt-running');
-    document.querySelectorAll('[data-morph]').forEach(node => { node.style.viewTransitionName = ''; });
-  });
+// Runs a screen change. Used to wrap this in the native View Transition API
+// for a cross-fade/morph effect, but on real phones (iOS Safari especially)
+// that produced a visible blank frame mid-transition — not worth the glitch,
+// so screens just swap directly now.
+function navigate(update) {
+  update();
 }
 let lastSyncAt = Date.now();
 async function syncFromServer() {
