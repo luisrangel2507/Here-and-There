@@ -28,6 +28,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'invalid profile' }, { status: 400 });
   }
 
+  // Admin-only: wipe every swipe from both travelers and start over at round 1.
+  if (body.resetAll === true) {
+    await prisma.swipe.deleteMany({});
+    await prisma.appState.upsert({
+      where: { id: 1 },
+      create: { id: 1, swipeRound: 1 },
+      update: { swipeRound: 1 },
+    });
+    return NextResponse.json({ ok: true });
+  }
+
   // Next round: everyone left said yes, so clear those likes and swipe again.
   // Only advances from the round the phone saw, so two phones finishing at
   // once can't skip a round or wipe likes from the new one.
@@ -74,11 +85,11 @@ export async function POST(req: NextRequest) {
     const partner = partnerOf(profile);
     const partnerSwipe = await prisma.swipe.findUnique({ where: { profile_destId: { profile: partner, destId } } });
     if (partnerSwipe && partnerSwipe.choice === 'like') {
-      const city = typeof body.city === 'string' ? body.city.slice(0, 60) : 'a destination';
-      await logActivity('both', '', 'It\'s a match: ' + city, destId);
+      const city = typeof body.city === 'string' ? body.city.slice(0, 60) : 'un destino';
+      await logActivity('both', '', 'Es un match: ' + city, destId);
       sendToProfile(partner, {
-        title: 'It\'s a match!',
-        body: 'You and ' + NAMES[profile] + ' both want to go to ' + city + '.',
+        title: '¡Es un match!',
+        body: 'Tú y ' + NAMES[profile] + ' quieren ir a ' + city + '.',
         tag: 'match-' + destId,
       }).catch(() => {});
     }

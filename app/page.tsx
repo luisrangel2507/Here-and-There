@@ -1469,7 +1469,6 @@ const APP_STYLE = `
   .app.is-redraw .swipe-cta,
   .app.is-redraw .swipe-card.is-top,
   .app.is-redraw .swipe-done-emoji,
-  .app.is-redraw .avatar-canvas.is-live,
   .app.is-redraw .home-pin,
   .app.is-redraw .activity-card,
   .app.is-redraw .activity-item,
@@ -1479,72 +1478,18 @@ const APP_STYLE = `
   .app.is-redraw .winner-cta,
   .app.is-redraw .itin-day{animation:none !important;}
 
-  /* 3D avatars */
+  /* avatar badges (flag initials — no 3D) */
   .avatar-thumb{background-size:cover;background-position:center 30%;display:flex;align-items:center;justify-content:center;}
-  /* Some hosts (feed bubble, map pin) set a background shorthand that resets size/position. */
-  .avatar-thumb.is-3d{background-color:rgba(255,255,255,0.9);background-size:cover !important;background-position:center 30% !important;}
-  .avatar-canvas{display:block;width:100%;height:150px;}
-  .avatar-canvas:not(.is-live){opacity:0;}
-  .avatar-canvas.is-live{animation:fadeIn .4s ease both;}
-  .profile-card .avatar-canvas{height:150px;margin:-12px 0 2px;}
+  .profile-card .avatar-thumb{width:96px;height:96px;border-radius:50%;margin:0 auto 10px;font-size:34px;}
   .profile-fab{padding:0;overflow:hidden;}
   .fab-thumb{width:100%;height:100%;border-radius:50%;font-size:18px;}
-  .profile-header-flag.is-3d{background-size:cover;}
-  .studio-stage{
-    position:relative;
-    height:270px;
-    margin-bottom:14px;
-    border-radius:20px;
-    background:radial-gradient(circle at 50% 42%, rgba(255,255,255,0.3), rgba(255,255,255,0.05) 68%);
-  }
-  .studio-stage .avatar-canvas{height:100%;}
-  .studio-hint{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:11px;opacity:0.7;pointer-events:none;}
-  .studio-row{margin-bottom:14px;}
-  .studio-label{font-size:10.5px;font-weight:700;letter-spacing:0.12em;opacity:0.8;margin-bottom:7px;}
-  .studio-swatches{display:flex;flex-wrap:wrap;gap:9px;}
-  .studio-swatch{
-    width:30px;height:30px;
-    padding:0;
-    border-radius:50%;
-    border:2px solid rgba(255,255,255,0.45);
-    cursor:pointer;
-    transition:transform .15s var(--ease-spring), box-shadow .15s ease;
-  }
-  .studio-swatch.active{border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,0.35);transform:scale(1.12);}
-  .studio-chips{display:flex;flex-wrap:wrap;gap:6px;}
-  .studio-chip{
-    border:1px solid rgba(255,255,255,0.35);
-    border-radius:999px;
-    padding:6px 12px;
-    background:rgba(255,255,255,0.1);
-    color:#fff;
-    font-family:'Poppins', sans-serif;
-    font-size:12px;
-    font-weight:600;
-    cursor:pointer;
-  }
-  .studio-chip.active{background:#fff;color:var(--ink);}
-  .studio-random{
-    display:block;
-    width:100%;
-    margin-top:4px;
-    border:none;
-    border-radius:999px;
-    padding:11px;
-    background:linear-gradient(90deg, var(--sky-pink), var(--sky-purple));
-    color:#fff;
-    font-family:'Poppins', sans-serif;
-    font-weight:700;
-    font-size:13px;
-    cursor:pointer;
-  }
-  .avatar-duo{display:flex;justify-content:center;height:150px;margin:0 0 -8px;}
-  .avatar-duo .avatar-canvas{width:130px;height:150px;flex:0 0 auto;}
+  .avatar-duo{display:flex;justify-content:center;gap:14px;margin:0 0 10px;}
+  .avatar-duo .avatar-thumb{width:84px;height:84px;border-radius:50%;font-size:30px;}
   .match-box .match-photo{height:170px;}
-  .reveal-duo{height:0;opacity:0;overflow:hidden;transition:height .6s var(--ease-out), opacity .6s ease;}
-  .reveal-backdrop.revealed .reveal-duo{height:150px;opacity:1;}
+  .reveal-duo{display:flex;justify-content:center;gap:14px;height:0;opacity:0;overflow:hidden;transition:height .6s var(--ease-out), opacity .6s ease;}
+  .reveal-backdrop.revealed .reveal-duo{height:84px;opacity:1;}
+  .reveal-duo .avatar-thumb{width:84px;height:84px;border-radius:50%;font-size:30px;}
   .activity-emoji.has-avatar{position:relative;overflow:visible;font-size:15px;}
-  .home-pin-flag.is-3d{background-size:cover;}
 
   /* flight routes & home bases */
   .route-layer{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible;}
@@ -3298,6 +3243,28 @@ async function saveSwipe(destId, choice) {
     return res.ok;
   } catch (e) { return false; }
 }
+async function resetSwipes() {
+  if (!window.confirm('¿Borrar todos los swipes de los dos y reiniciar desde la ronda 1? Esto no se puede deshacer.')) return;
+  try {
+    const res = await fetch('/api/swipes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile, resetAll: true }),
+    });
+    if (!res.ok) {
+      window.alert('No se guardó (' + await describeFailure(res) + ') — revisa tu conexión e intenta de nuevo.');
+      return;
+    }
+  } catch (e) {
+    window.alert('No se guardó (' + await describeFailure(null, e) + ') — revisa tu conexión e intenta de nuevo.');
+    return;
+  }
+  swipes = { luis: {}, eleny: {} };
+  pendingSwipes = {};
+  swipeRound = 1;
+  haptic([20, 40, 20]);
+  render();
+}
 
 // Elimination: a left swipe from either traveler takes a destination out for both.
 // Anything hidden from Mich isn't in play at all.
@@ -3593,7 +3560,7 @@ function showMatch(id) {
     backdrop.appendChild(bit);
   }
   const box = el('div', 'match-box');
-  box.appendChild(avatarDuo('celebrate'));
+  box.appendChild(avatarDuo());
   box.appendChild(txt('div', 'match-kicker', 'ES UN'));
   box.appendChild(txt('div', 'match-title', 'Match'));
   const photo = el('div', 'match-photo');
@@ -3611,7 +3578,6 @@ function showMatch(id) {
   box.appendChild(keepBtn);
   backdrop.appendChild(box);
   document.body.appendChild(backdrop);
-  mountAvatars();
 }
 
 // ---- notifications ----
@@ -4032,7 +3998,7 @@ function showReveal(id) {
   photo.style.setProperty('--plan-dim', plan.dim);
   if (d.cover) photo.style.backgroundImage = 'url("' + d.cover + '")';
   stage.appendChild(photo);
-  const revealDuo = avatarDuo('celebrate');
+  const revealDuo = avatarDuo();
   revealDuo.classList.add('reveal-duo');
   stage.appendChild(revealDuo);
 
@@ -4051,7 +4017,6 @@ function showReveal(id) {
 
   backdrop.appendChild(stage);
   document.body.appendChild(backdrop);
-  mountAvatars();
   haptic(15);
 
   setTimeout(() => {
@@ -4306,158 +4271,18 @@ document.addEventListener('visibilitychange', () => {
   loadWeather();
 });
 
-// ---- 3D avatars ----
-let avatarEngine = null;
-let avatarEnginePromise = null;
-function loadAvatars() {
-  if (!avatarEnginePromise && window.loadAvatarEngine) {
-    avatarEnginePromise = window.loadAvatarEngine()
-      .then(m => { avatarEngine = m; refreshAvatars(); return m; })
-      .catch(() => null);
-  }
-  return avatarEnginePromise;
-}
-function avatarOf(who) {
-  const info = profileInfo[who] || {};
-  if (info.avatar) return info.avatar;
-  return avatarEngine ? avatarEngine.defaultAvatar(who) : null;
-}
+// ---- avatars (flag-initial badge — no 3D engine) ----
 function flagOf(who) { return who === 'luis' ? 'L' : 'E'; }
-// Still headshot for small spots; shows the flag until the 3D engine has loaded.
 function avatarThumbNode(who, cls) {
   const node = txt('div', 'avatar-thumb' + (cls ? ' ' + cls : ''), flagOf(who));
   node.dataset.avatarThumb = who;
-  paintThumb(node);
   return node;
 }
-function paintThumb(node) {
-  if (!avatarEngine) return;
-  const cfg = avatarOf(node.dataset.avatarThumb);
-  if (!cfg) return;
-  try {
-    node.style.backgroundImage = 'url("' + avatarEngine.avatarThumb(cfg) + '")';
-    node.textContent = '';
-    node.classList.add('is-3d');
-  } catch (e) { /* no WebGL: keep the flag */ }
-}
-// Live 3D avatar; mounted once it's in the page, since it needs its on-screen size.
-function avatarCanvas(who, opts) {
-  const canvas = el('canvas', 'avatar-canvas');
-  canvas.dataset.avatarWho = who;
-  canvas._avatarOpts = opts || {};
-  return canvas;
-}
-function mountAvatars() {
-  if (!avatarEngine) { loadAvatars(); return; }
-  document.querySelectorAll('canvas[data-avatar-who]').forEach(canvas => {
-    if (canvas._avatar || canvas.classList.contains('is-failed')) return;
-    try {
-      canvas._avatar = avatarEngine.mountAvatar(canvas, avatarOf(canvas.dataset.avatarWho), canvas._avatarOpts);
-      canvas.classList.add('is-live');
-    } catch (e) { canvas.classList.add('is-failed'); }
-  });
-}
-function refreshAvatars() {
-  document.querySelectorAll('[data-avatar-thumb]').forEach(paintThumb);
-  document.querySelectorAll('canvas[data-avatar-who]').forEach(canvas => {
-    if (canvas._avatar) canvas._avatar.setConfig(avatarOf(canvas.dataset.avatarWho));
-  });
-  const options = document.getElementById('studio-options');
-  if (options) options.replaceWith(buildStudioOptions());
-  mountAvatars();
-}
-// Put already-running avatars back in place of their fresh copies, in the same
-// task as the redraw, so they don't blink out and fade back in.
-function avatarKey(canvas) {
-  return canvas.dataset.avatarWho + '|' + JSON.stringify(canvas._avatarOpts || {});
-}
-function reuseAvatarCanvases(previous) {
-  if (!previous.length) return;
-  const pool = previous.slice();
-  document.querySelectorAll('#root canvas[data-avatar-who]').forEach(fresh => {
-    if (fresh._avatar) return;
-    const i = pool.findIndex(old => avatarKey(old) === avatarKey(fresh));
-    if (i < 0) return;
-    const old = pool.splice(i, 1)[0];
-    old.className = fresh.className + ' is-live';
-    fresh.replaceWith(old);
-  });
-}
-function avatarDuo(action) {
+function avatarDuo() {
   const duo = el('div', 'avatar-duo');
-  duo.appendChild(avatarCanvas('luis', { framing: 'full', baseYaw: 0.55, action, loop: true, interactive: false }));
-  duo.appendChild(avatarCanvas('eleny', { framing: 'full', baseYaw: -0.55, action, loop: true, interactive: false }));
+  duo.appendChild(avatarThumbNode('luis'));
+  duo.appendChild(avatarThumbNode('eleny'));
   return duo;
-}
-
-// ---- avatar studio (profile) ----
-function setMyAvatar(patch) {
-  if (!avatarEngine) return;
-  const cfg = Object.assign({}, avatarOf(profile), patch);
-  saveProfileInfo('avatar', cfg);
-  const canvas = document.querySelector('.studio canvas[data-avatar-who]');
-  if (canvas && canvas._avatar) { canvas._avatar.setConfig(cfg); canvas._avatar.play('wave'); }
-  document.querySelectorAll('[data-avatar-thumb="' + profile + '"]').forEach(paintThumb);
-  const old = document.getElementById('studio-options');
-  if (old) old.replaceWith(buildStudioOptions());
-  haptic(8);
-}
-function buildAvatarStudio() {
-  const card = el('div', 'add-city-form profile-info-card studio');
-  card.appendChild(el('div', 'add-city-label', 'MI AVATAR'));
-  const stage = el('div', 'studio-stage');
-  stage.appendChild(avatarCanvas(profile, { framing: 'full', action: 'wave' }));
-  stage.appendChild(txt('div', 'studio-hint', 'Arrastra para girar · toca para saludar'));
-  card.appendChild(stage);
-  card.appendChild(buildStudioOptions());
-  return card;
-}
-function buildStudioOptions() {
-  const wrap = el('div', 'studio-options');
-  wrap.id = 'studio-options';
-  if (!avatarEngine) {
-    wrap.appendChild(txt('div', 'avail-empty', 'Cargando tu avatar…'));
-    return wrap;
-  }
-  const E = avatarEngine;
-  const cfg = avatarOf(profile);
-  const row = (label) => {
-    const r = el('div', 'studio-row');
-    r.appendChild(txt('div', 'studio-label', label));
-    wrap.appendChild(r);
-    return r;
-  };
-  const swatches = (label, key, colors) => {
-    const box = el('div', 'studio-swatches');
-    colors.forEach(color => {
-      const b = el('button', 'studio-swatch' + (cfg[key] === color ? ' active' : ''));
-      b.style.background = color;
-      b.setAttribute('aria-label', label + ' ' + color);
-      b.addEventListener('click', () => setMyAvatar({ [key]: color }));
-      box.appendChild(b);
-    });
-    row(label).appendChild(box);
-  };
-  const chips = (label, key, options) => {
-    const box = el('div', 'studio-chips');
-    options.forEach(([value, name]) => {
-      const b = txt('button', 'studio-chip' + (cfg[key] === value ? ' active' : ''), name);
-      b.addEventListener('click', () => setMyAvatar({ [key]: value }));
-      box.appendChild(b);
-    });
-    row(label).appendChild(box);
-  };
-  swatches('PIEL', 'skin', E.SKINS);
-  chips('CABELLO', 'hair', E.HAIR_STYLES);
-  swatches('COLOR DE CABELLO', 'hairColor', E.HAIR_COLORS);
-  swatches('PARTE DE ARRIBA', 'top', E.TOP_COLORS);
-  swatches('PANTALÓN', 'bottom', E.BOTTOM_COLORS);
-  chips('EXTRAS', 'acc', E.ACCESSORIES);
-  chips('CARA', 'face', E.FACES);
-  const random = el('button', 'studio-random', 'Sorpréndeme');
-  random.addEventListener('click', () => setMyAvatar(E.randomAvatar()));
-  wrap.appendChild(random);
-  return wrap;
 }
 
 // ---- home bases & flight routes ----
@@ -4911,14 +4736,14 @@ function renderIntro() {
   const select = el('div', 'profile-select');
 
   const luisCard = el('div', 'profile-card');
-  luisCard.appendChild(avatarCanvas('luis', { framing: 'full', baseYaw: 0.35, action: 'wave', interactive: false }));
+  luisCard.appendChild(avatarThumbNode('luis'));
   luisCard.appendChild(el('div', 'profile-name', 'Luis'));
   luisCard.appendChild(el('div', 'profile-hint', 'requiere contraseña'));
   luisCard.addEventListener('click', () => selectProfile('luis'));
   select.appendChild(luisCard);
 
   const elenyCard = el('div', 'profile-card');
-  elenyCard.appendChild(avatarCanvas('eleny', { framing: 'full', baseYaw: -0.35, action: 'wave', interactive: false }));
+  elenyCard.appendChild(avatarThumbNode('eleny'));
   elenyCard.appendChild(el('div', 'profile-name', 'Mich'));
   elenyCard.appendChild(el('div', 'profile-hint', 'toca para entrar'));
   elenyCard.addEventListener('click', () => selectProfile('eleny'));
@@ -5364,7 +5189,6 @@ function renderProfile() {
   switchBtn.addEventListener('click', goIntro);
   view_.appendChild(switchBtn);
 
-  view_.appendChild(buildAvatarStudio());
   view_.appendChild(buildAvailabilityCard());
 
   const tripCard = el('div', 'add-city-form profile-info-card');
@@ -5444,6 +5268,16 @@ function renderProfile() {
   card.appendChild(textarea);
 
   view_.appendChild(card);
+
+  if (isAdmin) {
+    const adminCard = el('div', 'add-city-form profile-info-card');
+    adminCard.appendChild(el('div', 'add-city-label', 'ADMIN'));
+    adminCard.appendChild(txt('div', 'avail-hint', 'Borra todos los swipes de los dos y vuelve a empezar desde la ronda 1.'));
+    const resetBtn = el('button', 'delete-city-btn', 'Reiniciar el swipe');
+    resetBtn.addEventListener('click', resetSwipes);
+    adminCard.appendChild(resetBtn);
+    view_.appendChild(adminCard);
+  }
 
   return view_;
 }
@@ -5739,7 +5573,6 @@ function buildDetailCard(d, plan) {
 let lastScreenKey = null;
 function render() {
   const root = document.getElementById('root');
-  const liveAvatars = Array.from(root.querySelectorAll('canvas[data-avatar-who]')).filter(c => c._avatar);
   root.innerHTML = '';
   const screenKey = view + '|' + (view === 'detail' ? detailId : '') + '|' + (profile || '');
   const sameScreen = screenKey === lastScreenKey;
@@ -5781,14 +5614,22 @@ function render() {
   }
 
   root.appendChild(app);
-  reuseAvatarCanvases(liveAvatars);
-  requestAnimationFrame(mountAvatars);
 }
 
 render();
-setTimeout(() => {
-  if (view === 'splash') { view = 'intro'; render(); }
-}, 5000);
+// Leaves the splash screen as soon as the first batch of data is ready,
+// with a short floor so it never flashes by instantly, and a safety cap
+// so a slow connection doesn't leave it stuck for long.
+const splashStart = Date.now();
+const SPLASH_MIN_MS = 900;
+let splashAdvanced = false;
+function leaveSplash() {
+  if (splashAdvanced || view !== 'splash') return;
+  splashAdvanced = true;
+  view = 'intro';
+  render();
+}
+setTimeout(leaveSplash, 4000);
 Promise.all([
   loadPriorities().then(loadCustomDestinations),
   loadHighlightsData(),
@@ -5803,11 +5644,11 @@ Promise.all([
   .then(([, , , , , , , , photosMap]) => {
     backfillIconicHighlights();
     applyPhotosMap(photosMap);
-    render();
+    setTimeout(leaveSplash, Math.max(0, SPLASH_MIN_MS - (Date.now() - splashStart)));
+    if (view !== 'splash') render();
     loadWeather();
   });
 registerServiceWorker();
-setTimeout(loadAvatars, 400);
 setupPullToRefresh();
 
 `;
@@ -5818,7 +5659,6 @@ export default function Page() {
   useEffect(() => {
     if (ranRef.current) return; // avoid double-run under React 18 strict mode in dev
     ranRef.current = true;
-    (window as any).loadAvatarEngine = () => import('@/lib/avatar');
     const script = document.createElement('script');
     script.textContent = APP_SCRIPT;
     document.body.appendChild(script);
@@ -5828,7 +5668,14 @@ export default function Page() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: APP_STYLE }} />
-      <div id="root" />
+      <div id="root">
+        {/* Server-rendered so it paints immediately, before the client
+            script loads — the script's own render() replaces this with
+            the identical markup once it takes over, so there's no flash. */}
+        <div className="splash-screen">
+          <img className="splash-img" src="/images/splash.jpg" alt="" />
+        </div>
+      </div>
     </>
   );
 }
