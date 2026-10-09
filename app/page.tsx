@@ -1928,7 +1928,13 @@ const APP_STYLE = `
   .notif-status.is-on{color:var(--turquoise-dim);font-weight:600;}
   .trip-dates{display:flex;gap:10px;}
   .trip-date{flex:1;min-width:0;display:flex;flex-direction:column;}
-  .trip-date input{width:100%;min-height:42px;}
+  .trip-date input{
+    width:100%;
+    min-width:0;
+    min-height:42px;
+    -webkit-appearance:none;
+    appearance:none;
+  }
   .trip-dates-hint{font-size:11.5px;color:var(--ink-soft);margin-top:8px;}
 
   /* winner */
