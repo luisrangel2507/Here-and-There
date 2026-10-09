@@ -3694,6 +3694,17 @@ function setTripRange(start, end) {
   haptic([20, 40, 20]);
   render();
 }
+function resetTripDates() {
+  if (!window.confirm('¿Borrar las fechas del viaje? Esto no se puede deshacer.')) return;
+  tripStart = null;
+  tripEnd = null;
+  saveState(['tripStart', 'tripEnd']).then(result => {
+    if (result.ok) return;
+    window.alert('No se guardó (' + result.detail + ') — revisa tu conexión e intenta de nuevo.');
+  });
+  haptic([20, 40, 20]);
+  render();
+}
 
 // ---- availability ("when I'm free") ----
 // Stored per traveler in profileInfo[who].freeDays as 'YYYY-MM-DD' strings.
@@ -5276,6 +5287,10 @@ function renderProfile() {
     const resetBtn = el('button', 'delete-city-btn', 'Reiniciar el swipe');
     resetBtn.addEventListener('click', resetSwipes);
     adminCard.appendChild(resetBtn);
+    adminCard.appendChild(txt('div', 'avail-hint', 'Borra las fechas del viaje que ya se pusieron.'));
+    const resetDatesBtn = el('button', 'delete-city-btn', 'Reiniciar fechas del viaje');
+    resetDatesBtn.addEventListener('click', resetTripDates);
+    adminCard.appendChild(resetDatesBtn);
     view_.appendChild(adminCard);
   }
 
