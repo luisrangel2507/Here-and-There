@@ -1448,35 +1448,11 @@ const APP_STYLE = `
     line-height:1.1;
   }
 
-  /* same-screen redraws: no entrance animations (see render) */
+  /* same-screen redraws: no entrance animations (see render). Blanket rule —
+     anything rebuilt in place (a toggled reaction, an opened form, a new
+     highlight, etc.) should just appear, not pop/fade in like a fresh screen. */
   .app.is-redraw .view,
-  .app.is-redraw .eyebrow,
-  .app.is-redraw h1,
-  .app.is-redraw .sub,
-  .app.is-redraw .region-tabs,
-  .app.is-redraw .map-card,
-  .app.is-redraw .pin-preview,
-  .app.is-redraw .profile-header,
-  .app.is-redraw .intro-hero,
-  .app.is-redraw .profile-select,
-  .app.is-redraw .intro-title,
-  .app.is-redraw .dest-row,
-  .app.is-redraw .back-btn,
-  .app.is-redraw .detail-card,
-  .app.is-redraw .highlight-row,
-  .app.is-redraw .fav-btn .heart,
-  .app.is-redraw .detail-cover,
-  .app.is-redraw .swipe-cta,
-  .app.is-redraw .swipe-card.is-top,
-  .app.is-redraw .swipe-done-emoji,
-  .app.is-redraw .home-pin,
-  .app.is-redraw .activity-card,
-  .app.is-redraw .activity-item,
-  .app.is-redraw .avail-nudge,
-  .app.is-redraw .countdown-card,
-  .app.is-redraw .push-banner,
-  .app.is-redraw .winner-cta,
-  .app.is-redraw .itin-day{animation:none !important;}
+  .app.is-redraw .view *{animation:none !important;}
 
   /* avatar badges (flag initials — no 3D) */
   .avatar-thumb{background-size:cover;background-position:center 30%;display:flex;align-items:center;justify-content:center;}
