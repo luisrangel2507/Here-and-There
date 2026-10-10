@@ -2361,7 +2361,7 @@ const APP_STYLE = `
 const APP_SCRIPT = `
 
 const MEXICO_MAP_IMG = '/images/mexico-map.jpg';
-const INTRO_HERO_IMG = '/images/intro-hero.jpg';
+const INTRO_HERO_IMG = '/images/intro-hero.jpg?v=2';
 const SPLASH_IMG = '/images/splash.jpg?v=2';
 const USA_MAP_IMG = '/images/usa-map.jpg';
 const BG_PHOTO_IMG = '/images/bg-photo.jpg';
