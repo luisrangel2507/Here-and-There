@@ -2540,6 +2540,10 @@ registerIconic(['Washington DC', 'Washington D.C.', 'DC'], ['National Mall', 'Li
 registerIconic(['Savannah'], ['Forsyth Park', 'Historic District squares', 'River Street', 'Bonaventure Cemetery', 'Tybee Island', 'Cathedral of St. John the Baptist', 'Mercer Williams House', 'City Market', 'Telfair Museums', 'Wormsloe Historic Site']);
 registerIconic(['Charleston'], ['Rainbow Row', 'Battery Park', 'Charleston City Market', 'Fort Sumter', 'Magnolia Plantation', 'Folly Beach', 'King Street shopping', 'Middleton Place', 'USS Yorktown', 'Angel Oak Tree']);
 registerIconic(['Honolulu', 'Oahu'], ['Waikiki Beach', 'Diamond Head', 'Pearl Harbor', 'Iolani Palace', 'Hanauma Bay', 'Ala Moana Center', "North Shore", 'Byodo-In Temple', 'Kualoa Ranch', 'Polynesian Cultural Center']);
+registerIconic(['San Antonio / Austin'], ['The Alamo', 'San Antonio River Walk', 'Pearl District', 'Six Flags Fiesta Texas', 'South Congress Avenue', 'Texas State Capitol', 'Barton Springs Pool', 'Lady Bird Lake', 'San Antonio Missions', 'Zilker Park']);
+registerIconic(['Utah / Zion National Park', 'Utah/Zion National Park', 'Zion National Park', 'Utah'], ['The Narrows', 'Angels Landing', 'Zion Canyon Scenic Drive', 'Bryce Canyon', 'Observation Point', 'Emerald Pools Trail', 'Kolob Canyons', 'Checkerboard Mesa', 'Weeping Rock', 'Capitol Reef National Park']);
+registerIconic(['Phoenix / Sedona / Grand Canyon', 'Phoenix/Sedona/Grand Canyon'], ['Grand Canyon South Rim', 'Cathedral Rock', 'Antelope Canyon', 'Camelback Mountain', 'Oak Creek Canyon', 'Chapel of the Holy Cross', 'Desert Botanical Garden', 'Horseshoe Bend', 'Red Rock State Park', 'Old Town Scottsdale']);
+registerIconic(['Sequoia National Park'], ['General Sherman Tree', 'Moro Rock', 'Crystal Cave', 'Giant Forest', 'Tunnel Log', 'Kings Canyon Scenic Byway', 'Tokopah Falls', 'Crescent Meadow', 'Hospital Rock', 'Big Trees Trail']);
 
 function applyIconicHighlights(d) {
   if (!d || d.highlights.length) return false;
