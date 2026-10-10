@@ -1456,6 +1456,8 @@ const APP_STYLE = `
 
   /* avatar badges (flag initials — no 3D) */
   .avatar-thumb{background-size:cover;background-position:center 30%;display:flex;align-items:center;justify-content:center;}
+  .avatar-glyph{width:1.5em;height:1.1em;display:block;flex:0 0 auto;}
+  .rx-partner .avatar-glyph{display:inline-block;vertical-align:-0.15em;}
   .profile-card .avatar-thumb{width:96px;height:96px;border-radius:50%;margin:0 auto 10px;font-size:34px;}
   .profile-fab{padding:0;overflow:hidden;}
   .fab-thumb{width:100%;height:100%;border-radius:50%;font-size:18px;}
@@ -4086,7 +4088,7 @@ function buildReactions(d, h) {
   const theirs = reactionFor(partner, d.id, h.name);
   const box = el('div', 'rx');
   if (theirs) {
-    const badge = txt('span', 'rx-partner', flagOf(partner) + REACTION_META[theirs]);
+    const badge = el('span', 'rx-partner', flagOf(partner) + REACTION_META[theirs]);
     badge.title = partnerName() + ' reaccionó';
     box.appendChild(badge);
   }
@@ -4269,9 +4271,10 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // ---- avatars (flag-initial badge — no 3D engine) ----
-function flagOf(who) { return who === 'luis' ? 'L' : 'E'; }
+const HARD_HAT_SVG = '<svg class="avatar-glyph" viewBox="2 11 60 44" aria-hidden="true"><path d="M8 44a24 24 0 0 1 48 0z" fill="#FFC93C" stroke="#B8860B" stroke-width="2.5" stroke-linejoin="round"/><rect x="27" y="14" width="10" height="30" rx="3" fill="#FFB300" stroke="#B8860B" stroke-width="2.5"/><rect x="4" y="44" width="56" height="9" rx="4.5" fill="#FFB300" stroke="#B8860B" stroke-width="2.5"/><path d="M15 38a17 17 0 0 1 7-11" stroke="#fff" stroke-opacity=".65" stroke-width="3" fill="none" stroke-linecap="round"/></svg>';
+function flagOf(who) { return who === 'luis' ? HARD_HAT_SVG : '🦷'; }
 function avatarThumbNode(who, cls) {
-  const node = txt('div', 'avatar-thumb' + (cls ? ' ' + cls : ''), flagOf(who));
+  const node = el('div', 'avatar-thumb' + (cls ? ' ' + cls : ''), flagOf(who));
   node.dataset.avatarThumb = who;
   return node;
 }
@@ -4717,7 +4720,7 @@ function renderIntro() {
   const hero = document.createElement('img');
   hero.className = 'intro-hero';
   hero.src = INTRO_HERO_IMG;
-  hero.alt = 'Mich y Luis';
+  hero.alt = '';
   view_.appendChild(hero);
 
   const header = el('div');
