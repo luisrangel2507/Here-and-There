@@ -2362,7 +2362,7 @@ const APP_SCRIPT = `
 
 const MEXICO_MAP_IMG = '/images/mexico-map.jpg';
 const INTRO_HERO_IMG = '/images/intro-hero.jpg';
-const SPLASH_IMG = '/images/splash.jpg';
+const SPLASH_IMG = '/images/splash.jpg?v=2';
 const USA_MAP_IMG = '/images/usa-map.jpg';
 const BG_PHOTO_IMG = '/images/bg-photo.jpg';
 const PLAN_META = {
@@ -5674,7 +5674,7 @@ export default function Page() {
             script loads — the script's own render() replaces this with
             the identical markup once it takes over, so there's no flash. */}
         <div className="splash-screen">
-          <img className="splash-img" src="/images/splash.jpg" alt="" />
+          <img className="splash-img" src="/images/splash.jpg?v=2" alt="" />
         </div>
       </div>
     </>
