@@ -2544,6 +2544,7 @@ registerIconic(['San Antonio / Austin'], ['The Alamo', 'San Antonio River Walk',
 registerIconic(['Utah / Zion National Park', 'Utah/Zion National Park', 'Zion National Park', 'Utah'], ['The Narrows', 'Angels Landing', 'Zion Canyon Scenic Drive', 'Bryce Canyon', 'Observation Point', 'Emerald Pools Trail', 'Kolob Canyons', 'Checkerboard Mesa', 'Weeping Rock', 'Capitol Reef National Park']);
 registerIconic(['Phoenix / Sedona / Grand Canyon', 'Phoenix/Sedona/Grand Canyon'], ['Grand Canyon South Rim', 'Cathedral Rock', 'Antelope Canyon', 'Camelback Mountain', 'Oak Creek Canyon', 'Chapel of the Holy Cross', 'Desert Botanical Garden', 'Horseshoe Bend', 'Red Rock State Park', 'Old Town Scottsdale']);
 registerIconic(['Sequoia National Park'], ['General Sherman Tree', 'Moro Rock', 'Crystal Cave', 'Giant Forest', 'Tunnel Log', 'Kings Canyon Scenic Byway', 'Tokopah Falls', 'Crescent Meadow', 'Hospital Rock', 'Big Trees Trail']);
+registerIconic(['Las Vegas'], ['The Strip', 'Bellagio Fountains', 'Fremont Street', 'Caesars Palace', 'Red Rock Canyon', 'High Roller', 'The Sphere', 'Hoover Dam', 'Venetian Grand Canal Shoppes', 'Cirque du Soleil']);
 
 function applyIconicHighlights(d) {
   if (!d || d.highlights.length) return false;
