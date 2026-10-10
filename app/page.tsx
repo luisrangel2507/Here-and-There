@@ -2366,7 +2366,7 @@ const MEXICO_MAP_IMG = '/images/mexico-map.jpg';
 const INTRO_HERO_IMG = '/images/intro-hero.jpg?v=2';
 const SPLASH_IMG = '/images/splash.jpg?v=2';
 const USA_MAP_IMG = '/images/usa-map.jpg';
-const BG_PHOTO_IMG = '/images/bg-photo.jpg';
+const BG_PHOTO_IMG = '/images/bg-photo.jpg?v=2';
 const PLAN_META = {
   beach:     { label: 'Playa',          color: '#0EA5A0', dim: '#0a7d79' },
   city:      { label: 'Ciudad',         color: '#FF6B5B', dim: '#e14f40' },
