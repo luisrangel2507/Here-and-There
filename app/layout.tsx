@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
         <link rel="preload" as="image" href="/images/splash.jpg?v=2" />
-        <link rel="preload" as="image" href="/images/intro-hero.jpg?v=2" />
+        <link rel="preload" as="image" href="/images/intro-hero.jpg?v=3" />
       </head>
       <body style={{ margin: 0 }}>{children}</body>
     </html>

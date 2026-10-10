@@ -2363,7 +2363,7 @@ const APP_STYLE = `
 const APP_SCRIPT = `
 
 const MEXICO_MAP_IMG = '/images/mexico-map.jpg';
-const INTRO_HERO_IMG = '/images/intro-hero.jpg?v=2';
+const INTRO_HERO_IMG = '/images/intro-hero.jpg?v=3';
 const SPLASH_IMG = '/images/splash.jpg?v=2';
 const USA_MAP_IMG = '/images/usa-map.jpg';
 const BG_PHOTO_IMG = '/images/bg-photo.jpg?v=2';
@@ -4720,7 +4720,7 @@ function renderIntro() {
   const hero = document.createElement('img');
   hero.className = 'intro-hero';
   hero.src = INTRO_HERO_IMG;
-  hero.alt = '';
+  hero.alt = 'Mich y Luis';
   view_.appendChild(hero);
 
   const header = el('div');
